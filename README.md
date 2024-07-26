@@ -1,6 +1,6 @@
 # My Dotfiles repo
 
-*this is primarily used for vim, but i may use this for other t hings as well*
+*this is primarily used for vim, but i may use this for other things as well*
 
 Instructions
 
@@ -9,8 +9,9 @@ Instructions
     cd ~
     git clone https://github.com/davlug3/.dotfiles
 
-    # install vim plugins 
-    ./.dotfiles/install_vim_plugins.sh
+    # i think no need to install vundle 
+    # because it is added as submodule 
+    # but if not, run install_vundle.sh
 
     # create the symlinks using stow
     ./.dotfiles/install.sh
