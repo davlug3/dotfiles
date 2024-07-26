@@ -9,9 +9,8 @@ Instructions
     cd ~
     git clone https://github.com/davlug3/.dotfiles
 
-    # i think no need to install vundle 
-    # because it is added as submodule 
-    # but if not, run install_vundle.sh
+    # install vundle 
+    ./.dotfiles/install_vundle.sh
 
     # create the symlinks using stow
     ./.dotfiles/install.sh
