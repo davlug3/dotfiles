@@ -14,6 +14,12 @@ Instructions
 
     # create the symlinks using stow
     ./.dotfiles/install.sh
+
+    # install plugins using vundle
+    vim
+    :PluginInstall
+
+    # Done!
 ```
 
 
