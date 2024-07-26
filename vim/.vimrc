@@ -24,6 +24,8 @@ set number
 set wildmenu
 set ruler
 set cmdheight=1
+set cursorline
+
 
 
 " set hid

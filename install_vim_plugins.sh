@@ -14,3 +14,8 @@ git submodule add \
   "$SCRIPT_DIR/vim/.vim/pack/plugins/start/nerdtree-git-plugin"
 
 
+git submodule add \
+  https://github.com/tpope/vim-commentary.git \
+  "$SCRIPT_DIR/vim/.vim/pack/plugins/start/vim-commentary"
+
+
