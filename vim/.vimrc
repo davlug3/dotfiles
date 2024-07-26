@@ -14,6 +14,10 @@ Plugin 'majutsushi/tagbar'
 Plugin 'junegunn/fzf'
 Plugin 'junegunn/fzf.vim'
 Plugin 'preservim/vimux'
+
+
+Plugin 'NLKNguyen/papercolor-theme'
+
 call vundle#end()
 filetype plugin indent on
 
@@ -93,7 +97,7 @@ if $COLORTERM == 'gnome_terminal'
 endif
 
 try
-	colorscheme slate
+	colorscheme PaperColor
 endtry
 
 set background=dark
@@ -260,3 +264,11 @@ endtry
 
 nmap <F8> :TagbarToggle<CR>
 nmap <silent> <leader>p :FZF<CR>
+
+
+
+
+"""""""""""""""""""""""""""""""""""""
+"Themes
+"""""""""""""""""""""""""""""""""""""
+
