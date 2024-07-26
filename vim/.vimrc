@@ -237,3 +237,6 @@ endtry
 "plugins
 """""""""""""""""""""""""""""""""""""""
 
+
+nmap <F8> :TagbarToggle<CR>
+nmap <silent> <leader>p :FZF<CR>

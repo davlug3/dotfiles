@@ -19,3 +19,33 @@ git submodule add \
   "$SCRIPT_DIR/vim/.vim/pack/plugins/start/vim-commentary"
 
 
+git submodule add \
+  https://github.com/majutsushi/tagbar.git \
+  "$SCRIPT_DIR/vim/.vim/pack/plugins/start/tagbar"
+
+git submodule add \
+  https://github.com/junegunn/fzf.git \
+  "$SCRIPT_DIR/vim/.vim/pack/plugins/start/fzf"
+
+
+git submodule add \
+  https://github.com/junegunn/fzf.vim.git \
+  "$SCRIPT_DIR/vim/.vim/pack/plugins/start/fzf.vim"
+
+git submodule add \
+    https://github.com/preservim/vimux.git \
+  "$SCRIPT_DIR/vim/.vim/pack/plugins/start/vimux"
+
+
+# git submodule add \
+#  https://github.com/jakedouglas/exuberant-ctags.git \
+#  "$SCRIPT_DIR/vim/.vim/pack/plugins/start/exuberant-ctags"
+
+
+# git submodule add \
+#    https://github.com/ycm-core/YouCompleteMe.git \
+#   "$SCRIPT_DIR/vim/.vim/pack/plugins/start/YouCompleteMe"
+#
+
+git rm $SCRIPOT_DIR/vim/.vim/pack/plugins/start/YouCompleteMe
+
