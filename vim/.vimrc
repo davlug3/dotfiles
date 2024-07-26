@@ -1,9 +1,29 @@
 " Hello 
+set nocompatible
+filetype off
+" filetype plugin on
+" filetype indent on
+"
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+Plugin 'VundleVim/Vundle.vim'
+Plugin 'scrooloose/nerdtree'
+Plugin 'Xuyanp/nerdtree-git-plugin'
+Plugin 'tpope/vim-commentary'
+Plugin 'majutsushi/tagbar'
+Plugin 'junegunn/fzf'
+Plugin 'junegunn/fzf.vim'
+Plugin 'preservim/vimux'
+call vundle#end()
+filetype plugin indent on
+
+
+
+
+""""""""""""""""""""""""""""""""""
+"start here
+""""""""""""""""""""""""""""""""""
 set history=500
-
-filetype plugin on
-filetype indent on
-
 set autoread
 au FocusGained,BufEnter * silent! checktime
 
