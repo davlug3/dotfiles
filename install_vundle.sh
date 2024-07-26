@@ -6,7 +6,9 @@ echo "Script directory $SCRIPT_DIR"
 cd $SCRIPT_DIR || exit
 
 
-git clone https://github.com/VundleVim/Vundle.vim.git $SCRIPT_DIR/vim/.vim/bundle/Vundle.vim
+git submodule add \
+   https://github.com/VundleVim/Vundle.vim.git \
+   $SCRIPT_DIR/vim/.vim/bundle/Vundle.vim
 
 echo "Vundle installed..."
 exit 0
