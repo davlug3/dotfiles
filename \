@@ -3,17 +3,29 @@ set nocompatible
 filetype off
 " filetype plugin on
 " filetype indent on
-"
+
+"install vim-plug
+let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
+if empty(glob(data_dir . '/autoload/plug.vim'))
+  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
+
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
-Plugin 'scrooloose/nerdtree'
-Plugin 'Xuyanp/nerdtree-git-plugin'
+Plugin 'preservim/nerdtree'
+Plugin 'Xuyuanp/nerdtree-git-plugin'
 Plugin 'tpope/vim-commentary'
 Plugin 'majutsushi/tagbar'
 Plugin 'junegunn/fzf'
 Plugin 'junegunn/fzf.vim'
 Plugin 'preservim/vimux'
+
+
+Plugin 'NLKNguyen/papercolor-theme'
+
 call vundle#end()
 filetype plugin indent on
 
@@ -93,7 +105,7 @@ if $COLORTERM == 'gnome_terminal'
 endif
 
 try
-	colorscheme slate
+	colorscheme PaperColor
 endtry
 
 set background=dark
@@ -260,3 +272,11 @@ endtry
 
 nmap <F8> :TagbarToggle<CR>
 nmap <silent> <leader>p :FZF<CR>
+
+
+
+
+"""""""""""""""""""""""""""""""""""""
+"Themes
+"""""""""""""""""""""""""""""""""""""
+

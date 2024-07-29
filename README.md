@@ -9,15 +9,13 @@ Instructions
     cd ~
     git clone https://github.com/davlug3/.dotfiles
 
-    # install vundle 
-    ./.dotfiles/install_vundle.sh
 
     # create the symlinks using stow
     ./.dotfiles/install.sh
 
-    # install plugins using vundle
+    # install plugins using vim-plug 
     vim
-    :PluginInstall
+    :PlugInstall
 
     # Done!
 ```

@@ -1,26 +1,33 @@
 " Hello 
 set nocompatible
-filetype off
-" filetype plugin on
-" filetype indent on
-"
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
-Plugin 'preservim/nerdtree'
-Plugin 'Xuyuanp/nerdtree-git-plugin'
-Plugin 'tpope/vim-commentary'
-Plugin 'majutsushi/tagbar'
-Plugin 'junegunn/fzf'
-Plugin 'junegunn/fzf.vim'
-Plugin 'preservim/vimux'
+
+"install vim-plug
+let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
+if empty(glob(data_dir . '/autoload/plug.vim'))
+  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
 
 
-Plugin 'NLKNguyen/papercolor-theme'
+call plug#begin('~/.vim/plugged')
+Plug 'preservim/nerdtree'
+Plug 'Xuyuanp/nerdtree-git-plugin'
+Plug 'tpope/vim-commentary'
+Plug 'majutsushi/tagbar'
+Plug 'junegunn/fzf'
+Plug 'junegunn/fzf.vim'
+Plug 'preservim/vimux'
 
-call vundle#end()
-filetype plugin indent on
+Plug 'prabirshrestha/vim-lsp'
+Plug 'mattn/vim-lsp-settings'
+Plug 'prabirshrestha/asyncomplete.vim'
+Plug 'prabirshrestha/asyncomplete-lsp.vim'
+Plug 'Shougo/ddc.vim'
+Plug 'shun/ddc-vim-lsp'
 
+Plug 'NLKNguyen/papercolor-theme'
+
+call plug#end()
 
 
 
@@ -263,6 +270,7 @@ endtry
 
 
 nmap <F8> :TagbarToggle<CR>
+nmap <F1> :NERDTreeToggle<CR>
 nmap <silent> <leader>p :FZF<CR>
 
 
