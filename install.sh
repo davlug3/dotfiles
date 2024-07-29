@@ -17,24 +17,4 @@ cd $SCRIPT_DIR || exit
 stow -t ~ vim
 
 
-#package="$SCRIPT_DIR/vim/pack"
-#
-# Add submodules here in this format
-#cd ~ || exit
-
-# plugins in plugins/start
-#git clone https://github.com/scrooloose/nerdtree $package/plugins/start/nerdtree
-#git clone https://github.com/Xuyuanp/nerdtree-git-plugin $package/plugins/start/nerdtree-git-plugin
-#
-## colors in colors/start
-#git clone https://github.com/rakr/vim-one.git $package/colors/start/one
-#
-## vue test
-#git clone https://github.com/posva/vim-vue.git $package/plugins/start/vim-vue
-#
-#
-# vim ~/.vimrc
-# git submodule update --remote --merge
-# git commit
-#
 echo "Done!"
