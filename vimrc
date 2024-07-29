@@ -7,17 +7,13 @@ filetype off
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
-Plugin 'preservim/nerdtree'
-Plugin 'Xuyuanp/nerdtree-git-plugin'
+Plugin 'scrooloose/nerdtree'
+Plugin 'Xuyanp/nerdtree-git-plugin'
 Plugin 'tpope/vim-commentary'
 Plugin 'majutsushi/tagbar'
 Plugin 'junegunn/fzf'
 Plugin 'junegunn/fzf.vim'
 Plugin 'preservim/vimux'
-
-
-Plugin 'NLKNguyen/papercolor-theme'
-
 call vundle#end()
 filetype plugin indent on
 
@@ -97,7 +93,7 @@ if $COLORTERM == 'gnome_terminal'
 endif
 
 try
-	colorscheme PaperColor
+	colorscheme slate
 endtry
 
 set background=dark
@@ -264,11 +260,3 @@ endtry
 
 nmap <F8> :TagbarToggle<CR>
 nmap <silent> <leader>p :FZF<CR>
-
-
-
-
-"""""""""""""""""""""""""""""""""""""
-"Themes
-"""""""""""""""""""""""""""""""""""""
-
