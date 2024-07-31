@@ -3,3 +3,4 @@ vim/.vim/undo
 vim/.vim/plugged
 vim/.vim/plugged/*
 vim/.vim/autoload
+tmp

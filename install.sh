@@ -15,6 +15,8 @@ cd $SCRIPT_DIR || exit
 
 #stow individual directories
 stow -t ~ vim
+stow -t ~ tmux
+stow -t ~ git
 
 
 echo "Done!"
