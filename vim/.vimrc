@@ -177,6 +177,9 @@ set wrap
 
 
 
+
+set tags=$HOME/.vim/system.tags,tags
+
 """""""""""""""""""""""""""""
 " visual mode
 """""""""""""""""""""""""""""
@@ -311,5 +314,5 @@ nmap <silent> <leader>p :FZF<CR>
 """""""""""""""""""""""""""""""""""""
 "Maps
 """""""""""""""""""""""""""""""""""""
-nmap <F5> :source ~/.vimrc
+nmap <F5> :source ~/.vimrc<CR>
 
