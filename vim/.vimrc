@@ -21,8 +21,10 @@ Plug 'preservim/vimux'
 
 Plug 'prabirshrestha/vim-lsp'
 Plug 'mattn/vim-lsp-settings'
-"Plug 'prabirshrestha/asyncomplete.vim'
-"Plug 'prabirshrestha/asyncomplete-lsp.vim'
+Plug 'prabirshrestha/asyncomplete.vim'
+Plug 'prabirshrestha/asyncomplete-lsp.vim'
+
+Plug 'mattn/emmet-vim'
 "Plug 'Shougo/ddc.vim'
 "Plug 'shun/ddc-vim-lsp'
 
@@ -61,6 +63,11 @@ augroup lsp_install
     autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
 augroup END
 
+
+inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+inoremap <expr> <cr>    pumvisible() ? asyncomplete#close_popup() : "\<cr>"
+
 set foldmethod=expr
   \ foldexpr=lsp#ui#vim#folding#foldexpr()
   \ foldtext=lsp#ui#vim#folding#foldtext()
@@ -75,6 +82,28 @@ au FocusGained,BufEnter * silent! checktime
 
 " Saving shortcut
 nmap <leader>w :w!<cr>
+
+" Settings shortcut
+nmap <leader>, :vs ~/.vimrc<cr>
+
+" refresh haha
+nmap <F5> :source ~/.vimrc<CR>
+
+
+" Define a function to toggle between tabs and splits
+function! ToggleTab()
+    let num_windows = len(filter(tabpagebuflist(), 'bufwinnr(v:val) != -1'))
+    
+    if num_windows > 1
+        tab split
+    else
+        tabclose
+    endif
+endfunction
+
+" Map Ctrl+K Ctrl+M to call the ToggleTab function
+nnoremap <C-k><C-m> :call ToggleTab()<CR>
+
 
 " sudo save with :W
 command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
@@ -307,8 +336,8 @@ endtry
 
 
 nmap <F8> :TagbarToggle<CR>
-nmap <F1> :NERDTreeToggle<CR>
-nmap <silent> <leader>p :FZF<CR>
+nmap <F1> :FZF<CR>
+nmap <silent> <leader>b :NERDTreeToggle<CR>
 
 
 
@@ -320,5 +349,4 @@ nmap <silent> <leader>p :FZF<CR>
 """""""""""""""""""""""""""""""""""""
 "Maps
 """""""""""""""""""""""""""""""""""""
-nmap <F5> :source ~/.vimrc<CR>
 
