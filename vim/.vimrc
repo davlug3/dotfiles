@@ -104,6 +104,15 @@ endfunction
 " Map Ctrl+K Ctrl+M to call the ToggleTab function
 nnoremap <C-k><C-m> :call ToggleTab()<CR>
 
+" Map <leader>fs to fzf vs
+nnoremap <leader>fs :Files<CR>:vertical split<CR>
+
+
+let g:fzf_action = {
+  \ 'ctrl-t': 'tab split',
+  \ 'ctrl-x': 'split',
+  \ 'ctrl-s': 'vsplit' }
+
 
 " sudo save with :W
 command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
@@ -336,7 +345,7 @@ endtry
 
 
 nmap <F8> :TagbarToggle<CR>
-nmap <F1> :FZF<CR>
+nmap <F1> :Files<CR>
 nmap <silent> <leader>b :NERDTreeToggle<CR>
 
 
