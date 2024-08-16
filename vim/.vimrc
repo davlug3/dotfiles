@@ -1,4 +1,9 @@
 " Hello 
+"
+" My vimrc settings. I am just starting out using vim and tmux. be cool
+"
+" Aayusin ko pa to pag nagka time
+
 set nocompatible
 filetype plugin on
 
@@ -44,12 +49,14 @@ function! s:on_lsp_buffer_enabled() abort
     nmap <buffer> gi <plug>(lsp-implementation)
     nmap <buffer> gt <plug>(lsp-type-definition)
     nmap <buffer> <leader>rn <plug>(lsp-rename)
+    nmap <buffer> <leader>g <plug>(lsp-document-diagnostics)
     nmap <buffer> [g <plug>(lsp-previous-diagnostic)
     nmap <buffer> ]g <plug>(lsp-next-diagnostic)
     nmap <buffer> K <plug>(lsp-hover)
    " nnoremap <buffer> <expr><c-f> lsp#scroll(+4)
    " nnoremap <buffer> <expr><c-d> lsp#scroll(-4)
     nnoremap <buffer> <leader>f <expr> lsp#scroll(+4)
+    nnoremap <buffer> <leader>d <expr> lsp#scroll(-4)
     nnoremap <buffer> <leader>d <expr> lsp#scroll(-4)
 
     let g:lsp_format_sync_timeout = 1000
@@ -108,12 +115,15 @@ nnoremap <C-k><C-m> :call ToggleTab()<CR>
 " Map <leader>fs to fzf vs
 nnoremap <leader>fs :Files<CR>:vertical split<CR>
 
+" Map <leader>* to highlight word under cursor
+" Hindi stable yung Lsp ehhh diko pa alam bakit
+nnoremap <leader>* :<C-u>let @/ = expand('<cword>')<cr>
 
+" change vsplit open in fzf window to ctrl s instead of ctrl v
 let g:fzf_action = {
   \ 'ctrl-t': 'tab split',
   \ 'ctrl-x': 'split',
   \ 'ctrl-s': 'vsplit' }
-
 
 " sudo save with :W
 command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
@@ -122,14 +132,12 @@ command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
 """""""""""""""""""""""""""""""""""""""
 " UI
 """"""""""""""""""""""""""""""""""""
-"
 set scrolloff=3
 set number
 set wildmenu
 set ruler
 set cmdheight=1
 set cursorline
-
 
 
 " set hid
@@ -163,11 +171,8 @@ endif
 
 set foldcolumn=1
 
+set hidden
 
-
-
-"""""""""""""""""""""""""""
-"colors and fonts
 """"""""""""""""""""""""
 syntax enable
 set regexpengine=0
@@ -242,8 +247,9 @@ vnoremap <silent> # : <C-u>call VisualSelection('', '')<CR>/<C-R>=@/<CR><CR>
 "disable highlight when leader-cr is pressed
 map <silent> <leader><cr> :noh<cr>
 
+nnoremap <Leader>b :buffers<CR>:buffer<Space>
 "close current buffer
-map <leader>bd :Bclose<cr>:tabclose<cr>gT
+" map <leader>bd :Bclose<cr>:tabclose<cr>gT
 
 "close all buffers
 map <leader>ba :bufdo bd<cr>
@@ -252,6 +258,20 @@ map <leader>l :bnext<cr>
 map <leader>h :bprevious<cr>
 
 
+
+"Enable vim-tmux-navigator shortcuts 
+"when on NERDtree
+let g:NERDTreeMapJumpPrevSibling=""
+let g:NERDTreeMapJumpNextSibling=""
+
+
+"disable folding for vim-lsp
+let g:lsp_fold_enabled = 0
+let g:lsp_document_highlight_enabled = 1
+let g:lsp_document_highlight_delay = 100
+
+
+let g:lsp_settings_filetype_vue = ['typescript-language-server', 'volar-server']
 
 
 """"""""""""""""""""""""""""""""
@@ -347,7 +367,7 @@ endtry
 
 nmap <F8> :TagbarToggle<CR>
 nmap <F1> :Files<CR>
-nmap <silent> <leader>b :NERDTreeToggle<CR>
+nmap <silent> <leader>1 :NERDTreeToggle<CR>
 
 
 
