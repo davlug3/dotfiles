@@ -29,7 +29,7 @@ Plug 'prabirshrestha/vim-lsp'
 Plug 'mattn/vim-lsp-settings'
 Plug 'prabirshrestha/asyncomplete.vim'
 Plug 'prabirshrestha/asyncomplete-lsp.vim'
-Plug 'Quramy/tsuquyomi'
+" Plug 'Quramy/tsuquyomi'
 
 Plug 'mattn/emmet-vim'
 "Plug 'Shougo/ddc.vim'
@@ -267,9 +267,28 @@ let g:NERDTreeMapJumpNextSibling=""
 
 
 "disable folding for vim-lsp
-let g:lsp_fold_enabled = 0
-let g:lsp_document_highlight_enabled = 1
-let g:lsp_document_highlight_delay = 100
+  let g:lsp_fold_enabled = 0
+" let g:lsp_document_highlight_enabled = 1
+
+let g:lsp_diagnostics_signs_error = {'text': 'X'}
+let g:lsp_diagnostics_signs_insert_mode_enabled = 1
+let g:lsp_diagnostics_enabled = 1 
+let g:lsp_diagnostics_echo_delay = 100
+let g:lsp_diagnostics_echo_cursor = 1
+let g:lsp_diagnostics_float_delay = 100
+let g:lsp_diagnostics_float_cursor = 1
+let g:lsp_diagnostics_virtual_text_enabled = 1
+let g:lsp_diagnostics_virtual_text_delay = 200
+let g:lsp_diagnostics_virtual_text_prefix = ">> "
+
+
+highlight link LspErrorVirtualText DiffDelete
+highlight link LspWarningVirtualText WildMenu
+highlight link LspInformationVirtualText WarningMsg
+highlight link LspHintVirtualText Conceal
+
+
+
 
 
 let g:lsp_settings_filetype_vue = ['typescript-language-server', 'volar-server']
