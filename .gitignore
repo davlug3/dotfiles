@@ -2,10 +2,12 @@
 
 #whitelist
 !.gitignore
-!.dotfiles/
+
 !.vimrc
 !.vim/autoload
 !.vim/plugged
+!.dotfiles/
+!.dotfiles/**
 !.tmux.conf
 
 
