@@ -1,0 +1,11 @@
+* 
+
+#whitelist
+!.gitignore
+!.dotfiles/
+!.vimrc
+!.vim/autoload
+!.vim/plugged
+!.tmux.conf
+
+
