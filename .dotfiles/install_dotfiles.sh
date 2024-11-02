@@ -1,10 +1,3 @@
-#!bin/bash
-if [ -z "${DOTFILES_URL}" ]; then
-  echo "DOTFILES_URL environment variable is not set"
-  exit 1
-  else
-        echo "MY_VARIABLE is set to ${MY_VARIABLE}"
-        fi
 
 echo "Installing your dotfiles..."
 
