@@ -2,7 +2,8 @@
 
 #whitelist
 !.gitignore
-
+!.gitconfig
+!.README.md
 !.vimrc
 !.vim/autoload
 !.vim/plugged
