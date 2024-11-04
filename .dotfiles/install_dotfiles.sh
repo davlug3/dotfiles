@@ -1,4 +1,4 @@
-
+#!/bin/bash
 echo "Installing your dotfiles..."
 
 
@@ -8,4 +8,4 @@ git remote add origin ${DOTFILES_URL} | { echo "Failed to add remote repository.
 git fetch origin || { echo "Failed to fetch from remote repository."; exit 1; }
 git checkout -f git || { echo "Failed to checkout to git branch."; exit 1; }
 echo "Successfully installled dotfiles"
-
+echo "pwd is $(pwd)"
