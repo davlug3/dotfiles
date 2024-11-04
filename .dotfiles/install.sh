@@ -1,40 +1,32 @@
 #!/bin/bash
 
-ask=false
-
+#parse some arguments
+ask=1
 for arg in "$@"; do
-    if [ "$arg" == "--ask" ]; then
-        ask=true
+    if [ "$arg" == "-y" ] || [ "$arg" == "--yes" ]; then
+        ask=0
         break
     fi
 done
 
-#
-#  # If '--ask' was provided, prompt the user
-#  if [ "$ask" = true ]; then
-#      read -p "Do you want to continue? (y/n): " response
-#      if [[ "$response" != "y" && "$response" != "Y" ]]; then
-#          echo "Exiting."
-#          exit 1
-#      fi
-#  fi
 
-
-
-read -p "Do you want to continue? (y/n): " response
-if [[ "${response,,}" != "y" ]]; then
-        echo "Exiting."
-            exit 1
+if (( ask != 0 )); then 
+	echo "Do you want to continue? (y/n): " 
+	read response </dev/tty
+	if [[ "${response,,}" != "y" ]]; then
+            echo "Exiting..."
+	    exit 1
+	fi
 fi
 
 
+#currently assuming dotfiles are hosted on github
 if [ -z "$DOTFILES_URL" ]; then
     export DOTFILES_URL=https://github.com/davlug3/dotfiles
 fi
-
-
 REPO_NAME="${DOTFILES_URL#*github.com/}"
 
+#
 # Check if install_git.sh exists, download if missing
  if [ ! -f "~/.dotfiles/install_git.sh" ]; then
      echo "install_git.sh not found. Downloading..."
