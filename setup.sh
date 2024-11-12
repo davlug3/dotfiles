@@ -35,10 +35,10 @@ source $DOTFILES_HOME/.env
 
 
 process_bashrc() {
-	[ -f $HOME/.bashrc ] && cp $HOME/.bashrc $BACKUP_DIR
+	[ -f $HOME/.bashrc ] && cp $HOME/.bashrc $BACKUP_DIR/.bashrc
 	echo "###ddconfig###" >> $HOME/.bashrc
-	echo "[ -f \"$DOTFILES_HOME/.env\" ] source $DOTFILES_HOME/.env" >> $HOME/.bashrc
-	echo "[ -f \"$DOTFILES_HOME/SHELL/.bashrc\"] source $DOTFILES_HOME/SHELL/.bashrc" >> $HOME/.bashrc
+	echo "[ -f \"$DOTFILES_HOME/.env\" ] && source $DOTFILES_HOME/.env" >> $HOME/.bashrc
+	echo "[ -f \"$DOTFILES_HOME/SHELL/.bashrc\" ] && source $DOTFILES_HOME/SHELL/.bashrc" >> $HOME/.bashrc
 	echo "###ddconfigend###" >> $HOME/.bashrc
 }
 
