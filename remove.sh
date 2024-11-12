@@ -18,20 +18,31 @@ backup_and_link() {
 
 	ln -s "$PWD/$1" "$HOME/$1"
 	echo "$PDS/$1 >> $HOME/$1" >> $DOTFILES_HOME/tracker.txt
+
 	echo Successfully linked $PCS/$1 to  $HOME/$1
 }
 
 $GIT_BIN clone "$DOTFILES_GIT_URL" "$DOTFILES_HOME"
 
-for item in "$DOTFILES_HOME"/{*,.*}; do
-	if [[ "$item" == "$DOTFILES_HOME/." || "$item" == "$DOTFILES_HOME/.." ]]; then 
-		continue
-	fi
+
+reurse() {
+	
+	for item in "$1"/{*,.*}; do
+		if [[ "$item" == "$1/." || "$item" == "$dir/.." ]]; then
+			continue
+		fi
+
+		if [[ -d "$item" ]]; then
+			recurse "$item"
+		elif [[ -f "$item" ]]; then 
+			filename=$(basename "$item") 
+			echo "$filename" 
+			backup_and_link "$filename"
+		fi
+	done
+}
 
 
-	filename=$(basename "$item") 
-	echo "Processing $filename ..."
-	backup_and_link "$filename"
-done
+recurse "$DOTFILES_HOME"
 
 
