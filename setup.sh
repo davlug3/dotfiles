@@ -5,13 +5,7 @@ DOTFILES_GIT_URL=/dotfiles_setup/dotfiles
 BACKUP_DIR=$HOME/.config_backup
 DOTFILES_HOME=$HOME/.config_dotfiles
 
-touch $DOTFILES_HOME/.env
-echo DDOTFILES_GIT_BIN=$GIT_BIN >> $DOTFILES_HOME/.env
-echo DDOTFILES_DOTFILES_GIT_URL=$DOTFILES_GIT_URL >> $DOTFILES_HOME/.env
-echo DDOTFILES_BACKUP_DIR=$BACKUP_DIR >> $DOTFILES_HOME/.env
-echo DDOTFILES_DOTFILES_HOME=$DOTFILES_HOME >> $DOTFILES_HOME/.env
 
-source $DOTFILES_HOME/.env 
 
 backup_and_link() {
 	# check if file in $1 exist, if yes, move it
@@ -30,6 +24,14 @@ backup_and_link() {
 
 
 $GIT_BIN clone "$DOTFILES_GIT_URL" "$DOTFILES_HOME"
+touch $DOTFILES_HOME/.env
+echo DDOTFILES_GIT_BIN=$GIT_BIN >> $DOTFILES_HOME/.env
+echo DDOTFILES_DOTFILES_GIT_URL=$DOTFILES_GIT_URL >> $DOTFILES_HOME/.env
+echo DDOTFILES_BACKUP_DIR=$BACKUP_DIR >> $DOTFILES_HOME/.env
+echo DDOTFILES_DOTFILES_HOME=$DOTFILES_HOME >> $DOTFILES_HOME/.env
+
+source $DOTFILES_HOME/.env 
+
 
 
 process_bashrc() {
