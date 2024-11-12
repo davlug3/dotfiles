@@ -1,6 +1,7 @@
 #!/bin/bash
 
 GIT_BIN=/usr/bin/git
+DOTFILES_GIT_URL=/dotfiles_setup/dotfiles
 BACKUP_DIR=$HOME/.config_backup
 DOTFILES_HOME=$HOME/.config_dotfiles
 backup_and_link() {
@@ -19,7 +20,7 @@ backup_and_link() {
 	echo "$PDS/$1 >> $HOME/$1" >> $DOTFILES_HOME/tracker.txt
 }
 
-
+$GIT_BIN clone "$DOTFILES_GIT_URL" "$DOTFILES_HOME"
 
 for item in "$DOTFILES_HOME"/*; do
 	filename=$(basename "$item") 
