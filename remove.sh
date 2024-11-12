@@ -1,7 +1,14 @@
 #!/bin/bash
 # File to be parsed
 
-file=$HOME/
+if [ -z "${DDOTFILES_DOTFILES_HOME}" ]; then 
+	echo "Environment variable \$DDOTFILES_DOTFILES_HOME not set."
+	echo 'Did you run \`source ~/.bashrc`\?'
+	exit 1
+fi
+
+file=$DDOTFILES_DOTFILES_HOME/tracker.txt
+
 
 # Loop through each line in the file
 while IFS= read -r line; do
