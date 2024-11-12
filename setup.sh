@@ -4,9 +4,8 @@ GIT_BIN=/usr/bin/git
 DOTFILES_GIT_URL=/dotfiles_setup/dotfiles
 BACKUP_DIR=$HOME/.config_backup
 DOTFILES_HOME=$HOME/.config_dotfiles
+
 backup_and_link() {
-
-
 	# check if file in $1 exist, if yes, move it
 	if [ -e "$HOME/$1" ]; then
 		# if backup dir doesnt exist, create it
@@ -17,21 +16,22 @@ backup_and_link() {
 	fi
 
 	ln -s "$PWD/$1" "$HOME/$1"
-	echo "$PDS/$1 >> $HOME/$1" >> $DOTFILES_HOME/tracker.txt
+	echo "link $PDS/$1 >> $HOME/$1" >> $DOTFILES_HOME/tracker.txt
 	echo Successfully linked $PCS/$1 to  $HOME/$1
 }
 
 $GIT_BIN clone "$DOTFILES_GIT_URL" "$DOTFILES_HOME"
 
-for item in "$DOTFILES_HOME"/{*,.*}; do
+for item in "$DOTFILES_HOME"/LINK_TO_HOME/{*,.*}; do
 	if [[ "$item" == "$DOTFILES_HOME/." || "$item" == "$DOTFILES_HOME/.." ]]; then 
 		continue
 	fi
 
 
 	filename=$(basename "$item") 
-	echo "Processing $filename ..."
+	echo "Processing $filename ... $item"
 	backup_and_link "$filename"
 done
 
 
+for 
