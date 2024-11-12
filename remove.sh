@@ -1,9 +1,10 @@
 #!/bin/bash
 # File to be parsed
+source "$HOME/.bashrc"
 
-if [ -z "${DDOTFILES_DOTFILES_HOME}" ]; then 
+if [ -z "$DDOTFILES_DOTFILES_HOME" ]; then 
 	echo "Environment variable \$DDOTFILES_DOTFILES_HOME not set."
-	echo 'Did you run \`source ~/.bashrc`\?'
+	echo 'Did you run source ~/.bashrc?'
 	exit 1
 fi
 
@@ -16,8 +17,10 @@ while IFS= read -r line; do
     IFS='>>' read -r -a parts <<< "$line"
     
     # Access the split parts (e.g., parts[0], parts[1], etc.)
-    echo "Part 1: ${parts[0]}"
-    echo "Part 2: ${parts[1]}"
+    # rm -rf ${parts[2]}
+    echo $DDOTFILES_BACKUP_DIR/${parts[2]#$HOME} $HOME
+    # echo "Part 1: ${parts[0]}"
+    # echo "Part 2: ${parts[1]}"
     
     # If there are more parts, print them too
     for i in "${!parts[@]}"; do
