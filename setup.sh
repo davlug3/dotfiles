@@ -10,7 +10,6 @@ echo $DOTFILES_GIT_URL
 echo $BACKUP_DIR
 echo $DOTFILES_HOME
 
-exit 1
 backup_and_link() {
 	# check if file in $1 exist, if yes, move it
 	if [ -e "$HOME/$1" ]; then
