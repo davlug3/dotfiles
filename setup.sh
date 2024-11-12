@@ -18,12 +18,15 @@ backup_and_link() {
 
 	ln -s "$PWD/$1" "$HOME/$1"
 	echo "$PDS/$1 >> $HOME/$1" >> $DOTFILES_HOME/tracker.txt
+
+	echo Successfully linked $PCS/$1 to  $HOME/$1
 }
 
 $GIT_BIN clone "$DOTFILES_GIT_URL" "$DOTFILES_HOME"
 
 for item in "$DOTFILES_HOME"/*; do
 	filename=$(basename "$item") 
+	echo $filename
 	backup_and_link "$filename"
 done
 
