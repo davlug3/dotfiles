@@ -3,47 +3,10 @@
 GIT_BIN=/usr/bin/git
 BACKUP_DIR=$HOME/.config_backup
 DOTFILES_HOME=$HOME/.config_dotfiles
-# DOTFILES_REPO_URL="/dotfiles"
-
-# CONFIG="$GIT_BIN --git-dir=$HOME/$GIT_REPO --work-tree=$HOME"
-
-
-# $GIT_BIN init --bare $HOME/.cfg
-
-# echo * >> "$HOME/.gitignore"
-
-# $GIT_BIN add -f .gitignore
-
-
-
-# curl 
-
-# config() {
-# 	$CONFIG "$@"
-# }
-
-# config config --local status.showUntrackedFiles no
-# config config user.email "dave@dave"
-# config config user.name "Dave"
-
-# config branch -M backup
-# config add "$HOME/.gitignore"
-# config commit -m "initial backup commit"
-
-
-# config checkout -b main
-# config remote add origin $DOTFILES_REPO_URL
-
-
 backup_and_link() {
-	# if ($BACKUP_DIR not exists ) mkdir $BACKUP_DIR
-	# if ($HOME/$@ exists) 
-	# 	mv $HOME/$@ $BACKUP_DIR
-	# link $@ $HOME
-
 
 	# if backup dir doesnt exist, create it
-	if [ ! -d "$BACKUP_DIR"]; then 
+	if [ ! -d "$BACKUP_DIR" ]; then 
 		mkdir -p "$BACKUP_DIR"
 	fi
 
