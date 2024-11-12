@@ -5,10 +5,13 @@ DOTFILES_GIT_URL=/dotfiles_setup/dotfiles
 BACKUP_DIR=$HOME/.config_backup
 DOTFILES_HOME=$HOME/.config_dotfiles
 
-echo $GIT_BIN
-echo $DOTFILES_GIT_URL
-echo $BACKUP_DIR
-echo $DOTFILES_HOME
+touch $DOTFILES_HOME/.env
+echo DDOTFILES_GIT_BIN=$GIT_BIN >> $DOTFILES_HOME/.env
+echo DDOTFILES_DOTFILES_GIT_URL=$DOTFILES_GIT_URL >> $DOTFILES_HOME/.env
+echo DDOTFILES_BACKUP_DIR=$BACKUP_DIR >> $DOTFILES_HOME/.env
+echo DDOTFILES_DOTFILES_HOME=$DOTFILES_HOME >> $DOTFILES_HOME/.env
+
+source $DOTFILES_HOME/.env 
 
 backup_and_link() {
 	# check if file in $1 exist, if yes, move it
@@ -25,25 +28,35 @@ backup_and_link() {
 	echo Successfully linked $PCS/$1 to  $HOME/$1
 }
 
+
 $GIT_BIN clone "$DOTFILES_GIT_URL" "$DOTFILES_HOME"
 
+
+process_bashrc() {
+	[ -f $HOME/.bashrc ] && cp $HOME/.bashrc $BACKUP_DIR
+	echo "###ddconfig###" >> $HOME/.bashrc
+	echo "source $DOTFILES_HOME/.env" >> $HOME/.bashrc
+	echo "source $DOTFILES_HOME/SHELL/.bashrc" >> $HOME/.bashrc
+	echo "###ddconfigend###" >> $HOME/.bashrc
+}
+
 recurse() {
-	
-	for item in "$1"/LINK_TO_HOME/{*,.*}; do
-		echo "item $item ...."
+	for item in "$1"/{*,.*}; do
 		if [[ "$item" == "$1/." || "$item" == "$dir/.." ]]; then
 			continue
 		fi
 
-		if [[ -d "$item" ]]; then
-			recurse "$item"
-		elif [[ -f "$item" ]]; then 
+		# echo "item $item ....."
+		# if [[ -d "$item" ]]; then
+		# 	recurse "$item"
+		# elif [[ -f "$item" ]]; then 
 			filename=$(basename "$item") 
 			echo "$now backup that"
-			# backup_and_link "$filename"
-		fi
+			backup_and_link "$filename"
+		# fi
 	done
 }
-recurse "$DOTFILES_HOME"
-
+recurse "$DOTFILES_HOME/LINK_TO_HOME"
+process_bashrc
+source $HOME/.bashrc
 
