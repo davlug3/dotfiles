@@ -30,7 +30,8 @@ $GIT_BIN clone "$DOTFILES_GIT_URL" "$DOTFILES_HOME"
 
 recurse() {
 	
-	for item in "$1"/{*,.*}; do
+	for item in "$1"/LINK_TO_HOME/{*,.*}; do
+		echo "item $item ...."
 		if [[ "$item" == "$1/." || "$item" == "$dir/.." ]]; then
 			continue
 		fi
@@ -39,8 +40,8 @@ recurse() {
 			recurse "$item"
 		elif [[ -f "$item" ]]; then 
 			filename=$(basename "$item") 
-			echo "$filename" 
-			backup_and_link "$filename"
+			echo "$now backup that"
+			# backup_and_link "$filename"
 		fi
 	done
 }
