@@ -6,17 +6,19 @@ BACKUP_DIR=$HOME/.config_backup
 DOTFILES_HOME=$HOME/.config_dotfiles
 
 mvcpp() {
+
+	echo "000000000000000"
 	# if backup dir doesnt exist, create it
 	if [ ! -d "$BACKUP_DIR" ]; then
 		mkdir -p "$BACKUP_DIR"
 	fi
 
 	if [ "$1" = "move" ]; then
-		mv "$HOME/$2" "$BACKUP_DIR"
-		echo "$HOME/$2 has been moved to $BACKUP_DIR" 
+		mv "$2" "$BACKUP_DIR"
+		echo "$2 has been moved to $BACKUP_DIR" 
 	elif [ "$1" = "copy" ]; then
-		cp -r "$HOME/$2" "$BACKUP_DIR"
-		echo "$HOME/$2 has been copied to $BACKUP_DIR" 
+		cp -r "$2" "$BACKUP_DIR"
+		echo "$2 has been copied to $BACKUP_DIR" 
 	else
 		echo "Invalid action. Use mvcpp 'move | copy' <path>"
 	fi
@@ -25,12 +27,12 @@ mvcpp() {
 backup_and_link() {
 	# check if file in $1 exist, if yes, move it
 	if [ -e "$HOME/$1" ]; then
-		mvcpp move $1
+		mvcpp move "$HOME/$1"
 	fi
 
-	ln -s "$DOTFILES_HOME/LINK_TO_HOME/$1" "$PWD/$1" 
-	echo "link >> $DOTFILES_HOME/LINK_TO_HOME/$1 >> $PWD/$1" >> $DOTFILES_HOME/tracker.txt
-	echo Successfully linked $PCS/$1 to  $HOME/$1
+	ln -s "$DOTFILES_HOME/LINK_TO_HOME/$1" "$HOME/$1" 
+	echo "link >> $DOTFILES_HOME/LINK_TO_HOME/$1 >> $HOME/$1" >> $DOTFILES_HOME/tracker.txt
+	echo "successfully linked $DOTFILES_HOME/LINK_TO_HOME/$1 to $HOME/$1"
 }
 
 
@@ -46,7 +48,8 @@ source $DOTFILES_HOME/.env
 
 
 process_bashrc() {
-	mvcpp copy "$HOME/.bashrc" "$BACKUP_DIR/.bashrc"
+	[ -f "$HOME/.bashrc" ] && mvcpp copy "$HOME/.bashrc"
+
 	echo "###ddconfig###" >> $HOME/.bashrc
 	echo "[ -f \"$DOTFILES_HOME/.env\" ] && source $DOTFILES_HOME/.env" >> $HOME/.bashrc
 	echo "[ -f \"$DOTFILES_HOME/SHELL/.bashrc\" ] && source $DOTFILES_HOME/SHELL/.bashrc" >> $HOME/.bashrc
@@ -60,8 +63,8 @@ recurse() {
 		fi
 
 		filename=$(basename "$item") 
-		echo "$now backup that"
-		backup_and_link "$filename"
+		# echo "$filename backup that"
+		backup_and_link $filename
 	done
 }
 
