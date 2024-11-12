@@ -24,25 +24,3 @@ backup_and_link() {
 
 $GIT_BIN clone "$DOTFILES_GIT_URL" "$DOTFILES_HOME"
 
-
-reurse() {
-	
-	for item in "$1"/{*,.*}; do
-		if [[ "$item" == "$1/." || "$item" == "$dir/.." ]]; then
-			continue
-		fi
-
-		if [[ -d "$item" ]]; then
-			recurse "$item"
-		elif [[ -f "$item" ]]; then 
-			filename=$(basename "$item") 
-			echo "$filename" 
-			backup_and_link "$filename"
-		fi
-	done
-}
-
-
-recurse "$DOTFILES_HOME"
-
-
