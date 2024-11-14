@@ -20,9 +20,20 @@ file=$DDOTFILES_DOTFILES_HOME/tracker.txt
 # Loop through each line in the file
 while IFS= read -r line; do
     # Split the line by the delimiter ">>"
+    line=$(echo "$line" | xargs)
     IFS='>>' read -r -a parts <<< "$line"
 
-    copyfrom=${parts[1]}
+    # Check if parts has enough elements
+    if [ ${#parts[@]} -ge 4 ]; then
+        copyto=${parts[1]}
+        copyfrom=${parts[2]}
+        echo "copyfrom=$copyfrom"
+        echo "copyto=$copyto"
+    else
+        echo "Error: Not enough parts in line"
+    fi
+
+    copyfrom=${parts[2]}
     copyto=${parts[1]}
 	echo copyfrom=$copyfrom
 	echo copyto=$copyto
