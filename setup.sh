@@ -5,9 +5,10 @@ DOTFILES_GIT_URL=/dotfiles_setup/dotfiles
 BACKUP_DIR=$HOME/.config_backup
 DOTFILES_HOME=$HOME/.config_dotfiles
 
+#this moves or copies files to $BACKUP_DIR, 
+#making sure that $BACKUP_DIR exists before
+#doing so
 mvcpp() {
-
-	echo "000000000000000"
 	# if backup dir doesnt exist, create it
 	if [ ! -d "$BACKUP_DIR" ]; then
 		mkdir -p "$BACKUP_DIR"
@@ -21,8 +22,9 @@ mvcpp() {
 		echo "$2 has been copied to $BACKUP_DIR" 
 	else
 		echo "Invalid action. Use mvcpp 'move | copy' <path>"
-	fi
+	fe
 }
+
 
 backup_and_link() {
 	# check if file in $1 exist, if yes, move it
@@ -36,7 +38,7 @@ backup_and_link() {
 }
 
 
-$GIT_BIN clone "$DOTFILES_GIT_URL" "$DOTFILES_HOME"
+$GIT_BIN clone "$DOTFILES_GIT_URL" "$DOTFILES_HOME"  && echo "git clone succeeded." || { echo "git clone failed. Exiting..."; exit 1; }
 touch $DOTFILES_HOME/.env
 echo DDOTFILES_GIT_BIN=$GIT_BIN >> $DOTFILES_HOME/.env
 echo DDOTFILES_DOTFILES_GIT_URL=$DOTFILES_GIT_URL >> $DOTFILES_HOME/.env
@@ -49,6 +51,7 @@ source $DOTFILES_HOME/.env
 
 process_bashrc() {
 	[ -f "$HOME/.bashrc" ] && mvcpp copy "$HOME/.bashrc"
+	read
 
 	echo "###ddconfig###" >> $HOME/.bashrc
 	echo "[ -f \"$DOTFILES_HOME/.env\" ] && source $DOTFILES_HOME/.env" >> $HOME/.bashrc
@@ -56,11 +59,13 @@ process_bashrc() {
 	echo "###ddconfigend###" >> $HOME/.bashrc
 }
 
-recurse() {
+loop() {
 	for item in "$1"/{*,.*}; do
-		if [[ "$item" == "$1/." || "$item" == "$dir/.." ]]; then
+		if [[ "$item" == "$1/*" || "$item" == "$1/." || "$item" == "$dir/.." ]]; then
 			continue
 		fi
+
+
 
 		filename=$(basename "$item") 
 		# echo "$filename backup that"
@@ -68,7 +73,7 @@ recurse() {
 	done
 }
 
-recurse "$DOTFILES_HOME/LINK_TO_HOME"
+loop "$DOTFILES_HOME/LINK_TO_HOME"
 process_bashrc
 source $HOME/.bashrc
 
