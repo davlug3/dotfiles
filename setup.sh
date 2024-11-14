@@ -33,10 +33,17 @@ backup_and_link() {
 	# check if file in $1 exist, if yes, move it
 	if [ -e "$HOME/$1" ]; then
 		mvcpp move "$HOME/$1"
+		moved=true
+	fi
+	ln -s "$DOTFILES_HOME/LINK_TO_HOME/$1" "$HOME/$1" 
+
+	if [ "$moved" = true ]; then
+		action="moved_linked"
+	else
+		action="linked"
 	fi
 
-	ln -s "$DOTFILES_HOME/LINK_TO_HOME/$1" "$HOME/$1" 
-	echo "link>>$DOTFILES_HOME/LINK_TO_HOME/$1>>$HOME/$1>>$BACKUP_DIR/$1" >> $DOTFILES_HOME/tracker.txt
+	echo "$action>>$HOME/$1>>$BACKUP_DIR/$1>>$DOTFILES_HOME/LINK_TO_HOME/$1"
 	echo "successfully linked $DOTFILES_HOME/LINK_TO_HOME/$1 to $HOME/$1"
 }
 
