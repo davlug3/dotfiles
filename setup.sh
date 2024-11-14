@@ -5,9 +5,9 @@ DOTFILES_GIT_URL=/dotfiles_setup/dotfiles
 BACKUP_DIR=$HOME/.config_backup
 DOTFILES_HOME=$HOME/.config_dotfiles
 
-#this moves or copies files to $BACKUP_DIR, 
-#making sure that $BACKUP_DIR exists before
-#doing so
+# this moves or copies files to $BACKUP_DIR, 
+# making sure that $BACKUP_DIR exists before
+# doing so
 mvcpp() {
 	# if backup dir doesnt exist, create it
 	if [ ! -d "$BACKUP_DIR" ]; then
@@ -22,7 +22,7 @@ mvcpp() {
 		echo "$2 has been copied to $BACKUP_DIR" 
 	else
 		echo "Invalid action. Use mvcpp 'move | copy' <path>"
-	fe
+	fi
 }
 
 

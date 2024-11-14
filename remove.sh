@@ -1,9 +1,9 @@
 #!/bin/bash
 # File to be parsed
 source "$HOME/.bashrc"
-source ~/.config_dotfiles/.env
+source .env
 
-echo $DDOTFILES_DOTFILES_HOME
+echo HOME = $DDOTFILES_DOTFILES_HOME
 
 
 
