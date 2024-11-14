@@ -33,16 +33,16 @@ while IFS= read -r line; do
         echo "Error: Not enough parts in line"
     fi
 
-    copyfrom=${parts[2]}
-    copyto=${parts[1]}
-	echo copyfrom=$copyfrom
-	echo copyto=$copyto
-continue
-    url=${parts[0]}
-    url=$(echo "$url" | sed -e 's/^[[:space:]]*//')
-    url="${url#$DDOTFILES_DOTFILES_HOME/LINK_TO_HOME/}"
-    wholeurl="$DDOTFILES_BACKUP_DIR/$url"
-    echo "my url=$wholeurl"
+    # copyfrom=${parts[2]}
+    # copyto=${parts[1]}
+	# echo copyfrom=$copyfrom
+	# echo copyto=$copyto
+# continue
+#     url=${parts[0]}
+#     url=$(echo "$url" | sed -e 's/^[[:space:]]*//')
+#     url="${url#$DDOTFILES_DOTFILES_HOME/LINK_TO_HOME/}"
+#     wholeurl="$DDOTFILES_BACKUP_DIR/$url"
+#     echo "my url=$wholeurl"
 
    # rm -rf ${parts[2]}
     
