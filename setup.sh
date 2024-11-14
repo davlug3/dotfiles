@@ -33,7 +33,7 @@ backup_and_link() {
 	fi
 
 	ln -s "$DOTFILES_HOME/LINK_TO_HOME/$1" "$HOME/$1" 
-	echo "link >> $DOTFILES_HOME/LINK_TO_HOME/$1 >> $HOME/$1" >> $DOTFILES_HOME/tracker.txt
+	echo "link>>$DOTFILES_HOME/LINK_TO_HOME/$1>>$HOME/$1>>$BACKUP_DIR/$1" >> $DOTFILES_HOME/tracker.txt
 	echo "successfully linked $DOTFILES_HOME/LINK_TO_HOME/$1 to $HOME/$1"
 }
 

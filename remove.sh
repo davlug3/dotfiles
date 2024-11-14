@@ -3,12 +3,11 @@
 source "$HOME/.bashrc"
 source .env
 
-echo HOME = $DDOTFILES_DOTFILES_HOME
+echo MY_HOME = $DDOTFILES_DOTFILES_HOME
 
 
 
-exit 0
-
+#check if .env is sourced
 if [ -z "${DDOTFILES_DOTFILES_HOME}" ]; then 
 	echo "Environment variable \$DDOTFILES_DOTFILES_HOME not set.."
 	echo 'Did you run source ~/.bashrc?'
@@ -22,19 +21,19 @@ file=$DDOTFILES_DOTFILES_HOME/tracker.txt
 while IFS= read -r line; do
     # Split the line by the delimiter ">>"
     IFS='>>' read -r -a parts <<< "$line"
-    
-    # Access the split parts (e.g., parts[0], parts[1], etc.)
-    # rm -rf ${parts[2]}
-    url=${parts[2]}
-    echo ${url#$HOME}
-  # $DDOTFILES_BACKUP_DIR/${parts[2]#$HOME} $HOME
-    # echo "Part 1: ${parts[0]}"
-    # echo "Part 2: ${parts[1]}"
-    
-    # If there are more parts, print them too
-    # for i in "${!parts[@]}"; do
-    #     echo "Part $((i + 1)): ${parts[i]}"
-    # done
 
-    echo "----"
+    copyfrom=${parts[3]}
+    copyto=${parts[2]}
+	echo copyfrom=$copyfrom
+	echo copyto=$copyto
+continue
+    url=${parts[0]}
+    url=$(echo "$url" | sed -e 's/^[[:space:]]*//')
+    url="${url#$DDOTFILES_DOTFILES_HOME/LINK_TO_HOME/}"
+    wholeurl="$DDOTFILES_BACKUP_DIR/$url"
+    echo "my url=$wholeurl"
+
+   # rm -rf ${parts[2]}
+    
+
 done < "$file"
