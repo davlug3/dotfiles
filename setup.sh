@@ -1,9 +1,13 @@
 #!/bin/bash
 
+echo "Welcome!"
 GIT_BIN=/usr/bin/git
 DOTFILES_GIT_URL=/dotfiles_setup/dotfiles
 BACKUP_DIR=$HOME/.config_backup
 DOTFILES_HOME=$HOME/.config_dotfiles
+
+
+
 
 # this moves or copies files to $BACKUP_DIR, 
 # making sure that $BACKUP_DIR exists before
@@ -24,7 +28,6 @@ mvcpp() {
 		echo "Invalid action. Use mvcpp 'move | copy' <path>"
 	fi
 }
-
 
 backup_and_link() {
 	# check if file in $1 exist, if yes, move it
