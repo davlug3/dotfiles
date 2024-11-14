@@ -22,8 +22,8 @@ while IFS= read -r line; do
     # Split the line by the delimiter ">>"
     IFS='>>' read -r -a parts <<< "$line"
 
-    copyfrom=${parts[3]}
-    copyto=${parts[2]}
+    copyfrom=${parts[1]}
+    copyto=${parts[1]}
 	echo copyfrom=$copyfrom
 	echo copyto=$copyto
 continue
