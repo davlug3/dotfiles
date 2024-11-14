@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 echo "Welcome!"
 GIT_BIN=/usr/bin/git
 DOTFILES_GIT_URL=/dotfiles_setup/dotfiles
