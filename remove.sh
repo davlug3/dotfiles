@@ -26,19 +26,43 @@ while IFS= read -r line; do
     # Check if parts has enough elements
     if [ ${#parts[@]} -ge 4 ]; then
         action=${parts[0]}
-        copyto=${parts[1]}
-        copyfrom=${parts[2]}
+        copyfrom=${parts[1]}
+        copyto=${parts[2]}
 
         if [ "$action" = "moved_linked" ]; then
-            rm -rf $copyto
-            cp $copyfrom $copyto
+            echo "Performing moved_linked: Removing $copyfrom and copying $copyto to $copyfrom"
+            rm -rf $copyfrom
+            if [ $? -eq 0 ]; then
+                    echo "Successfully removed $copyfrom"
+            else
+                echo "Error: failed to remove $copypfrom"
+            fi
+
+            cp "$copyto" "$copyfrom"
+            if [ $? -eq 0 ]; then
+                echo "Successfully copied $copyto to $copyfrom"
+            else
+                echo "Error: Failed to copy $copyto to $copyfrom"
+            fi
         fi
 
         if [ "$action" = "linked" ]; then
             rm -rf $copyto
+            if [ $? -eq 0 ]; then
+                echo "Successfully removed $copyto"
+            else 
+                echo "Error: Failed to remove $copyto"
+            fi
         fi
 
-        
+        if [ "$action" = "bashrc" ]; then
+            sed -i '/###ddconfig###/,/###ddconfigend###/d' ~/.bashrc
+            if [ $? -eq 0 ]; then
+                echo "Successfully removed the tag in .bashrc"
+            else 
+                echo "Error: Failed to remove the tag in .bashrc"
+            fi
+        fi
 
     else
         echo "Error: Not enough parts in line"

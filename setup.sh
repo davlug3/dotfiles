@@ -3,9 +3,9 @@
 
 echo "Welcome!"
 GIT_BIN=/usr/bin/git
-DOTFILES_GIT_URL=/dotfiles_setup/dotfiles
-BACKUP_DIR=$HOME/.config_backup
-DOTFILES_HOME=$HOME/.config_dotfiles
+DOTFILES_GIT_URL=https://github.com/davlug3/dotfiles
+BACKUP_DIR=$HOME/.ddbackup
+DOTFILES_HOME=$HOME/.ddhome
 
 
 
@@ -39,10 +39,11 @@ backup_and_link() {
 	ln -s "$DOTFILES_HOME/LINK_TO_HOME/$1" "$HOME/$1" 
 
 	if [ "$moved" = true ]; then
-		action="moved_linked"
+	 	# moved,fromAddr,toAddr,linkAddr
 		echo "moved,$HOME/$1,$BACKUP_DIR/$1,$DOTFILES_HOME/LINK_TO_HOME/$1" >> $DOTFILES_HOME/tracker.txt
 	else
-		action="linked"
+	 	# linked,fromAddr,toAddr,linkAddr
+		echo "linked,$DOTFILES_HOME/LINK_TO_HOME/$1,$HOME/$1,$DOTFILES_HOME/LINK_TO_HOME/$1" >> $DOTFILES_HOME/tracker.txt
 	fi
 
 	echo "successfully linked $DOTFILES_HOME/LINK_TO_HOME/$1 to $HOME/$1"
@@ -62,12 +63,11 @@ source $DOTFILES_HOME/.env
 
 process_bashrc() {
 	[ -f "$HOME/.bashrc" ] && mvcpp copy "$HOME/.bashrc"
-	read
-
 	echo "###ddconfig###" >> $HOME/.bashrc
 	echo "[ -f \"$DOTFILES_HOME/.env\" ] && source $DOTFILES_HOME/.env" >> $HOME/.bashrc
 	echo "[ -f \"$DOTFILES_HOME/SHELL/.bashrc\" ] && source $DOTFILES_HOME/SHELL/.bashrc" >> $HOME/.bashrc
 	echo "###ddconfigend###" >> $HOME/.bashrc
+	echo "bashrc" >> $DOTFILES_HOME/tracker.txt
 }
 
 loop() {
