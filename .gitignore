@@ -1,3 +1,4 @@
 tracker.txt
 LINK_TO_HOME/.vim/*
+!LINK_TO_HOME/.vim/coc.nvim.vim
 .env
