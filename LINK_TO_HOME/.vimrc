@@ -14,6 +14,10 @@ if empty(glob(data_dir . '/autoload/plug.vim'))
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
+if empty (glob(data_dir . '/coc.nvim.vim'))
+    silent execute '!curl -fLo '.data_dir.'/coc.nvim.vim https://raw.githubusercontent.com/neoclide/coc.nvim/refs/heads/master/doc/coc-example-config.vim'
+endif
+
 
 call plug#begin('~/.vim/plugged')
 Plug 'preservim/nerdtree'
