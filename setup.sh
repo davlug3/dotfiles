@@ -2,9 +2,9 @@
 
 echo "Welcome!"
 GIT_BIN=/usr/bin/git
-DOTFILES_GIT_URL=/dotfiles_setup/dotfiles
-BACKUP_DIR=$HOME/.config_backup
-DOTFILES_HOME=$HOME/.config_dotfiles
+DOTFILES_GIT_URL=https://github.com/davlug3/dotfiles
+BACKUP_DIR=$HOME/.ddconfig_backup
+DOTFILES_HOME=$HOME/.ddconfig
 
 
 
