@@ -25,10 +25,21 @@ while IFS= read -r line; do
 
     # Check if parts has enough elements
     if [ ${#parts[@]} -ge 4 ]; then
+        action=${parts[0]}
         copyto=${parts[1]}
         copyfrom=${parts[2]}
-        echo "copyfrom=$copyfrom"
-        echo "copyto=$copyto"
+
+        if [ "$action" = "moved_linked" ]; then
+            rm -rf $copyto
+            cp $copyfrom $copyto
+        fi
+
+        if [ "$action" = "linked" ]; then
+            rm -rf $copyto
+        fi
+
+        
+
     else
         echo "Error: Not enough parts in line"
     fi
