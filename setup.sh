@@ -9,7 +9,7 @@ DOTFILES_HOME=$HOME/.config_dotfiles
 
 
 
-# this moves or copies files to $BACKUP_DIR, 
+# this moves or copies files to $BACKUP_DIR,
 # making sure that $BACKUP_DIR exists before
 # doing so
 mvcpp() {
@@ -20,10 +20,10 @@ mvcpp() {
 
 	if [ "$1" = "move" ]; then
 		mv "$2" "$BACKUP_DIR"
-		echo "$2 has been moved to $BACKUP_DIR" 
+		echo "$2 has been moved to $BACKUP_DIR"
 	elif [ "$1" = "copy" ]; then
 		cp -r "$2" "$BACKUP_DIR"
-		echo "$2 has been copied to $BACKUP_DIR" 
+		echo "$2 has been copied to $BACKUP_DIR"
 	else
 		echo "Invalid action. Use mvcpp 'move | copy' <path>"
 	fi
@@ -35,13 +35,16 @@ backup_and_link() {
 		mvcpp move "$HOME/$1"
 		moved=true
 	fi
-	ln -s "$DOTFILES_HOME/LINK_TO_HOME/$1" "$HOME/$1" 
+	ln -s "$DOTFILES_HOME/LINK_TO_HOME/$1" "$HOME/$1"
 
 	if [ "$moved" = true ]; then
 		action="moved_linked"
-		echo "moved,$HOME/$1,$BACKUP_DIR/$1,$DOTFILES_HOME/LINK_TO_HOME/$1" >> $DOTFILES_HOME/tracker.txt
+        #parsed as move from $HOME/$1 to $BACKUP_DIR/$1, and linked the file $DOTFILES_HOME/LINK_TO_HOME/$1
+		echo "moved_linked,$HOME/$1,$BACKUP_DIR/$1,$DOTFILES_HOME/LINK_TO_HOME/$1" >> $DOTFILES_HOME/tracker.txt
 	else
 		action="linked"
+        #parsed as linked from $DOTFILES_HOME/LINK_TO_HOME/$1 to $HOME/$1
+        echo "linked,$DOTFILES_HOME/LINK_TO_HOME/$1,$HOME/$1" >> $DOTFILES_HOME/tracker.txt
 	fi
 
 	echo "successfully linked $DOTFILES_HOME/LINK_TO_HOME/$1 to $HOME/$1"
@@ -55,7 +58,7 @@ echo DDOTFILES_DOTFILES_GIT_URL=$DOTFILES_GIT_URL >> $DOTFILES_HOME/.env
 echo DDOTFILES_BACKUP_DIR=$BACKUP_DIR >> $DOTFILES_HOME/.env
 echo DDOTFILES_DOTFILES_HOME=$DOTFILES_HOME >> $DOTFILES_HOME/.env
 
-source $DOTFILES_HOME/.env 
+source $DOTFILES_HOME/.env
 
 
 
@@ -77,7 +80,7 @@ loop() {
 
 
 
-		filename=$(basename "$item") 
+		filename=$(basename "$item")
 		# echo "$filename backup that"
 		backup_and_link $filename
 	done
