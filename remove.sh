@@ -73,3 +73,8 @@ while IFS= read -r line; do
 
 
 done < "$file"
+
+
+rm -rf .ddconfig
+rm -rf .ddconfig_backup
+rm -rf ddconfigishere
