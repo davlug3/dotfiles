@@ -15,7 +15,7 @@ if empty(glob(data_dir . '/autoload/plug.vim'))
 endif
 
 if empty (glob(data_dir . '/coc.nvim.vim'))
-    silent execute '!curl -fLo '.data_dir.'/coc.nvim.vim https://raw.githubusercontent.com/neoclide/coc.nvim/master/doc/coc-example-config.vim'
+    silent execute '!curl -fLo '.data_dir.'/coc.nvim.vim --create-dirs https://raw.githubusercontent.com/neoclide/coc.nvim/master/doc/coc-example-config.vim'
 endif
 
 
