@@ -1,7 +1,9 @@
 #!/bin/bash
 # File to be parsed
+
+script_dir="$(cd "$(dirname "$(BASH_SOURCE[0])")" && pwd)"
 source "$HOME/.bashrc"
-source .env
+source $script_dir/.env
 
 echo MY_HOME = $DDOTFILES_DOTFILES_HOME
 
@@ -75,6 +77,9 @@ while IFS= read -r line; do
 done < "$file"
 
 
-rm -rf .ddconfig
-rm -rf .ddconfig_backup
-rm -rf ddconfigishere
+echo "removing .ddconfig"
+rm -rf ~/.ddconfig
+echo "removing .ddconfig_backup"
+rm -rf ~/.ddconfig_backup
+echo "removing ddconfigishere"
+rm -rf ~/ddconfigishere
