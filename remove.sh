@@ -1,7 +1,7 @@
 #!/bin/bash
 # File to be parsed
 
-script_dir="$(cd "$(dirname "$(BASH_SOURCE[0])")" && pwd)"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "$HOME/.bashrc"
 source $script_dir/.env
 
@@ -22,6 +22,7 @@ file=$DDOTFILES_DOTFILES_HOME/tracker.txt
 
 
 # Loop through each line in the file
+echo Restoring files on $file...
 while IFS= read -r line; do
     # Split the line by the delimiter ">>"
     line=$(echo "$line" | xargs)
@@ -34,7 +35,9 @@ while IFS= read -r line; do
         if [ ${#parts[@]} -ge 4 ]; then
             copyto=${parts[1]}
             copyfrom=${parts[2]}
+	    echo transferring $copyfrom to $copyto...
             cp -f $copyfrom $copyto
+	    echo done.
         else
             echo "ERROR! INCOMPLETE PARTS"
             exit 1
@@ -46,36 +49,18 @@ while IFS= read -r line; do
     if [ action = 'linked' ]; then
         if [ ${#parts[@]} -ge 3 ]; then
             addr=${parts[2]}
+	    echo "removing $addr..."
             rm -rf $addr
+	    echo done.
         else
             echo "ERROR! INCOMPLETE PARTS"
             exit 1
         fi
     fi
 
-    # Check if parts has enough elements
-    if [ ${#parts[@]} -ge 2 ]; then
-        copyto=${parts[1]}
-        copyfrom=${parts[2]}
-
-        if [ "$action" = "moved_linked" ]; then
-            rm -rf $copyto
-            cp $copyfrom $copyto
-        fi
-
-        if [ "$action" = "linked" ]; then
-            rm -rf $copyto
-        fi
-
-
-
-    else
-        echo "Error: Not enough parts in line"
-    fi
-
 
 done < "$file"
-
+echo "done restoring files."
 
 echo "removing .ddconfig"
 rm -rf ~/.ddconfig
