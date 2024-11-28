@@ -11,7 +11,7 @@ git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME config core.excludesFile $SEPA
 touch $SEPARATE_GIT_IGNORE
 echo * >> $SEPARATE_GIT_IGNORE
 
-$GIT_BIN clone "$DOTFILES_GIT_URL" "$DOTFILES_HOME" && echo "git clone succeeded." || { echo "git clone failed. Exiting..."; exit 1; }
+$GIT_BIN clone --branch new "$DOTFILES_GIT_URL" "$DOTFILES_HOME" && echo "git clone succeeded." || { echo "git clone failed. Exiting..."; exit 1; }
 
 
 loop() {
