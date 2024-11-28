@@ -21,8 +21,10 @@ loop() {
         fi
 
         filename=$(basename "$item")
-        echo git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME add --force "$HOME/$filename"
-        git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME add --force "$HOME/$filename"
+	if [[ -e "$HOME/$filename" ]]; then
+		echo git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME add --force "$HOME/$filename"
+		git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME add --force "$HOME/$filename"
+	fi
     done
     echo "done1"
     git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME commit -m "Initial commits"
