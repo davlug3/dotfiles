@@ -29,14 +29,12 @@ loop() {
         fi
 
         filename=$(basename "$item")
-	if [[ -e "$HOME/$filename" ]]; then
-		echo git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME add --force "$HOME/$filename"
-		git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME add --force "$HOME/$filename"
-	fi
+        if [[ -e "$HOME/$filename" ]]; then
+            $GIT_BIN add --force "$HOME/$filename"
+        fi
     done
-    echo "done1"
-
-    git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME commit --allow-empty -m "Initial commits"
+    echo "loop 1 done. committing..."
+    $GIT_BIN commit --allow-empty -m "Initial commits"
 
     echo "looping again..."
     for item in "$1"/{*,.*}; do
@@ -45,17 +43,17 @@ loop() {
         fi
 
         filename=$(basename "$item")
-        echo rm -rf -- $HOME/$filename
+        echo removing $HOME/$filename ...
         rm -rf -- $HOME/$filename
-        echo ln -s "$DOTFILES_HOME/LINK_TO_HOME/$filename" "$HOME/$filename"
+
+        echo linking $HOME/$filename...
         ln -s "$DOTFILES_HOME/LINK_TO_HOME/$filename" "$HOME/$filename"
 
-        echo git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME add --force "$HOME/$filename"
-        git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME add --force "$HOME/$filename"
+        $GIT_BIN add --force "$HOME/$filename"
 
     done
-    echo "done2"
-    git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME commit -m "Second commit"
+    echo "loop 2 done."
+    $GIT_BIN commit -m "Second commit"
 
 }
 
