@@ -19,6 +19,30 @@ fi
 file=$DDOTFILES_DOTFILES_HOME/tracker.txt
 
 
+sanitize_input() {
+    local input="$1"
+    # Allow only alphanumeric characters, dashes, underscores, slashes, and dots
+    if [[ "$input" =~ ^[a-zA-Z0-9/_\.-]+$ ]]; then
+        echo "$input"
+    else
+        echo "Invalid input: $input"
+        exit 1
+    fi
+}
+
+
+saferm() {
+        local target_dir=$(sanitize_input "$1")
+        local safe_path="$HOME"
+
+        if [[ "$target_dir" != "$safe_path"* ]]; then
+            echo "Operation restricted to directories within $safe_path."
+            exit 1
+        fi
+
+        rm -rf -- "$target_dir"
+        echo "Successfully deleted $target_dir"
+}
 
 
 # Loop through each line in the file
@@ -35,9 +59,12 @@ while IFS= read -r line; do
         if [ ${#parts[@]} -ge 4 ]; then
             copyto=${parts[1]}
             copyfrom=${parts[2]}
-	    echo transferring $copyfrom to $copyto...
+
+            echo "removing $copyto..."
+            saferm $copyto
+            echo transferring $copyfrom to $copyto...
             cp -f $copyfrom $copyto
-	    echo done.
+            echo done.
         else
             echo "ERROR! INCOMPLETE PARTS"
             exit 1
@@ -49,9 +76,9 @@ while IFS= read -r line; do
     if [ action = 'linked' ]; then
         if [ ${#parts[@]} -ge 3 ]; then
             addr=${parts[2]}
-	    echo "removing $addr..."
-            rm -rf $addr
-	    echo done.
+            echo "removing $addr..."
+            saferm $addr
+            echo done.
         else
             echo "ERROR! INCOMPLETE PARTS"
             exit 1
@@ -63,8 +90,8 @@ done < "$file"
 echo "done restoring files."
 
 echo "removing .ddconfig"
-rm -rf ~/.ddconfig
+saferm $DDOTFILES_DOTFILES_HOME
 echo "removing .ddconfig_backup"
-rm -rf ~/.ddconfig_backup
+saferm $DDOTFILES_BACKUP_DIR
 echo "removing ddconfigishere"
 rm -rf ~/ddconfigishere
