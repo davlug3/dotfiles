@@ -39,8 +39,8 @@ loop() {
         filename=$(basename "$item")
         echo rm -rf -- $HOME/$filename
         rm -rf -- $HOME/$filename
-        echo ln -s "$DOTFILES_HOME/LINK_TO_HOME/$1" "$HOME/$1"
-        ln -s "$DOTFILES_HOME/LINK_TO_HOME/$1" "$HOME/$1"
+        echo ln -s "$DOTFILES_HOME/LINK_TO_HOME/$filename" "$HOME/$filename"
+        ln -s "$DOTFILES_HOME/LINK_TO_HOME/$filename" "$HOME/$filename"
 
         echo git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME add --force "$HOME/$filename"
         git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME add --force "$HOME/$filename"
