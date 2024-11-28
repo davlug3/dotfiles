@@ -27,8 +27,10 @@ loop() {
 	fi
     done
     echo "done1"
-    git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME commit -m "Initial commits"
 
+    git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME commit --allow-empty -m "Initial commits"
+
+    echo "looping again..."
     for item in "$1"/{*,.*}; do
         if [[ "$item" == "$1/*" || "$item" == "$1/." || "$item" == "$dir/.." ]]; then
             continue
