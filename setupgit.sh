@@ -47,4 +47,5 @@ loop() {
 
 }
 
+loop "$DOTFILES_HOME/LINK_TO_HOME"
 echo "final done"
