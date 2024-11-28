@@ -8,6 +8,7 @@ SEPARATE_GIT_IGNORE=$HOME/.ddgitignore
 
 git init --separate-git-dir=$SEPARATE_GIT_DIR $HOME
 echo "1"
+echo "2"
 git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME config core.excludesFile $SEPARATE_GIT_IGNORE
 echo "2"
 touch $SEPARATE_GIT_IGNORE
