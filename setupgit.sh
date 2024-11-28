@@ -6,8 +6,16 @@ DOTFILES_HOME=$HOME/.ddconfig
 SEPARATE_GIT_DIR=$HOME/.ddgit
 SEPARATE_GIT_IGNORE=$HOME/.ddgitignore
 
-git init --separate-git-dir=$SEPARATE_GIT_DIR $HOME
-git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME config core.excludesFile $SEPARATE_GIT_IGNORE
+if [[ -e $HOME/.git ]]; then
+    echo ".git directory exists. moving to $HOME/.git.backup"
+    mv $HOME/.git $HOME/.git.backup
+    echo "done"
+fi
+
+
+cd $HOME
+git init $HOME
+git config core.excludesFile $SEPARATE_GIT_IGNORE
 touch $SEPARATE_GIT_IGNORE
 echo * >> $SEPARATE_GIT_IGNORE
 
