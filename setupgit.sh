@@ -1,7 +1,7 @@
 #!/bin/bash
 
 GIT_BIN=/usr/bin/git
-DOTFILES_GIT_URL=https://github.com/davlug3/dotfiles
+DOTFILES_GIT_URL=/dotfiles
 DOTFILES_HOME=$HOME/.ddconfig
 SEPARATE_GIT_DIR=$HOME/.ddgit
 SEPARATE_GIT_IGNORE=$HOME/.ddgitignore
