@@ -14,10 +14,12 @@ fi
 
 
 cd $HOME
-git init $HOME
-git config core.excludesFile $SEPARATE_GIT_IGNORE
+$GIT_BIN init $HOME
+$GIT_BIN config core.excludesFile $SEPARATE_GIT_IGNORE
 touch $SEPARATE_GIT_IGNORE
 echo * >> $SEPARATE_GIT_IGNORE
+$GIT_BIN add --force $SEPARATE_GIT_DIR
+
 
 $GIT_BIN clone --branch new "$DOTFILES_GIT_URL" "$DOTFILES_HOME" && echo "git clone succeeded." || { echo "git clone failed. Exiting..."; exit 1; }
 
