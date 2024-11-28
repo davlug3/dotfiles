@@ -7,11 +7,14 @@ SEPARATE_GIT_DIR=$HOME/.ddgit
 SEPARATE_GIT_IGNORE=$HOME/.ddgitignore
 
 git init --separate-git-dir=$SEPARATE_GIT_DIR $HOME
-git config --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME core.excludesFile $SEPARATE_GIT_IGNORE
+echo "1"
+git --git-dir=$SEPARATE_GIT_DIR --work-tree=$HOME config core.excludesFile $SEPARATE_GIT_IGNORE
+echo "2"
 touch $SEPARATE_GIT_IGNORE
+echo "3"
 echo * >> $SEPARATE_GIT_IGNORE
 
-
+echo "4"
 $GIT_BIN clone "$DOTFILES_GIT_URL" "$DOTFILES_HOME" && echo "git clone succeeded." || { echo "git clone failed. Exiting..."; exit 1; }
 
 
