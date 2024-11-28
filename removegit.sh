@@ -9,7 +9,7 @@ echo "done restoring files."
 echo "removing $HOME/.git"
 rm -rf $HOME/.git
 
-if [[ -e "$HOME/.git.backup" ]]
+if [[ -e "$HOME/.git.backup" ]]; then
     echo "$HOME/.git.backup detected. Moving to $HOME/.git..."
     mv $HOME/.git.backup $HOME/.git
 fi
