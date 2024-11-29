@@ -48,7 +48,7 @@ else
 fi
 
 echo "config..."
-$DDOTFILES_GIT_BIN config core.excludesFile $DDOTFILES_SEPARATE_GIT_IGNORE
+$DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME config core.excludesFile $DDOTFILES_SEPARATE_GIT_IGNORE
 
 if [[ -f "$DDOTFILES_SEPARATE_GIT_IGNORE" ]]; then
     echo "File $DDOTFILES_SEPARATE_GIT_IGNORE exists."
@@ -66,13 +66,13 @@ if [[ ! "$(cat "$DDOTFILES_SEPARATE_GIT_IGNORE")" == "*" ]]; then
 fi
 
 echo "git add"
-$DDOTFILES_GIT_BIN add --force .
+$DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME add --force .
 
 echo "Add safe directory"
-$DDOTFILES_GIT_BIN config --add safe.direcotry $DDOTFILES_GIT_REPO_URL/.git
-$DDOTFILES_GIT_BIN config --add safe.direcotry $DDOTFILES_GIT_REPO_URL
-$DDOTFILES_GIT_BIN config user.email $DOTFILES_GIT_EMAIL
-$DDOTFILES_GIT_BIN config user.name $DOTFILES_GIT_NAME
+$DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME config --add safe.direcotry $DDOTFILES_GIT_REPO_URL/.git
+$DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME config --add safe.direcotry $DDOTFILES_GIT_REPO_URL
+$DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME config user.email $DOTFILES_GIT_EMAIL
+$DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME config user.name $DOTFILES_GIT_NAME
 
 echo "Fetching the repo..."
 $DDOTFILES_GIT_BIN -c safe.directory=$DDOTFILES_GIT_REPO_URL/.git clone --branch new "$DDOTFILES_GIT_REPO_URL" "$DDOTFILES_HOME" && echo "Fetching done." || { echo "git clone failed. Exiting..."; exit 1; }
