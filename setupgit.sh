@@ -3,7 +3,7 @@
 # This is my test dotfiles installer.
 # Use cURL to invoke the script. ie:
 #
-# curl https://raw.githubusercontent.com/davlug3/dotfiles/new/setupgit.sh | GIT_BIN=/usr/local/bin/git DOTFILES_HOME=$HOME/.config bash
+# curl https://raw.githubusercontent.com/davlug3/dotfiles/new/setupgit.sh | GIT_BIN=/usr/local/bin/git DDOTFILES_HOME=$HOME/.config bash
 
 DDOTFILES_GIT_BIN=${DDOTFILES_GIT_BIN:-/usr/bin/git}
 DDOTFILES_GIT_REPO_URL=${DDOTFILES_GIT_REPO_URL:-https://github.com/davlug3/dotfiles}
@@ -75,7 +75,7 @@ $DDOTFILES_GIT_BIN config user.email $DOTFILES_GIT_EMAIL
 $DDOTFILES_GIT_BIN config user.name $DOTFILES_GIT_NAME
 
 echo "Fetching the repo..."
-$DDOTFILES_GIT_BIN -c safe.directory=$DDOTFILES_GIT_REPO_URL/.git clone --branch new "$DDOTFILES_GIT_REPO_URL" "$DOTFILES_HOME" && echo "Fetching done." || { echo "git clone failed. Exiting..."; exit 1; }
+$DDOTFILES_GIT_BIN -c safe.directory=$DDOTFILES_GIT_REPO_URL/.git clone --branch new "$DDOTFILES_GIT_REPO_URL" "$DDOTFILES_HOME" && echo "Fetching done." || { echo "git clone failed. Exiting..."; exit 1; }
 
 touch $DDOTFILES_HOME/.env
 echo export DDOTFILES_GIT_BIN="${DDOTFILES_GIT_BIN}"
@@ -117,7 +117,7 @@ loop() {
         fi
 
         echo "   linking $HOME/$filename..."
-        ln -s "$DOTFILES_HOME/LINK_TO_HOME/$filename" "$HOME/$filename"
+        ln -s "$DDOTFILES_HOME/LINK_TO_HOME/$filename" "$HOME/$filename"
 
         $DDOTFILES_GIT_BIN add --force "$HOME/$filename"
     done
@@ -126,5 +126,5 @@ loop() {
 
 }
 
-loop "$DOTFILES_HOME/LINK_TO_HOME"
+loop "$DDOTFILES_HOME/LINK_TO_HOME"
 echo "Done!"
