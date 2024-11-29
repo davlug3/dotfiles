@@ -26,7 +26,7 @@ fi
 
 
 cd $HOME
-$GIT_BIN init --Initial-branch=main $HOME > /dev/null
+$GIT_BIN init --initial-branch=main $HOME > /dev/null
 if [ ! -d ".git" ]; then
     echo "Error initializing \$HOME as a git directory. "
     echo "If you continue, you will lose the ability to restore your \$HOME directory back to"
@@ -43,6 +43,7 @@ else
     echo "Git repository at \$HOME successfully initialized."
 fi
 
+echo "config..."
 $GIT_BIN config core.excludesFile $SEPARATE_GIT_IGNORE
 
 if [[ -f "$SEPARATE_GIT_IGNORE" ]]; then
@@ -51,6 +52,7 @@ if [[ -f "$SEPARATE_GIT_IGNORE" ]]; then
     exit 1
 fi
 
+echo "creating gitignore"
 touch $SEPARATE_GIT_IGNORE
 echo * >> $SEPARATE_GIT_IGNORE
 
@@ -59,10 +61,11 @@ if [[ ! "$(cat "$SEPARATE_GIT_IGNORE")" == "*" ]]; then
     exit 1
 fi
 
+echo "git add"
 $GIT_BIN add --force .
 
 echo "Fetching the repo..."
-$GIT_BIN clone --branch new "$DOTFILES_GIT_REPO_URL" "$DOTFILES_HOME" && echo "Fetching done." || { echo "git clone failed. Exiting..."; exit 1; }
+$GIT_BIN -c safe.direcotry=$DOTFILES_GIT_REPO_URL clone --branch new "$DOTFILES_GIT_REPO_URL" "$DOTFILES_HOME" && echo "Fetching done." || { echo "git clone failed. Exiting..."; exit 1; }
 
 
 loop() {
