@@ -8,6 +8,9 @@
 GIT_BIN=${GIT_BIN:-/usr/bin/git}
 DOTFILES_GIT_REPO_URL=${DOTFILES_GIT_REPO_URL:-https://github.com/davlug3/dotfiles}
 DOTFILES_HOME=${DOTFILES_HOME:-$HOME/.ddconfig}
+DOTFILES_GIT_NAME=${DOTFILES_GIT_NAME:-Dave}
+DOTFILES_GIT_EMAIL=${DOTFILES_GIT_EMAIL:-Dave@Dave}
+DOTFILES_HOME=${DOTFILES_HOME:-$HOME/.ddconfig}
 SEPARATE_GIT_IGNORE=${SEPARATE_GIT_IGNORE:-$HOME/.ddgitignore}
 
 if [[ -e $HOME/.git ]]; then
@@ -64,8 +67,14 @@ fi
 echo "git add"
 $GIT_BIN add --force .
 
+echo "Add safe directory"
+$GIT_BIN config --add safe.direcotry $DOTFILES_GIT_REPO_URL/.git
+$GIT_BIN config --add safe.direcotry $DOTFILES_GIT_REPO_URL
+$GIT_BIN config user.email $DOTFILES_GIT_EMAIL
+$GIT_BIN config user.name $DOTFILES_GIT_NAME
+
 echo "Fetching the repo..."
-$GIT_BIN -c safe.direcotry=$DOTFILES_GIT_REPO_URL clone --branch new "$DOTFILES_GIT_REPO_URL" "$DOTFILES_HOME" && echo "Fetching done." || { echo "git clone failed. Exiting..."; exit 1; }
+$GIT_BIN -c safe.direcotry=$DOTFILES_GIT_REPO_URL/.git clone --branch new "$DOTFILES_GIT_REPO_URL" "$DOTFILES_HOME" && echo "Fetching done." || { echo "git clone failed. Exiting..."; exit 1; }
 
 
 loop() {
