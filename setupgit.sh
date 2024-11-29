@@ -5,13 +5,14 @@
 #
 # curl https://raw.githubusercontent.com/davlug3/dotfiles/new/setupgit.sh | GIT_BIN=/usr/local/bin/git DOTFILES_HOME=$HOME/.config bash
 
-GIT_BIN=${GIT_BIN:-/usr/bin/git}
-DOTFILES_GIT_REPO_URL=${DOTFILES_GIT_REPO_URL:-https://github.com/davlug3/dotfiles}
-DOTFILES_HOME=${DOTFILES_HOME:-$HOME/.ddconfig}
-DOTFILES_GIT_NAME=${DOTFILES_GIT_NAME:-Dave}
-DOTFILES_GIT_EMAIL=${DOTFILES_GIT_EMAIL:-Dave@Dave}
-DOTFILES_HOME=${DOTFILES_HOME:-$HOME/.ddconfig}
-SEPARATE_GIT_IGNORE=${SEPARATE_GIT_IGNORE:-$HOME/.ddgitignore}
+DDOTFILES_GIT_BIN=${DDOTFILES_GIT_BIN:-/usr/bin/git}
+DDOTFILES_GIT_REPO_URL=${DDOTFILES_GIT_REPO_URL:-https://github.com/davlug3/dotfiles}
+DDOTFILES_HOME=${DDOTFILES_HOME:-$HOME/.ddconfig}
+DDOTFILES_GIT_NAME=${DDOTFILES_GIT_NAME:-Dave}
+DDOTFILES_GIT_EMAIL=${DDOTFILES_GIT_EMAIL:-Dave@Dave}
+DDOTFILES_HOME=${DDOTFILES_HOME:-$HOME/.ddconfig}
+DDOTFILES_SEPARATE_GIT_IGNORE=${DDOTFILES_SEPARATE_GIT_IGNORE:-$HOME/.ddgitignore}
+
 
 if [[ -e $HOME/.git ]]; then
     echo "Git is already initialized at the \$HOME directory. Trying to rename to \$HOME/.git.backup..."
@@ -29,7 +30,7 @@ fi
 
 
 cd $HOME
-$GIT_BIN init --initial-branch=main $HOME > /dev/null
+$DDOTFILES_GIT_BIN init --initial-branch=main $HOME > /dev/null
 if [ ! -d ".git" ]; then
     echo "Error initializing \$HOME as a git directory. "
     echo "If you continue, you will lose the ability to restore your \$HOME directory back to"
@@ -47,35 +48,43 @@ else
 fi
 
 echo "config..."
-$GIT_BIN config core.excludesFile $SEPARATE_GIT_IGNORE
+$DDOTFILES_GIT_BIN config core.excludesFile $DDOTFILES_SEPARATE_GIT_IGNORE
 
-if [[ -f "$SEPARATE_GIT_IGNORE" ]]; then
-    echo "File $SEPARATE_GIT_IGNORE exists. Please handle it accordingly."
-    echo "Exiting."
-    exit 1
+if [[ -f "$DDOTFILES_SEPARATE_GIT_IGNORE" ]]; then
+    echo "File $DDOTFILES_SEPARATE_GIT_IGNORE exists."
+    echo "Deleting..."
+    rm -rf -- "$DDOTFILES_SEPARATE_GIT_IGNORE"
 fi
 
 echo "creating gitignore"
-touch $SEPARATE_GIT_IGNORE
-echo * >> $SEPARATE_GIT_IGNORE
+touch $DDOTFILES_SEPARATE_GIT_IGNORE
+echo * >> $DDOTFILES_SEPARATE_GIT_IGNORE
 
-if [[ ! "$(cat "$SEPARATE_GIT_IGNORE")" == "*" ]]; then
-    echo "Invalid file $SEPARATE_GIT_IGNORE. Please handle accordingly."
+if [[ ! "$(cat "$DDOTFILES_SEPARATE_GIT_IGNORE")" == "*" ]]; then
+    echo "Invalid file $DDOTFILES_SEPARATE_GIT_IGNORE. Please handle accordingly."
     exit 1
 fi
 
 echo "git add"
-$GIT_BIN add --force .
+$DDOTFILES_GIT_BIN add --force .
 
 echo "Add safe directory"
-$GIT_BIN config --add safe.direcotry $DOTFILES_GIT_REPO_URL/.git
-$GIT_BIN config --add safe.direcotry $DOTFILES_GIT_REPO_URL
-$GIT_BIN config user.email $DOTFILES_GIT_EMAIL
-$GIT_BIN config user.name $DOTFILES_GIT_NAME
+$DDOTFILES_GIT_BIN config --add safe.direcotry $DDOTFILES_GIT_REPO_URL/.git
+$DDOTFILES_GIT_BIN config --add safe.direcotry $DDOTFILES_GIT_REPO_URL
+$DDOTFILES_GIT_BIN config user.email $DOTFILES_GIT_EMAIL
+$DDOTFILES_GIT_BIN config user.name $DOTFILES_GIT_NAME
 
 echo "Fetching the repo..."
-$GIT_BIN -c safe.direcotry=$DOTFILES_GIT_REPO_URL/.git clone --branch new "$DOTFILES_GIT_REPO_URL" "$DOTFILES_HOME" && echo "Fetching done." || { echo "git clone failed. Exiting..."; exit 1; }
+$DDOTFILES_GIT_BIN -c safe.directory=$DDOTFILES_GIT_REPO_URL/.git clone --branch new "$DDOTFILES_GIT_REPO_URL" "$DOTFILES_HOME" && echo "Fetching done." || { echo "git clone failed. Exiting..."; exit 1; }
 
+touch $DDOTFILES_HOME/.env
+echo export DDOTFILES_GIT_BIN="${DDOTFILES_GIT_BIN}"
+echo export DDOTFILES_GIT_REPO_URL="${DDOTFILES_GIT_REPO_URL}"
+echo export DDOTFILES_HOME="${DDOTFILES_HOME}"
+echo export DDOTFILES_GIT_NAME="${DDOTFILES_GIT_NAME}"
+echo export DDOTFILES_GIT_EMAIL="${DDOTFILES_GIT_EMAIL}"
+echo export DDOTFILES_HOME="${DDOTFILES_HOME}"
+echo export DDOTFILES_SEPARATE_GIT_IGNORE="${DDOTFILES_SEPARATE_GIT_IGNORE}"
 
 loop() {
     echo "Linking files..."
@@ -88,12 +97,12 @@ loop() {
         filename=$(basename "$item")
         if [[ -e "$HOME/$filename" ]]; then
             echo "   Found file $HOME/$filename. Backing up..."
-            $GIT_BIN add --force "$HOME/$filename"
+            $DDOTFILES_GIT_BIN add --force "$HOME/$filename"
         fi
     done
     echo "loop 1 done. committing..."
 
-    $GIT_BIN commit --allow-empty -m "Initial commits"
+    $DDOTFILES_GIT_BIN commit --allow-empty -m "Initial commits"
 
     echo "looping again..."
     for item in "$1"/{*,.*}; do
@@ -110,10 +119,10 @@ loop() {
         echo "   linking $HOME/$filename..."
         ln -s "$DOTFILES_HOME/LINK_TO_HOME/$filename" "$HOME/$filename"
 
-        $GIT_BIN add --force "$HOME/$filename"
+        $DDOTFILES_GIT_BIN add --force "$HOME/$filename"
     done
     echo "loop 2 done."
-    $GIT_BIN commit -m "Second commit"
+    $DDOTFILES_GIT_BIN commit -m "Second commit"
 
 }
 

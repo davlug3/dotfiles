@@ -1,9 +1,17 @@
 #!/bin/bash
 # File to be parsed
 
+if [ ! -e $0/.env ]; then
+    echo "$0/.env does not exist. Is the dotfiles script set up?"
+    exit 1
+fi
+
+echo "Sourcing $0/.env..."
+source $0/.env
+echo "Done."
 
 cd $HOME;
-git checkout $(git rev-list --max-parents=0 HEAD)
+git -C $HOME checkout $(git rev-list --max-parents=0 HEAD)
 echo "done restoring files."
 
 echo "removing $HOME/.git"
