@@ -2,6 +2,7 @@
 # File to be parsed
 
 SCRIPT_DIR=$(dirname "$0")
+echo "\$DDOTFILES_GIT_BIN $DDOTFILES_GIT_BIN"
 
 if [ ! -e "$SCRIPT_DIR/.env" ]; then
     echo "$SCRIPT_DIR/.env does not exist. Is the dotfiles script set up?"
