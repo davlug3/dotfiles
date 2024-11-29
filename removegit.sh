@@ -13,8 +13,8 @@ source $SCRIPT_DIR/.env
 echo "Done."
 
 cd $HOME;
-git -C $HOME checkout $(git rev-list --max-parents=0 HEAD)
-echo "done restoring files."
+$DDOTFILES_GIT_BIN -C $HOME checkout $($DDOTFILES_GIT_BIN -C $HOME rev-list --max-parents=0 HEAD)
+echo "done restoring files$DDOTFILES_GIT_BIN
 
 echo "removing $HOME/.git"
 rm -rf $HOME/.git
