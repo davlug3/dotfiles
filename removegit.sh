@@ -1,13 +1,15 @@
 #!/bin/bash
 # File to be parsed
 
-if [ ! -e $0/.env ]; then
-    echo "$0/.env does not exist. Is the dotfiles script set up?"
+SCRIPT_DIR=$(dirname "$0")
+
+if [ ! -e "$SCRIPT_DIR/.env" ]; then
+    echo "$SCRIPT_DIR/.env does not exist. Is the dotfiles script set up?"
     exit 1
 fi
 
 echo "Sourcing $0/.env..."
-source $0/.env
+source $SCRIPT_DIR/.env
 echo "Done."
 
 cd $HOME;
