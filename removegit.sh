@@ -2,7 +2,6 @@
 # File to be parsed
 
 SCRIPT_DIR=$(dirname "$0")
-echo "\$DDOTFILES_GIT_BIN $DDOTFILES_GIT_BIN"
 
 if [ ! -e "$SCRIPT_DIR/.env" ]; then
     echo "$SCRIPT_DIR/.env does not exist. Is the dotfiles script set up?"
@@ -12,6 +11,8 @@ fi
 echo "Sourcing $0/.env..."
 source $SCRIPT_DIR/.env
 echo "Done."
+
+echo "\$DDOTFILES_GIT_BIN $DDOTFILES_GIT_BIN"
 
 cd $HOME;
 $DDOTFILES_GIT_BIN -C $HOME checkout $($DDOTFILES_GIT_BIN -C $HOME rev-list --max-parents=0 HEAD)
