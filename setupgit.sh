@@ -102,8 +102,10 @@ loop() {
         fi
 
         filename=$(basename "$item")
-        echo "   removing $HOME/$filename..."
-        rm -rf -- $HOME/$filename
+        if [[ -e "$HOME/$filename" ]]; then
+            echo "   Found file $HOME/$filename. Removing..."
+            rm -rf -- $HOME/$filename
+        fi
 
         echo "   linking $HOME/$filename..."
         ln -s "$DOTFILES_HOME/LINK_TO_HOME/$filename" "$HOME/$filename"
