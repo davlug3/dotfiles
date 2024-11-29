@@ -97,12 +97,12 @@ loop() {
         filename=$(basename "$item")
         if [[ -e "$HOME/$filename" ]]; then
             echo "   Found file $HOME/$filename. Backing up..."
-            $DDOTFILES_GIT_BIN add --force "$HOME/$filename"
+            $DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME add --force "$HOME/$filename"
         fi
     done
     echo "loop 1 done. committing..."
 
-    $DDOTFILES_GIT_BIN commit --author="$DDOTFILES_GIT_NAME <$DDOTFILES_GIT_EMAIL>" --allow-empty -m "Initial commits"
+    $DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME commit --author="$DDOTFILES_GIT_NAME <$DDOTFILES_GIT_EMAIL>" --allow-empty -m "Initial commits"
 
     echo "looping again..."
     for item in "$1"/{*,.*}; do
@@ -119,10 +119,10 @@ loop() {
         echo "   linking $HOME/$filename..."
         ln -s "$DDOTFILES_HOME/LINK_TO_HOME/$filename" "$HOME/$filename"
 
-        $DDOTFILES_GIT_BIN add --force "$HOME/$filename"
+        $DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME add --force "$HOME/$filename"
     done
     echo "loop 2 done."
-    $DDOTFILES_GIT_BIN commit --author="$DDOTFILES_GIT_NAME <$DDOTFILES_GIT_EMAIL>" -m "Second commit"
+    $DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME commit --author="$DDOTFILES_GIT_NAME <$DDOTFILES_GIT_EMAIL>" -m "Second commit"
 
 }
 
