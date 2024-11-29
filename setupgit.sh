@@ -102,7 +102,7 @@ loop() {
     done
     echo "loop 1 done. committing..."
 
-    $DDOTFILES_GIT_BIN commit --author="$DDOTFILES_GIT_NAME $DDOTFILES_GIT_EMAIL" --allow-empty -m "Initial commits"
+    $DDOTFILES_GIT_BIN commit --author="$DDOTFILES_GIT_NAME <$DDOTFILES_GIT_EMAIL>" --allow-empty -m "Initial commits"
 
     echo "looping again..."
     for item in "$1"/{*,.*}; do
@@ -122,7 +122,7 @@ loop() {
         $DDOTFILES_GIT_BIN add --force "$HOME/$filename"
     done
     echo "loop 2 done."
-    $DDOTFILES_GIT_BIN commit --author="$DDOTFILES_GIT_NAME $DDOTFILES_GIT_EMAIL" -m "Second commit"
+    $DDOTFILES_GIT_BIN commit --author="$DDOTFILES_GIT_NAME <$DDOTFILES_GIT_EMAIL>" -m "Second commit"
 
 }
 
