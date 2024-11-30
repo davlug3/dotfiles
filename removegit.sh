@@ -16,7 +16,7 @@ echo "\$DDOTFILES_GIT_BIN $DDOTFILES_GIT_BIN"
 
 cd $HOME;
 $DDOTFILES_GIT_BIN -C $HOME checkout $($DDOTFILES_GIT_BIN -C $HOME rev-list --max-parents=0 HEAD)
-echo "done restoring files$DDOTFILES_GIT_BIN
+echo "done restoring files$DDOTFILES_GIT_BIN"
 
 echo "removing $HOME/.git"
 rm -rf $HOME/.git

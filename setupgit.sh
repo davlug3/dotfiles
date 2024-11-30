@@ -1,10 +1,13 @@
 #!/bin/bash
 
 # This is my test dotfiles installer.
+# I use a git to manage my \$HOME
 # Use cURL to invoke the script. ie:
 #
 # curl https://raw.githubusercontent.com/davlug3/dotfiles/new/setupgit.sh | DDOTFILES_GIT_BIN=/usr/local/bin/git DDOTFILES_HOME=$HOME/.ddconfig bash
 
+#set some variables, check first if environment variable of the same name is defined.
+#if yes, use that
 DDOTFILES_GIT_BIN=${DDOTFILES_GIT_BIN:-/usr/bin/git}
 DDOTFILES_GIT_REPO_URL=${DDOTFILES_GIT_REPO_URL:-https://github.com/davlug3/dotfiles}
 DDOTFILES_HOME=${DDOTFILES_HOME:-$HOME/.ddconfig}
@@ -80,7 +83,12 @@ $DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME config user.email $DDO
 $DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME config user.name $DDOTFILES_GIT_NAME
 
 echo "Fetching the repo..."
-$DDOTFILES_GIT_BIN -c safe.directory=$DDOTFILES_GIT_REPO_URL/.git clone --branch new "$DDOTFILES_GIT_REPO_URL" "$DDOTFILES_HOME" && echo "Fetching done." || { echo "git clone failed. Exiting..."; exit 1; }
+$DDOTFILES_GIT_BIN \
+    -c safe.directory=$DDOTFILES_GIT_REPO_URL/.git \
+    clone \
+    --branch new \
+    "$DDOTFILES_GIT_REPO_URL" \
+    "$DDOTFILES_HOME" && echo "Fetching done." || { echo "git clone failed. Exiting..."; exit 1; }
 
 touch $DDOTFILES_HOME/.env
 echo export DDOTFILES_GIT_BIN="${DDOTFILES_GIT_BIN}" >> $DDOTFILES_HOME/.env
