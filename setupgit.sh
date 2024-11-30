@@ -3,7 +3,7 @@
 # This is my test dotfiles installer.
 # Use cURL to invoke the script. ie:
 #
-# curl https://raw.githubusercontent.com/davlug3/dotfiles/new/setupgit.sh | DDOTFILES_GIT_BIN=/usr/local/bin/git DDOTFILES_HOME=$HOME/.config bash
+# curl https://raw.githubusercontent.com/davlug3/dotfiles/new/setupgit.sh | DDOTFILES_GIT_BIN=/usr/local/bin/git DDOTFILES_HOME=$HOME/.ddconfig bash
 
 DDOTFILES_GIT_BIN=${DDOTFILES_GIT_BIN:-/usr/bin/git}
 DDOTFILES_GIT_REPO_URL=${DDOTFILES_GIT_REPO_URL:-https://github.com/davlug3/dotfiles}
