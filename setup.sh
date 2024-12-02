@@ -1,92 +1,155 @@
 #!/bin/bash
 
-echo "Welcome!"
-GIT_BIN=/usr/bin/git
-DOTFILES_GIT_URL=https://github.com/davlug3/dotfiles
-BACKUP_DIR=$HOME/.ddconfig_backup
-DOTFILES_HOME=$HOME/.ddconfig
+# This is my test dotfiles installer.
+# I use a git to manage my \$HOME
+# Use cURL to invoke the script. ie:
+#
+# curl https://raw.githubusercontent.com/davlug3/dotfiles/new/setup.sh | DDOTFILES_GIT_BIN=/usr/local/bin/git DDOTFILES_HOME=$HOME/.ddconfig bash
+
+#set some variables, check first if environment variable of the same name is defined.
+#if yes, use that
+DDOTFILES_GIT_BIN=${DDOTFILES_GIT_BIN:-/usr/bin/git}
+DDOTFILES_GIT_REPO_URL=${DDOTFILES_GIT_REPO_URL:-https://github.com/davlug3/dotfiles}
+DDOTFILES_HOME=${DDOTFILES_HOME:-$HOME/.ddconfig}
+DDOTFILES_GIT_NAME=${DDOTFILES_GIT_NAME:-Dave}
+DDOTFILES_GIT_EMAIL=${DDOTFILES_GIT_EMAIL:-Dave@Dave}
+DDOTFILES_HOME=${DDOTFILES_HOME:-$HOME/.ddconfig}
+
+# This is still not operational
+DDOTFILES_SEPARATE_GITIGNORE=${DDOTFILES_SEPARATE_GITIGNORE:-$HOME/.gitignore}
+
+
+if [[ -e $HOME/.git ]]; then
+    echo "Git is already initialized at the \$HOME directory. Trying to rename to \$HOME/.git.backup..."
+    mv $HOME/.git $HOME/.git.backup
+
+    if [[ $? -eq 0 ]]; then
+        echo "Success!"
+        echo "The old \$HOME/.git directory is now \$HOME/.git.backup. It will be restored when you run the uninstall script that comes with this config."
+        echo "If this script fails, just rename this with:"
+        echo "   mv $HOME/.git.backup $HOME/.git"
+    else
+        echo "Move operation failed. You have to manually move the \$HOME/.git directory (or rename it) somewhere else."
+        echo "Exiting..."
+        exit 1
+    fi
+fi
 
 
 
+cd $HOME
+$DDOTFILES_GIT_BIN init --initial-branch=main $HOME > /dev/null
+if [ ! -d ".git" ]; then
+    echo "Error initializing \$HOME as a git directory. "
+    echo "If you continue, you will lose the ability to restore your \$HOME directory back to"
+    echo "its original state. Do you want to continue? (Y/n)"
+    read -r user_input
 
-# this moves or copies files to $BACKUP_DIR,
-# making sure that $BACKUP_DIR exists before
-# doing so
-mvcpp() {
-	# if backup dir doesnt exist, create it
-	if [ ! -d "$BACKUP_DIR" ]; then
-		mkdir -p "$BACKUP_DIR"
-	fi
+    if [[ "$user_input" =~ ^[Yy]$ ]]; then
+        echo "Continuing..."
+    else
+        echo "Aborting."
+        exit 1
+    fi
+else
+    echo "Git repository at \$HOME successfully initialized."
+fi
 
-	if [ "$1" = "move" ]; then
-		mv "$2" "$BACKUP_DIR"
-		echo "$2 has been moved to $BACKUP_DIR"
-	elif [ "$1" = "copy" ]; then
-		cp -r "$2" "$BACKUP_DIR"
-		echo "$2 has been copied to $BACKUP_DIR"
-	else
-		echo "Invalid action. Use mvcpp 'move | copy' <path>"
-	fi
-}
+#echo "config..."
+#$DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME config core.excludesFile $DDOTFILES_SEPARATE_GITIGNORE
 
-backup_and_link() {
-	# check if file in $1 exist, if yes, move it
-	if [ -e "$HOME/$1" ]; then
-		mvcpp move "$HOME/$1"
-		moved=true
-	fi
-	ln -s "$DOTFILES_HOME/LINK_TO_HOME/$1" "$HOME/$1"
+if [[ -f "$DDOTFILES_SEPARATE_GITIGNORE" ]]; then
+    echo "File $DDOTFILES_SEPARATE_GITIGNORE exists."
+    echo "Deleting..."
+    rm -rf -- "$DDOTFILES_SEPARATE_GITIGNORE"
+fi
 
-	if [ "$moved" = true ]; then
-		action="moved_linked"
-        #parsed as move from $HOME/$1 to $BACKUP_DIR/$1, and linked the file $DOTFILES_HOME/LINK_TO_HOME/$1
-		echo "moved_linked,$HOME/$1,$BACKUP_DIR/$1,$DOTFILES_HOME/LINK_TO_HOME/$1" >> $DOTFILES_HOME/tracker.txt
-	else
-		action="linked"
-        #parsed as linked from $DOTFILES_HOME/LINK_TO_HOME/$1 to $HOME/$1
-        echo "linked,$DOTFILES_HOME/LINK_TO_HOME/$1,$HOME/$1" >> $DOTFILES_HOME/tracker.txt
-	fi
+echo "creating gitignore"
+touch $DDOTFILES_SEPARATE_GITIGNORE
+echo "*" >> $DDOTFILES_SEPARATE_GITIGNORE
 
-	echo "successfully linked $DOTFILES_HOME/LINK_TO_HOME/$1 to $HOME/$1"
-}
+if [[ ! "$(cat "$DDOTFILES_SEPARATE_GITIGNORE")" == "*" ]]; then
+    echo "Invalid file $DDOTFILES_SEPARATE_GITIGNORE. Please handle accordingly."
+    exit 1
+fi
 
+echo "git add"
+$DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME add .
 
-$GIT_BIN clone "$DOTFILES_GIT_URL" "$DOTFILES_HOME"  && echo "git clone succeeded." || { echo "git clone failed. Exiting..."; exit 1; }
-touch $DOTFILES_HOME/.env
-echo DDOTFILES_GIT_BIN=$GIT_BIN >> $DOTFILES_HOME/.env
-echo DDOTFILES_DOTFILES_GIT_URL=$DOTFILES_GIT_URL >> $DOTFILES_HOME/.env
-echo DDOTFILES_BACKUP_DIR=$BACKUP_DIR >> $DOTFILES_HOME/.env
-echo DDOTFILES_DOTFILES_HOME=$DOTFILES_HOME >> $DOTFILES_HOME/.env
+echo "Add safe directory"
+$DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME config --add safe.direcotry $DDOTFILES_GIT_REPO_URL/.git
+$DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME config --add safe.direcotry $DDOTFILES_GIT_REPO_URL
+$DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME config user.email $DDOTFILES_GIT_EMAIL
+$DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME config user.name $DDOTFILES_GIT_NAME
 
-source $DOTFILES_HOME/.env
+echo "Fetching the repo..."
+$DDOTFILES_GIT_BIN \
+    -c safe.directory=$DDOTFILES_GIT_REPO_URL/.git \
+    clone \
+    --branch new \
+    "$DDOTFILES_GIT_REPO_URL" \
+    "$DDOTFILES_HOME" && echo "Fetching done." || { echo "git clone failed. Exiting..."; exit 1; }
 
-
-
-process_bashrc() {
-	[ -f "$HOME/.bashrc" ] && mvcpp copy "$HOME/.bashrc"
-	read
-
-	echo "###ddconfig###" >> $HOME/.bashrc
-	echo "[ -f \"$DOTFILES_HOME/.env\" ] && source $DOTFILES_HOME/.env" >> $HOME/.bashrc
-	echo "[ -f \"$DOTFILES_HOME/SHELL/.bashrc\" ] && source $DOTFILES_HOME/SHELL/.bashrc" >> $HOME/.bashrc
-	echo "###ddconfigend###" >> $HOME/.bashrc
-}
+touch $DDOTFILES_HOME/.env
+echo export DDOTFILES_GIT_BIN="${DDOTFILES_GIT_BIN}" >> $DDOTFILES_HOME/.env
+echo export DDOTFILES_GIT_REPO_URL="${DDOTFILES_GIT_REPO_URL}" >> $DDOTFILES_HOME/.env
+echo export DDOTFILES_HOME="${DDOTFILES_HOME}" >> $DDOTFILES_HOME/.env
+echo export DDOTFILES_GIT_NAME="${DDOTFILES_GIT_NAME}" >> $DDOTFILES_HOME/.env
+echo export DDOTFILES_GIT_EMAIL="${DDOTFILES_GIT_EMAIL}" >> $DDOTFILES_HOME/.env
+echo export DDOTFILES_HOME="${DDOTFILES_HOME}" >> $DDOTFILES_HOME/.env
+echo export DDOTFILES_SEPARATE_GITIGNORE="${DDOTFILES_SEPARATE_GITIGNORE}" >> $DDOTFILES_HOME/.env
 
 loop() {
-	for item in "$1"/{*,.*}; do
-		if [[ "$item" == "$1/*" || "$item" == "$1/." || "$item" == "$dir/.." ]]; then
-			continue
-		fi
+    echo "Linking files..."
 
+    for item in "$1"/{*,.*}; do
+        if [[ "$item" == "$1/*" || "$item" == "$1/." || "$item" == "$dir/.." ]]; then
+            continue
+        fi
 
+        filename=$(basename "$item")
+        if [[ -e "$HOME/$filename" ]]; then
+            echo "   Found file $HOME/$filename. Backing up..."
+            $DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME add --force "$HOME/$filename"
+        fi
+    done
+    echo "cat .gitignore: "
+    cat ~/.gitignore
+    echo "----done----"
+    echo "loop 1 done. committing..."
 
-		filename=$(basename "$item")
-		# echo "$filename backup that"
-		backup_and_link $filename
-	done
+    $DDOTFILES_GIT_BIN \
+        --git-dir=$HOME/.git \
+        --work-tree=$HOME \
+        commit \
+        --allow-empty -m "Initial commits"
+
+    echo "looping again..."
+    for item in "$1"/{*,.*}; do
+        if [[ "$item" == "$1/*" || "$item" == "$1/." || "$item" == "$dir/.." ]]; then
+            continue
+        fi
+
+        filename=$(basename "$item")
+        if [[ -e "$HOME/$filename" ]]; then
+            echo "   Found file $HOME/$filename. Removing..."
+            rm -rf -- $HOME/$filename
+        fi
+
+        echo "   linking $HOME/$filename..."
+        ln -s "$DDOTFILES_HOME/LINK_TO_HOME/$filename" "$HOME/$filename"
+
+        $DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME add --force "$HOME/$filename"
+    done
+
+    echo "loop 2 done. committing..."
+    $DDOTFILES_GIT_BIN \
+        --git-dir=$HOME/.git \
+        --work-tree=$HOME \
+        commit \
+        -m "Second commit"
+
 }
 
-loop "$DOTFILES_HOME/LINK_TO_HOME"
-process_bashrc
-source $HOME/.bashrc
-
+loop "$DDOTFILES_HOME/LINK_TO_HOME"
+echo "Done!"
