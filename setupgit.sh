@@ -74,7 +74,7 @@ if [[ ! "$(cat "$DDOTFILES_SEPARATE_GITIGNORE")" == "*" ]]; then
 fi
 
 echo "git add"
-$DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME add --force .
+$DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME add .
 
 echo "Add safe directory"
 $DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME config --add safe.direcotry $DDOTFILES_GIT_REPO_URL/.git
