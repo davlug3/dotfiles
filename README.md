@@ -30,7 +30,7 @@ For debugging this repo:
 
 2. Pipe `setup.sh` to bash, then set `DDOTFILES_GIT_REPO_URL` environment
 variable to your clone directory.  
-   - `cat /$HOME/dd/setup.sh | DDOTFILES_GIT_REPO_URL=/dir/where/you/cloned bash`
+   - `cat $HOME/dd/setup.sh | DDOTFILES_GIT_REPO_URL=$HOME/dd/setup.sh bash`
 
 ## About
 
