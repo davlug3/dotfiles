@@ -55,8 +55,8 @@ else
     echo "Git repository at \$HOME successfully initialized."
 fi
 
-echo "config..."
-$DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME config core.excludesFile $DDOTFILES_SEPARATE_GITIGNORE
+#echo "config..."
+#$DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME config core.excludesFile $DDOTFILES_SEPARATE_GITIGNORE
 
 if [[ -f "$DDOTFILES_SEPARATE_GITIGNORE" ]]; then
     echo "File $DDOTFILES_SEPARATE_GITIGNORE exists."
