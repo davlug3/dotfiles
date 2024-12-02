@@ -66,7 +66,7 @@ fi
 
 echo "creating gitignore"
 touch $DDOTFILES_SEPARATE_GITIGNORE
-echo * >> $DDOTFILES_SEPARATE_GITIGNORE
+echo "*" >> $DDOTFILES_SEPARATE_GITIGNORE
 
 if [[ ! "$(cat "$DDOTFILES_SEPARATE_GITIGNORE")" == "*" ]]; then
     echo "Invalid file $DDOTFILES_SEPARATE_GITIGNORE. Please handle accordingly."
