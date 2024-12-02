@@ -113,6 +113,9 @@ loop() {
             $DDOTFILES_GIT_BIN --git-dir=$HOME/.git --work-tree=$HOME add --force "$HOME/$filename"
         fi
     done
+    echo "cat .gitignore: "
+    cat ~/.gitignore
+    echo "----done----"
     echo "loop 1 done. committing..."
 
     $DDOTFILES_GIT_BIN \
