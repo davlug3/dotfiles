@@ -4,7 +4,7 @@
 # I use a git to manage my \$HOME
 # Use cURL to invoke the script. ie:
 #
-# curl https://raw.githubusercontent.com/davlug3/dotfiles/new/setup.sh | DDOTFILES_GIT_BIN=/usr/local/bin/git DDOTFILES_HOME=$HOME/.ddconfig bash
+# curl https://raw.githubusercontent.com/davlug3/dotfiles/main/setup.sh | DDOTFILES_GIT_BIN=/usr/local/bin/git DDOTFILES_HOME=$HOME/.ddconfig bash
 
 #set some variables, check first if environment variable of the same name is defined.
 #if yes, use that
