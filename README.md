@@ -16,11 +16,21 @@
 2. run `setup.sh`:
 
 - `curl https://raw.githubusercontent.com/davlug3/dotfiles/master/setup.sh | bash`
-- `curl /dir/where/you/cloned | DDOTFILES_GIT_REPO_URL=/dir/where/you/cloned bash`
 
 ### To uninstall
 
 - run `remove.sh`
+
+### Development
+
+For debugging this repo:
+
+1. Clone this repo  
+   - `git clone https://github.com/davlug3/dotfiles $HOME/dd`
+
+2. Pipe `setup.sh` to bash, then set `DDOTFILES_GIT_REPO_URL` environment
+variable to your clone directory.  
+   - `cat /$HOME/dd/setup.sh | DDOTFILES_GIT_REPO_URL=/dir/where/you/cloned bash`
 
 ## About
 
