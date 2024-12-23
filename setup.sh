@@ -10,6 +10,7 @@
 #if yes, use that
 DDOTFILES_GIT_BIN=${DDOTFILES_GIT_BIN:-/usr/bin/git}
 DDOTFILES_GIT_REPO_URL=${DDOTFILES_GIT_REPO_URL:-https://github.com/davlug3/dotfiles}
+DDOTFILES_GIT_BRANCH=main
 DDOTFILES_HOME=${DDOTFILES_HOME:-$HOME/.ddconfig}
 DDOTFILES_GIT_NAME=${DDOTFILES_GIT_NAME:-Dave}
 DDOTFILES_GIT_EMAIL=${DDOTFILES_GIT_EMAIL:-Dave@Dave}
@@ -86,7 +87,7 @@ echo "Fetching the repo..."
 $DDOTFILES_GIT_BIN \
     -c safe.directory=$DDOTFILES_GIT_REPO_URL/.git \
     clone \
-    --branch new \
+    --branch "$DDOTFILES_GIT_BRANCH" \
     "$DDOTFILES_GIT_REPO_URL" \
     "$DDOTFILES_HOME" && echo "Fetching done." || { echo "git clone failed. Exiting..."; exit 1; }
 
