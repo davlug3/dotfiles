@@ -298,16 +298,6 @@ set completeopt=menuone,noinsert,noselect,preview
 
 
 
-
-highlight link LspErrorVirtualText DiffDelete
-highlight link LspWarningVirtualText WildMenu
-highlight link LspInformationVirtualText WarningMsg
-highlight link LspHintVirtualText Conceal
-
-
-
-
-
 let g:lsp_settings_filetype_vue = ['typescript-language-server', 'vls', 'html-languageserver']
 
 

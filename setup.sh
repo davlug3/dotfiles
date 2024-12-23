@@ -20,6 +20,8 @@ DDOTFILES_HOME=${DDOTFILES_HOME:-$HOME/.ddconfig}
 DDOTFILES_SEPARATE_GITIGNORE=${DDOTFILES_SEPARATE_GITIGNORE:-$HOME/.gitignore}
 
 
+
+
 if [[ -e $HOME/.git ]]; then
     echo "Git is already initialized at the \$HOME directory. Trying to rename to \$HOME/.git.backup..."
     mv $HOME/.git $HOME/.git.backup
@@ -39,6 +41,8 @@ fi
 
 
 cd $HOME
+
+
 $DDOTFILES_GIT_BIN init --initial-branch=main $HOME > /dev/null
 if [ ! -d ".git" ]; then
     echo "Error initializing \$HOME as a git directory. "
@@ -107,6 +111,8 @@ loop() {
         if [[ "$item" == "$1/*" || "$item" == "$1/." || "$item" == "$dir/.." ]]; then
             continue
         fi
+
+        if [[ "$item" == "$1/.bashrc" ]]
 
         filename=$(basename "$item")
         if [[ -e "$HOME/$filename" ]]; then
