@@ -15,11 +15,13 @@
 1. install the dependencies (if not available)
 2. run `setup.sh`:
 
-- `curl https://raw.githubusercontent.com/davlug3/dotfiles/master/setup.sh | bash`
+- `curl https://raw.githubusercontent.com/davlug3/dotfiles/main/setup.sh | bash`
 
 ### To uninstall
 
 - run `remove.sh`
+
+> `remove.sh` does not work properly yet. I will check when I got the time.
 
 ### Development
 
