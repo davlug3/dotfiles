@@ -27,7 +27,8 @@ Plug 'majutsushi/tagbar'
 Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
 Plug 'christoomey/vim-tmux-navigator'
-
+Plug 'hashivim/vim-terraform'
+Plug 'vim-airline/vim-airline'
 Plug 'neoclide/coc.nvim' , {'branch':'release'}
 " Plug 'preservim/vimux'
 
@@ -128,6 +129,11 @@ nnoremap <leader>fs :Files<CR>:vertical split<CR>
 " Map <leader>* to highlight word under cursor
 " Hindi stable yung Lsp ehhh diko pa alam bakit
 nnoremap <leader>* :<C-u>let @/ = expand('<cword>')<cr>
+
+
+
+" Focus nerdtree
+nmap <Leader>r :NERDTreeFocus<cr>R<c-w><c-p>
 
 " change vsplit open in fzf window to ctrl s instead of ctrl v
 let g:fzf_action = {
@@ -273,6 +279,21 @@ map <leader>h :bprevious<cr>
 "when on NERDtree
 let g:NERDTreeMapJumpPrevSibling=""
 let g:NERDTreeMapJumpNextSibling=""
+let g:NERDTreeChDirMode=2
+let g:NERDTreeQuitOnOpen=1
+
+function! s:SyncNERDTree()
+  " check if NERDTree is open
+  if exists("t:NERDTreeBufName") && bufwinnr(t:NERDTreeBufName) != -1
+    " current buffer is a file (not NERDTree) and readable
+    if bufname('%') !~# 'NERD_tree_' && filereadable(expand('%:p'))
+      silent! NERDTreeFind
+      wincmd p
+    endif
+  endif
+endfunction
+
+autocmd! BufEnter * call s:SyncNERDTree()
 
 
 "disable folding for vim-lsp
@@ -384,7 +405,6 @@ try
 
 catch
 endtry
-
 
 
 """""""""""""""""""""""""""""""""""""""
