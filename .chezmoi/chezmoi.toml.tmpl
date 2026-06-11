@@ -1,0 +1,14 @@
+{{- $email := promptStringOnce . "email" "GitHub email" -}}
+{{- $name := promptStringOnce . "name" "GitHub username" -}}
+
+[data]
+    email = {{ $email | quote }}
+    name = {{ $name | quote }}
+
+[git]
+    autoCommit = false
+    autoPush = false
+
+[merge]
+    command = "vimdiff"
+

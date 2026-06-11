@@ -1,0 +1,44 @@
+# ~/.bash_aliases: sourced by .bashrc
+
+# handy shortcuts
+alias ll='ls -alF'
+alias la='ls -A'
+alias l='ls -CF'
+alias ..='cd ..'
+alias ...='cd ../..'
+
+# safety first
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+# Utils
+alias cls='clear'
+alias h='history'
+alias j='jobs -l'
+alias df='df -h'
+alias du='du -h'
+alias free='free -h'
+
+# tmux
+alias tmux='tmux -2'
+alias ta='tmux attach -t'
+alias ts='tmux new-session -s'
+alias tl='tmux list-sessions'
+
+# git
+alias gs='git status'
+alias ga='git add'
+alias gc='git commit'
+alias gp='git push'
+alias gl='git log --oneline --graph'
+alias gd='git diff'
+alias gco='git checkout'
+alias gb='git branch'
+
+# chezmoi
+alias cz='chezmoi'
+alias cza='chezmoi apply'
+alias cze='chezmoi edit'
+alias czd='chezmoi diff'
+alias czu='chezmoi update'

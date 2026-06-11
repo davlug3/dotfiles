@@ -1,0 +1,58 @@
+format = """
+[[](fg:blue)\n\
+$os\
+$shell\
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_state\
+$git_status\
+$nodejs\
+$rust\
+$python\
+$docker_context\
+$time\
+$line_break\
+$character[](fg:blue) ]\]
+
+[os]
+disabled = false
+style = "bold blue"
+
+[directory]
+truncation_length = 3
+style = "bold cyan"
+
+[git_branch]
+style = "bold yellow"
+
+[git_status]
+style = "bold yellow"
+
+[nodejs]
+style = "bold green"
+
+[python]
+style = "bold green"
+
+[rust]
+style = "bold red"
+
+[hostname]
+ssh_only = true
+style = "bold magenta"
+
+[username]
+show_always = false
+style_user = "bold green"
+style_root = "bold red"
+
+[time]
+disabled = false
+format = "🕐 $time"
+style = "dimmed white"
+
+[character]
+success_symbol = "[➜](bold green)"
+error_symbol = "[➜](bold red)"

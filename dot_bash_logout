@@ -1,0 +1,4 @@
+# ~/.bash_logout: executed by bash at login shell exit.
+
+# clear the console on logout
+clear
