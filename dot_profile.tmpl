@@ -1,0 +1,5 @@
+# ~/.profile: executed by sh for login shells.
+# Switch to bash if available (for Termux compatibility)
+if [ -z "$BASH_VERSION" ] && [ -x "{{ .chezmoi.osBinPath }}/bash" ]; then
+    exec "{{ .chezmoi.osBinPath }}/bash" -l
+fi

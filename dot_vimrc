@@ -191,7 +191,7 @@ set hidden
 
 """"""""""""""""""""""""
 syntax enable
-set regexpengine=0
+" set regexpengine=0  " removed: deprecated in Vim 8+
 
 if $COLORTERM == 'gnome_terminal'
 	set t_Co=256
@@ -396,7 +396,7 @@ try
     " Check if the undo directory exists
     if !isdirectory(undodir)
         " Create the undo directory
-        silent! call mkdri(undodir, 'p')
+        silent! call mkdir(undodir, 'p')
     endif
 
     " Set the undo directory and enable persistent undo

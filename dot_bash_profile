@@ -8,3 +8,8 @@ fi
 if [ -d "$HOME/.local/bin" ]; then
     export PATH="$HOME/.local/bin:$PATH"
 fi
+
+# Switch to bash if currently in sh (Termux default)
+if [ -z "$BASH_VERSION" ] && command -v bash >/dev/null 2>&1; then
+    exec bash -l
+fi
