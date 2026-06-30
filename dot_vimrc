@@ -14,9 +14,8 @@ if empty(glob(data_dir . '/autoload/plug.vim'))
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
-if empty (glob(data_dir . '/coc.nvim.vim'))
-    silent execute '!curl -fLo '.data_dir.'/coc.nvim.vim --create-dirs https://raw.githubusercontent.com/neoclide/coc.nvim/master/doc/coc-example-config.vim'
-endif
+" Note: Install coc.nvim plugins via :PlugInstall, then configure via :CocConfig
+" The example config downloads but fails when sourced before plugin loads
 
 
 call plug#begin('~/.vim/plugged')
@@ -329,7 +328,7 @@ let g:lsp_settings_filetype_vue = ['typescript-language-server', 'vls', 'html-la
 "always show status line
 set laststatus=2
 "
-set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %r%{getcwd()}%h\ \ \ Line:\ %l\ \ Column:\ %c
+set statusline=\ %{HasPaste()}%F%m%r%h\ %w\ \ CWD:\ %{getcwd()}\ \ \ Line:\ %l\ \ Column:\ %c
 
 """""""""""""""""""""""""
 " editing mappings 
@@ -415,9 +414,6 @@ endtry
 nmap <F8> :TagbarToggle<CR>
 nmap <F1> :Files<CR>
 nmap <silent> <leader>1 :NERDTreeToggle<CR>
-
-source ~/.vim/coc.nvim.vim
-
 
 """""""""""""""""""""""""""""""""""""
 "Themes
