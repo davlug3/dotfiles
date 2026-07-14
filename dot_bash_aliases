@@ -42,3 +42,8 @@ alias cza='chezmoi apply'
 alias cze='chezmoi edit'
 alias czd='chezmoi diff'
 alias czu='chezmoi update'
+
+mkcd() {
+    mkdir -p -- "$1" && cd -P -- "$1"
+}
+
