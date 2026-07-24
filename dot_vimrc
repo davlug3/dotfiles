@@ -7,6 +7,7 @@
 set nocompatible
 filetype plugin on
 
+if !has('nvim')
 "install vim-plug
 let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
 if empty(glob(data_dir . '/autoload/plug.vim'))
@@ -18,6 +19,7 @@ endif
 " The example config downloads but fails when sourced before plugin loads
 
 
+if !has('nvim')
 call plug#begin('~/.vim/plugged')
 Plug 'preservim/nerdtree'
 Plug 'Xuyuanp/nerdtree-git-plugin'
@@ -45,6 +47,7 @@ Plug 'mattn/emmet-vim'
 Plug 'NLKNguyen/papercolor-theme'
 
 call plug#end()
+endif
 
 " function! s:on_lsp_buffer_enabled() abort
 "     setlocal omnifunc=lsp#complete
@@ -122,8 +125,10 @@ endfunction
 " Map Ctrl+K Ctrl+M to call the ToggleTab function
 nnoremap <C-k><C-m> :call ToggleTab()<CR>
 
+if !has('nvim')
 " Map <leader>fs to fzf vs
 nnoremap <leader>fs :Files<CR>:vertical split<CR>
+endif
 
 " Map <leader>* to highlight word under cursor
 " Hindi stable yung Lsp ehhh diko pa alam bakit
@@ -131,14 +136,18 @@ nnoremap <leader>* :<C-u>let @/ = expand('<cword>')<cr>
 
 
 
+if !has('nvim')
 " Focus nerdtree
 nmap <Leader>r :NERDTreeFocus<cr>R<c-w><c-p>
+endif
 
+if !has('nvim')
 " change vsplit open in fzf window to ctrl s instead of ctrl v
 let g:fzf_action = {
   \ 'ctrl-t': 'tab split',
   \ 'ctrl-x': 'split',
   \ 'ctrl-s': 'vsplit' }
+endif
 
 " sudo save with :W
 command! W execute 'w !sudo tee % > /dev/null' <bar> edit!
@@ -243,7 +252,9 @@ set wrap
 
 
 
+if !has('nvim')
 set tags=$HOME/.vim/system.tags,tags
+endif
 
 """""""""""""""""""""""""""""
 " visual mode
@@ -274,6 +285,7 @@ map <leader>h :bprevious<cr>
 
 
 
+if !has('nvim')
 "Enable vim-tmux-navigator shortcuts 
 "when on NERDtree
 let g:NERDTreeMapJumpPrevSibling=""
@@ -293,10 +305,13 @@ function! s:SyncNERDTree()
 endfunction
 
 autocmd! BufEnter * call s:SyncNERDTree()
+endif
 
 
+if !has('nvim')
 "disable folding for vim-lsp
   let g:lsp_fold_enabled = 0
+endif
 " let g:lsp_document_highlight_enabled = 1
 
 " vim-lsp again
@@ -313,12 +328,16 @@ autocmd! BufEnter * call s:SyncNERDTree()
 
 " allow modifying the completeopt variable, or it will
 " be overridden all the time
+if !has('nvim')
 let g:asyncomplete_auto_completeopt = 0
 set completeopt=menuone,noinsert,noselect,preview
+endif
 
 
 
+if !has('nvim')
 let g:lsp_settings_filetype_vue = ['typescript-language-server', 'vls', 'html-languageserver']
+endif
 
 
 """"""""""""""""""""""""""""""""
@@ -386,6 +405,7 @@ function! VisualSelection(direction, extra_filter) range
     let @" = l:saved_reg
 endfunction
 
+if !has('nvim')
 """""""""""""""""""""""""""
 "persistent undo""
 """"""""""""""""""""""
@@ -404,6 +424,7 @@ try
 
 catch
 endtry
+endif
 
 
 """""""""""""""""""""""""""""""""""""""
@@ -411,9 +432,11 @@ endtry
 """""""""""""""""""""""""""""""""""""""
 
 
+if !has('nvim')
 nmap <F8> :TagbarToggle<CR>
 nmap <F1> :Files<CR>
 nmap <silent> <leader>1 :NERDTreeToggle<CR>
+endif
 
 """""""""""""""""""""""""""""""""""""
 "Themes
