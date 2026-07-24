@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+FONT_NAME="JetBrainsMono"
+FONT_DIR="${HOME}/.local/share/fonts"
+INSTALLED_MARKER="${FONT_DIR}/${FONT_NAME}NerdFontMono-Regular.ttf"
+TEMP_DIR=$(mktemp -d)
+trap 'rm -rf "${TEMP_DIR}"' EXIT
+
+if [[ -f "${INSTALLED_MARKER}" ]]; then
+  echo "JetBrains Mono Nerd Font already installed"
+  exit 0
+fi
+
+mkdir -p "${FONT_DIR}"
+
+echo "Downloading ${FONT_NAME} Nerd Font..."
+curl -fSL "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${FONT_NAME}.zip" \
+  -o "${TEMP_DIR}/${FONT_NAME}.zip"
+
+echo "Extracting..."
+unzip -q "${TEMP_DIR}/${FONT_NAME}.zip" -d "${TEMP_DIR}/extracted"
+
+find "${TEMP_DIR}/extracted" -name '*.ttf' -o -name '*.otf' | head -1
+
+find "${TEMP_DIR}/extracted" \( -name '*.ttf' -o -name '*.otf' \) -exec cp {} "${FONT_DIR}/" \;
+
+echo "Updating font cache..."
+fc-cache -fv "${FONT_DIR}"
+
+echo "JetBrains Mono Nerd Font installed successfully"

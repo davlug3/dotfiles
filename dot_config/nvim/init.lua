@@ -28,7 +28,12 @@ require('lazy').setup({
 
   {
     'nvim-lualine/lualine.nvim',
-    opts = { theme = 'PaperColor' },
+    opts = {
+      theme = 'PaperColor',
+      icons_enabled = false,
+      component_separators = { left = '|', right = '|' },
+      section_separators = { left = '', right = '' },
+    },
   },
 
   {
@@ -40,6 +45,78 @@ require('lazy').setup({
       'MunifTanjim/nui.nvim',
     },
     opts = {
+      default_component_configs = {
+        icon = {
+          folder_closed = "▸",
+          folder_open = "▾",
+          folder_empty = "□",
+          folder_empty_open = "◇",
+          default = "*",
+          provider = function(icon, node, state)
+            if node.type ~= "file" then return end
+            local default = "·"
+            local ext_icons = {
+              md = "§",
+              sh = ">",
+              json = "{ }",
+              lua = "◇",
+              go = "◎",
+              py = "▶",
+              js = "◈",
+              ts = "◈",
+              rs = "◇",
+              rb = "◆",
+              ex = "◆",
+              yaml = "≡",
+              toml = "≡",
+              txt = "·",
+              cfg = "·",
+              conf = "·",
+              ini = "·",
+              gz = "⎔",
+              zip = "⎔",
+              tar = "⎔",
+              rar = "⎔",
+              bz2 = "⎔",
+              xz = "⎔",
+              ["7z"] = "⎔",
+              iso = "⎔",
+              gitignore = "○",
+              dockerignore = "○",
+              lock = "◎",
+              log = "¶",
+              err = "×",
+              out = "×",
+              pdf = "□",
+              png = "▣",
+              jpg = "▣",
+              jpeg = "▣",
+              gif = "▣",
+              svg = "▣",
+              ico = "▣",
+              css = "#",
+              scss = "#",
+              less = "#",
+              html = "<>",
+              htm = "<>",
+              xml = "<>",
+              sql = "⎈",
+              db = "⎈",
+              c = "◎",
+              cpp = "◎",
+              h = "◎",
+              hpp = "◎",
+              java = "◎",
+              kt = "◎",
+              swift = "◎",
+              dart = "◎",
+            }
+            local ext = vim.fn.fnamemodify(node.name, ":e"):lower()
+            icon.text = ext_icons[ext] or default
+            icon.highlight = "NeoTreeFileIcon"
+          end,
+        },
+      },
       filesystem = { follow_current_file = { enabled = true } },
     },
   },
@@ -52,7 +129,7 @@ require('lazy').setup({
     },
   },
 
-  { 'williamboman/mason.nvim', build = ':MasonUpdate' },
+  { 'williamboman/mason.nvim' },
   { 'williamboman/mason-lspconfig.nvim' },
   { 'neovim/nvim-lspconfig' },
   { 'hrsh7th/nvim-cmp' },
@@ -61,21 +138,32 @@ require('lazy').setup({
   { 'hrsh7th/cmp-path' },
   { 'L3MON4D3/LuaSnip' },
   { 'saadparwaiz1/cmp_luasnip' },
+}, {
+  colorscheme = 'PaperColor',
 })
 
-local servers = { 'ts_ls', 'pyright', 'rust_analyzer', 'gopls', 'terraformls', 'lua_ls', 'html', 'cssls', 'jsonls' }
+require('nvim-web-devicons').setup({
+  override = {
+    default_icon = {
+      icon = "•",
+      color = "#6d8086",
+      name = "Default",
+    },
+  },
+})
+
+local servers = { 'ts_ls', 'pyright', 'rust_analyzer', 'terraformls', 'lua_ls', 'html', 'cssls', 'jsonls' }
 require('mason').setup()
 require('mason-lspconfig').setup({
   ensure_installed = servers,
   automatic_installation = true,
 })
 
-local lspconfig = require('lspconfig')
-local capabilities = require('cmp_nvim_lsp').default_capabilities()
+vim.lsp.config['*'] = {
+  capabilities = require('cmp_nvim_lsp').default_capabilities(),
+}
 
-for _, server in ipairs(servers) do
-  lspconfig[server].setup({ capabilities = capabilities })
-end
+vim.lsp.enable(servers)
 
 local cmp = require('cmp')
 cmp.setup({
