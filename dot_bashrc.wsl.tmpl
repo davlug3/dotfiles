@@ -1,0 +1,13 @@
+# WSL specific settings
+
+export PATH="$HOME/.local/bin:$PATH"
+
+alias explorer='explorer.exe'
+alias wsl-open='cmd.exe /c start'
+alias winhome='cd /mnt/c/Users/$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d "\r")'
+
+shopt -s nocaseglob
+
+if [ -z "$DISPLAY" ] && [ -n "$WAYLAND_DISPLAY" ]; then
+    export DISPLAY=:0
+fi
