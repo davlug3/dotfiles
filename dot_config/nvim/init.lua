@@ -138,6 +138,32 @@ require('lazy').setup({
   { 'hrsh7th/cmp-path' },
   { 'L3MON4D3/LuaSnip' },
   { 'saadparwaiz1/cmp_luasnip' },
+
+  -- termux-ai: mobile coding + AI assistant
+  {
+    name = 'termux-ai',
+    dir = vim.fn.expand('~/termux-ai.nvim'),
+    --- For production, change to:
+    -- 'yourname/termux-ai.nvim',
+    dependencies = {
+      'nvim-treesitter/nvim-treesitter-textobjects',
+    },
+    opts = {
+      mobile = {
+        enable = nil,  -- auto-detect Termux
+        toolbar = true,
+        touch_gestures = true,
+        simple_keymaps = true,
+      },
+      ai = {
+        default = 'ollama',
+        ollama = {
+          endpoint = 'http://localhost:11434',
+          model = 'codellama',
+        },
+      },
+    },
+  },
 }, {
   colorscheme = 'PaperColor',
 })
