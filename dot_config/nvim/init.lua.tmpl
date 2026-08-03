@@ -1,7 +1,12 @@
 vim.cmd('source ~/.vimrc')
 
+-- Termux mode flag (set by chezmoi config, overridable at runtime)
+{{- if .termux }}
+vim.g.termux = 1
+{{- end }}
+
 local lazypath = vim.fn.stdpath('data') .. '/lazy/lazy.nvim'
-if not vim.loop.fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
   vim.fn.system({
     'git',
     'clone',
@@ -13,21 +18,56 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- Runtime Termux detection: auto-detect OR env var OR chezmoi flag
+local function is_termux()
+  if os.getenv("TERMUX_VERSION") then return true end
+  if os.getenv("SHELL") and os.getenv("SHELL"):find("termux") then return true end
+  if os.getenv("TERMUX_MODE") == "1" then return true end
+  if vim.g.termux == 1 then return true end
+  return false
+end
+_G.is_termux = is_termux
+
 require('lazy').setup({
   { 'tpope/vim-commentary' },
   { 'christoomey/vim-tmux-navigator' },
   { 'hashivim/vim-terraform' },
   { 'mattn/emmet-vim' },
   { 'NLKNguyen/papercolor-theme' },
+{
+  "nvim-treesitter/nvim-treesitter",
+  lazy = false,
+  build = ":TSUpdate",
+  config = function()
+    -- Modern API: the old require('nvim-treesitter.configs') module and the
+    -- ensure_installed / highlight.enable options were removed from master.
+    -- install() is a no-op for already-installed parsers.
+    require("nvim-treesitter").setup()
+    require("nvim-treesitter").install {
+      "gotmpl",
+      "bash",
+      "toml",
+    }
+  end,
+},
 
+  {
+      "dpezto/chezmoi-template.nvim",
+      lazy = false,
+      ---@module 'chezmoi-template'
+      ---@type chezmoi-template.Config
+      opts = {},
+  },
   {
     'nvim-telescope/telescope.nvim',
     tag = '0.1.8',
     dependencies = { 'nvim-lua/plenary.nvim' },
   },
 
+  -- Lualine: desktop only (Termux uses bottombar instead)
   {
     'nvim-lualine/lualine.nvim',
+    cond = function() return not is_termux() end,
     opts = {
       theme = 'PaperColor',
       icons_enabled = false,
@@ -138,32 +178,6 @@ require('lazy').setup({
   { 'hrsh7th/cmp-path' },
   { 'L3MON4D3/LuaSnip' },
   { 'saadparwaiz1/cmp_luasnip' },
-
-  -- termux-ai: mobile coding + AI assistant
-  {
-    name = 'termux-ai',
-    dir = vim.fn.expand('~/termux-ai.nvim'),
-    --- For production, change to:
-    -- 'yourname/termux-ai.nvim',
-    dependencies = {
-      'nvim-treesitter/nvim-treesitter-textobjects',
-    },
-    opts = {
-      mobile = {
-        enable = nil,  -- auto-detect Termux
-        toolbar = true,
-        touch_gestures = true,
-        simple_keymaps = true,
-      },
-      ai = {
-        default = 'ollama',
-        ollama = {
-          endpoint = 'http://localhost:11434',
-          model = 'codellama',
-        },
-      },
-    },
-  },
 }, {
   colorscheme = 'PaperColor',
 })
@@ -214,6 +228,7 @@ cmp.setup({
   }),
 })
 
+
 local builtin = require('telescope.builtin')
 vim.keymap.set('n', '<F1>', builtin.find_files, { desc = 'Telescope find files' })
 vim.keymap.set('n', '<leader>fs', function()
@@ -254,3 +269,18 @@ vim.api.nvim_create_autocmd('LspAttach', {
     map('n', ']d', vim.diagnostic.goto_next, 'Next diagnostic')
   end,
 })
+
+-- Treesitter highlighting is no longer auto-enabled by nvim-treesitter
+-- (highlight.enable was removed); chezmoi-template.nvim only sets the gotmpl
+-- filetype + registers the injection directive. Start it explicitly.
+vim.api.nvim_create_autocmd('FileType', {
+  pattern = 'gotmpl',
+  callback = function()
+    vim.treesitter.start()
+  end,
+})
+
+-- Termux mobile enhancements (bottom bar, clipboard, etc.)
+if is_termux() then
+  require('mobile').setup()
+end

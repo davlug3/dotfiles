@@ -1,0 +1,29 @@
+{{- if .termux }}
+# --- Termux extra-keys for Vim mobile IDE ---
+# Row 1: modifiers + escape + arrows (things Vim needs constantly)
+# Row 2: symbols painful to reach on a soft keyboard
+#
+# CTRL/ALT are "sticky" in Termux: tap CTRL, then tap another key,
+# and it sends Ctrl+<key> without needing a real chord.
+# Long-press any key to get its popup alternate (shown after ':').
+#
+# After editing, run: termux-reload-settings
+# (or long-press the Termux notification icon and reload)
+
+extra-keys = [ \
+  ["ESC","CTRL","ALT","TAB","-",":","HOME","UP","END"], \
+  [ \
+    {key: '(', popup: ')'}, \
+    {key: '{', popup: '}'}, \
+    {key: '[', popup: ']'}, \
+    {key: '<', popup: '>'}, \
+    {key: '|', popup: '\\\\'}, \
+    {key: '&', popup: '^'}, \
+    {key: ';', popup: '"'}, \
+    "LEFT","DOWN","RIGHT" \
+  ] \
+]
+
+# Uncomment for slimmer arrows:
+# extra-keys-style = arrows-only
+{{- end }}

@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Installs the treesitter parsers nvim needs for chezmoi templates
+# (gotmpl, bash, toml) plus their highlight queries — by compiling from
+# source with a C compiler. No tree-sitter CLI, npm, or manual :TSInstall
+# required, so this works on any machine with cc/clang and a network.
+#
+# Sources are pinned to the same revisions nvim-treesitter uses, so the
+# built parsers match its ABI expectations. Idempotent: parsers already
+# present in $NVIM_SITE/parser are left untouched; queries are re-copied.
+#
+# run_once semantics: chezmoi records successful runs in its persistent
+# state (scriptState bucket) and skips the script on later applies. A
+# failed run is NOT recorded, so it is retried on the next `chezmoi apply`
+# (verified). To force a re-run, delete its entry, e.g.:
+#   chezmoi state delete --bucket=scriptState --key=$(chezmoi state dump | grep -B1 "install-treesitter" | grep -oE '"[0-9a-f]+"' | tr -d '"')
+
+NVIM_SITE="${HOME}/.local/share/nvim/site"
+PARSER_DIR="${NVIM_SITE}/parser"
+QUERY_DIR="${NVIM_SITE}/queries"
+TEMP_DIR=$(mktemp -d)
+trap 'rm -rf "${TEMP_DIR}"' EXIT
+
+# --- find a C compiler -------------------------------------------------
+CC_BIN="${CC:-}"
+if [[ -z "${CC_BIN}" ]]; then
+  for c in cc clang gcc; do
+    if command -v "${c}" >/dev/null 2>&1; then
+      CC_BIN="${c}"
+      break
+    fi
+  done
+fi
+if [[ -z "${CC_BIN}" ]]; then
+  echo "treesitter-parsers: no C compiler found (cc/clang/gcc); skipping" >&2
+  exit 0
+fi
+
+mkdir -p "${PARSER_DIR}" "${QUERY_DIR}"
+
+# lang | repo | pinned revision (nvim-treesitter parsers.lua) | C sources
+PARSERS=(
+  "gotmpl|ngalaiko/tree-sitter-go-template|aa71f63de226c5592dfbfc1f29949522d7c95fac|src/parser.c"
+  "bash|tree-sitter/tree-sitter-bash|a06c2e4415e9bc0346c6b86d401879ffb44058f7|src/parser.c src/scanner.c"
+  "toml|tree-sitter-grammars/tree-sitter-toml|64b56832c2cffe41758f28e05c756a3a98d16f41|src/parser.c src/scanner.c"
+)
+
+built=0
+for entry in "${PARSERS[@]}"; do
+  IFS='|' read -r lang repo rev sources <<< "${entry}"
+  if [[ -f "${PARSER_DIR}/${lang}.so" ]]; then
+    echo "treesitter-parsers: ${lang}.so already present"
+    continue
+  fi
+  echo "treesitter-parsers: building ${lang}..."
+  src_name="$(basename "${repo}")-${rev}"
+  curl -fSL "https://github.com/${repo}/archive/${rev}.tar.gz" -o "${TEMP_DIR}/${src_name}.tar.gz"
+  tar -xzf "${TEMP_DIR}/${src_name}.tar.gz" -C "${TEMP_DIR}"
+  (
+    cd "${TEMP_DIR}/${src_name}"
+    # shellcheck disable=SC2086
+    "${CC_BIN}" -O2 -fPIC -shared -I src -o "${PARSER_DIR}/${lang}.so" ${sources}
+  )
+  built=$((built + 1))
+done
+
+# --- queries (highlights/folds/etc.) -----------------------------------
+# Prefer the maintained copies nvim-treesitter ships (already cloned by
+# lazy.nvim on this machine); otherwise fetch them from its tarball.
+if [[ -d "${HOME}/.local/share/nvim/lazy/nvim-treesitter/runtime/queries" ]]; then
+  for lang in gotmpl bash toml; do
+    cp -r "${HOME}/.local/share/nvim/lazy/nvim-treesitter/runtime/queries/${lang}" "${QUERY_DIR}/" 2>/dev/null || true
+  done
+else
+  echo "treesitter-parsers: fetching nvim-treesitter queries..."
+  curl -fSL "https://github.com/nvim-treesitter/nvim-treesitter/archive/master.tar.gz" -o "${TEMP_DIR}/nt.tar.gz"
+  tar -xzf "${TEMP_DIR}/nt.tar.gz" -C "${TEMP_DIR}"
+  for lang in gotmpl bash toml; do
+    cp -r "${TEMP_DIR}/nvim-treesitter-master/runtime/queries/${lang}" "${QUERY_DIR}/" 2>/dev/null || true
+  done
+fi
+
+echo "treesitter-parsers: done (${built} parser(s) built)"
