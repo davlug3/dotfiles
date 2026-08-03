@@ -12,3 +12,5 @@ shopt -s nocaseglob
 if [ -z "$DISPLAY" ] && [ -n "$WAYLAND_DISPLAY" ]; then
     export DISPLAY=:0
 fi
+
+eval "$(starship init bash)"

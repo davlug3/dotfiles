@@ -1,0 +1,247 @@
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Starship Config — ASCII by default, Nerd Font when STARSHIP_NERD_FONT=1
+# ─────────────────────────────────────────────────────────────────────────────
+# To enable Nerd Font icons: export STARSHIP_NERD_FONT=1 in your shell config
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Palette (Catppuccin Mocha)
+# ─────────────────────────────────────────────────────────────────────────────
+[palettes.catppuccin]
+rosewater = "#f5e0dc"
+flamingo  = "#f2cdcd"
+pink      = "#f5c2e7"
+mauve     = "#cba6f7"
+red       = "#f38ba8"
+maroon    = "#eba0ac"
+peach     = "#fab387"
+yellow    = "#f9e2af"
+green     = "#a6e3a1"
+teal      = "#94e2d5"
+sky       = "#89dceb"
+sapphire  = "#74c7ec"
+blue      = "#89b4fa"
+lavender  = "#b4befe"
+text      = "#cdd6f4"
+subtext1  = "#bac2de"
+subtext0  = "#a6adc8"
+overlay2  = "#9399b2"
+overlay1  = "#7f849c"
+overlay0  = "#6c7086"
+surface2  = "#585b70"
+surface1  = "#45475a"
+surface0  = "#313244"
+base      = "#1e1e2e"
+mantle    = "#181825"
+crust     = "#11111b"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Conditional symbols based on STARSHIP_NERD_FONT
+# ─────────────────────────────────────────────────────────────────────────────
+{{- $nerd := eq (env "STARSHIP_NERD_FONT") "1" -}}
+{{- $char_success := ternary "➜" ">" $nerd -}}
+{{- $char_error   := ternary "➜" ">" $nerd -}}
+{{- $char_vicmd   := ternary "❮" "<" $nerd -}}
+{{- $git_branch   := ternary " " "git:" $nerd -}}
+{{- $conflicted   := ternary " " "! " $nerd -}}
+{{- $ahead        := ternary "" "^" $nerd -}}
+{{- $behind       := ternary "" "v" $nerd -}}
+{{- $diverged     := ternary "" "<>" $nerd -}}
+{{- $untracked    := ternary "" "?" $nerd -}}
+{{- $stashed      := ternary "" "S" $nerd -}}
+{{- $modified     := ternary "" "M" $nerd -}}
+{{- $deleted      := ternary "" "D" $nerd -}}
+{{- $renamed      := ternary "" "R" $nerd -}}
+{{- $python_sym   := ternary " " "py " $nerd -}}
+{{- $node_sym     := ternary " " "node " $nerd -}}
+{{- $rust_sym     := ternary " " "rs " $nerd -}}
+{{- $go_sym       := ternary " " "go " $nerd -}}
+{{- $docker_sym   := ternary " " "docker " $nerd -}}
+{{- $k8s_sym      := ternary "ﴱ " "k8s " $nerd -}}
+{{- $cmd_dur_sym  := ternary " " "took " $nerd -}}
+{{- $time_sym     := ternary " " "" $nerd -}}
+{{- $bat_full     := ternary "" "100%" $nerd -}}
+{{- $bat_charging := ternary "" "+" $nerd -}}
+{{- $bat_dischg   := ternary "" "-" $nerd -}}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Character (prompt symbol)
+# ─────────────────────────────────────────────────────────────────────────────
+[character]
+success_symbol = "[{{ $char_success }}](bold green)"
+error_symbol   = "[{{ $char_error }}](bold red)"
+vicmd_symbol   = "[{{ $char_vicmd }}](bold yellow)"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Username & Hostname
+# ─────────────────────────────────────────────────────────────────────────────
+[username]
+show_always = false
+style_user = "bold blue"
+style_root = "bold red"
+format = "[$user](fg:blue) "
+
+[hostname]
+ssh_only = true
+format = "@[$hostname](fg:magenta) "
+style = "bold"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Directory
+# ─────────────────────────────────────────────────────────────────────────────
+[directory]
+style = "bold cyan"
+truncation_length = 3
+truncation_symbol = ".../"
+format = "[$path]($style) "
+home_symbol = "~"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Git Branch
+# ─────────────────────────────────────────────────────────────────────────────
+[git_branch]
+symbol = "{{ $git_branch }}"
+format = "on [$symbol$branch](fg:mauve) "
+style = "bold"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Git Status
+# ─────────────────────────────────────────────────────────────────────────────
+[git_status]
+conflicted = "{{ $conflicted }}"
+ahead = "{{ $ahead }}${count}"
+behind = "{{ $behind }}${count}"
+diverged = "{{ $diverged }}"
+untracked = "{{ $untracked }}"
+stashed = "{{ $stashed }}"
+modified = "{{ $modified }}"
+deleted = "{{ $deleted }}"
+renamed = "{{ $renamed }}"
+typechanged = ""
+style = "red"
+disabled = false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Languages / Toolchains
+# ─────────────────────────────────────────────────────────────────────────────
+
+[python]
+symbol = "{{ $python_sym }}"
+format = "via [$symbol$version](fg:yellow) "
+style = "yellow"
+python_binary = ["python3", "python"]
+pyenv_version_name = true
+
+[nodejs]
+symbol = "{{ $node_sym }}"
+format = "via [$symbol$version](fg:green) "
+style = "green"
+
+[rust]
+symbol = "{{ $rust_sym }}"
+format = "via [$symbol$version](fg:red) "
+style = "red"
+
+[golang]
+symbol = "{{ $go_sym }}"
+format = "via [$symbol$version](fg:cyan) "
+style = "cyan"
+
+[docker_context]
+symbol = "{{ $docker_sym }}"
+format = "via [$symbol$context](fg:blue) "
+style = "blue"
+only_with_files = true
+
+[kubernetes]
+symbol = "{{ $k8s_sym }}"
+format = "via [$symbol$context(/$namespace)](fg:blue) "
+style = "blue"
+disabled = false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Command Duration
+# ─────────────────────────────────────────────────────────────────────────────
+[cmd_duration]
+min_time = 2000
+format = "{{ $cmd_dur_sym }}[$duration](fg:yellow) "
+style = "yellow"
+show_notifications = true
+notification_timeout = 30000
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Time (right side)
+# ─────────────────────────────────────────────────────────────────────────────
+[time]
+disabled = false
+format = "{{ $time_sym }}[$time](fg:overlay0) "
+time_format = "%H:%M:%S"
+style = "overlay0"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Battery (right side)
+# ─────────────────────────────────────────────────────────────────────────────
+[battery]
+full_symbol = "{{ $bat_full }}"
+charging_symbol = "{{ $bat_charging }}"
+discharging_symbol = "{{ $bat_dischg }}"
+display = [
+  { threshold = 10, style = "bold red" },
+  { threshold = 30, style = "bold yellow" },
+  { style = "bold green" }
+]
+format = "[$symbol$percentage]($style) "
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Line break
+# ─────────────────────────────────────────────────────────────────────────────
+[line_break]
+disabled = false
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Main prompt format
+# ─────────────────────────────────────────────────────────────────────────────
+format = """
+$username$hostname\
+$directory\
+$git_branch$git_status\
+$python$nodejs$rust$golang$docker_context$kubernetes\
+$cmd_duration\
+$line_break$character"""
+
+right_format = "$time$battery"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Disable noisy modules
+# ─────────────────────────────────────────────────────────────────────────────
+[aws]
+disabled = true
+
+[azure]
+disabled = true
+
+[gcloud]
+disabled = true
+
+[conda]
+disabled = true
+
+[package]
+disabled = true
+
+[cmake]
+disabled = true
+
+[meson]
+disabled = true
+
+[nix_shell]
+disabled = true
+
+[zig]
+disabled = true
+
+[vlang]
+disabled = true
