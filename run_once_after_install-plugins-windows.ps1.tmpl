@@ -1,0 +1,26 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Installs vim-plug and runs PlugInstall for classic Vim on Windows.
+# nvim plugins are handled by lazy.nvim (see ~/.config/nvim/init.lua).
+$ErrorActionPreference = 'Stop'
+
+$plugPath = Join-Path $HOME '.vim\autoload\plug.vim'
+
+if (-not (Test-Path $plugPath)) {
+    Write-Host "installing vim-plug..."
+    $dir = Split-Path $plugPath -Parent
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
+    Invoke-WebRequest -UseBasicParsing `
+        -Uri 'https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim' `
+        -OutFile $plugPath
+}
+
+$vim = Get-Command vim -ErrorAction SilentlyContinue
+if (-not $vim) { $vim = Get-Command gvim -ErrorAction SilentlyContinue }
+if ($vim) {
+    Write-Host "running PlugInstall..."
+    & $vim.Source '-E' '-s' '-c' 'PlugInstall --sync' '-c' 'qa'
+} else {
+    Write-Host "vim not found; skipping PlugInstall (install vim and re-run chezmoi apply)"
+}
+Write-Host "plugin installation done"
+{{- end -}}

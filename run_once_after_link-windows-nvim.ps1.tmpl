@@ -1,0 +1,24 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Windows nvim reads its config from %LOCALAPPDATA%\nvim (not ~/.config/nvim).
+# Link that path to the chezmoi-managed ~/.config/nvim so edits stay in sync.
+$ErrorActionPreference = 'Stop'
+
+$link = Join-Path $env:LOCALAPPDATA 'nvim'
+$target = Join-Path $HOME '.config\nvim'
+
+if (Test-Path $link) {
+    $item = Get-Item $link -Force
+    $isJunction = $item.LinkType -eq 'Junction'
+    $resolvesToTarget = $isJunction -and $item.Target -eq $target
+    if (-not $resolvesToTarget) {
+        Write-Warning "$link exists and is not a junction to $target; leaving it alone."
+    } else {
+        Write-Host "nvim config already linked: $link -> $target"
+    }
+} elseif (Test-Path $target) {
+    New-Item -ItemType Junction -Path $link -Target $target | Out-Null
+    Write-Host "linked nvim config: $link -> $target"
+} else {
+    Write-Warning "chezmoi-managed nvim config $target not found; skipping junction."
+}
+{{- end -}}

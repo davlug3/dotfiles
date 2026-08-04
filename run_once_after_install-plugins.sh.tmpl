@@ -1,3 +1,4 @@
+{{- if ne .chezmoi.os "windows" -}}
 #!/usr/bin/env bash
 
 set -e
@@ -12,3 +13,4 @@ echo "running PlugInstall..."
 vim -E -s -c "PlugInstall --sync" -c "qa" 2>/dev/null || true
 
 echo "plugin installation done"
+{{- end -}}

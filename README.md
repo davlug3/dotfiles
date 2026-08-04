@@ -4,27 +4,51 @@ My personal config files using [chezmoi](https://chezmoi.io). I use this repo fo
 
 ## Installation
 
-### Option 1 — One-liner, no need to clone
+Either one-liner below installs chezmoi (if needed) and applies the dotfiles. Pick whichever you prefer.
+
+### Option A — This repo's installer
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/davlug3/dotfiles/main/install.sh | bash
 ```
 
-The script will install chezmoi if not yet installed, then it will run `chezmoi init --apply` to pull the dotfiles from GitHub.
+Installs chezmoi if missing, then runs `chezmoi init --apply` to pull the dotfiles from GitHub.
 
-### Option 2 — Using chezmoi directly
+### Option B — Official chezmoi installer
 
 ```bash
 sh -c "$(curl -fsLS https://chezmoi.io/get)" -- init --apply davlug3/dotfiles
 ```
 
-### Option 3 — Clone it yourself
+Installs chezmoi via the official script and immediately runs `init --apply` on this repo.
+
+### Option C — Clone it yourself
 
 ```bash
 git clone https://github.com/davlug3/dotfiles.git
 cd dotfiles
 ./install.sh
 ```
+
+### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/davlug3/dotfiles/main/install.ps1 | iex
+```
+
+### Windows (PowerShell)
+
+```powershell
+irm https://raw.githubusercontent.com/davlug3/dotfiles/main/install.ps1 | iex
+```
+
+The script installs chezmoi (winget, falling back to the official installer) and runs `chezmoi apply`. On Windows it installs:
+
+- **PowerShell profiles** for both PowerShell 7 (`Documents\PowerShell`) and Windows PowerShell 5.1 (`Documents\WindowsPowerShell`) — each inits **starship**
+- **vim** — `.vimrc` + vim-plug (plugins via `PlugInstall`)
+- **nvim** — config at `~/.config/nvim`, linked to `%LOCALAPPDATA%\nvim` via a junction
+
+Note: the compiled nvim-treesitter parsers (`run_once_after_install-treesitter-parsers.sh.tmpl`) are Unix-only for now.
 
 ## Usage
 

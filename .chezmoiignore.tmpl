@@ -1,0 +1,20 @@
+{{- if eq .chezmoi.os "windows" -}}
+{{- /* Unix shell config: not installed on Windows */ -}}
+.bashrc
+.bash_aliases
+.bash_logout
+.bash_profile
+.bashrc.termux
+.bashrc.wsl
+.profile
+.tmux.conf
+install.sh
+{{- else -}}
+{{- /* PowerShell profiles + installer: not installed on Unix */ -}}
+Documents
+Documents/PowerShell
+Documents/WindowsPowerShell
+Documents/PowerShell/Microsoft.PowerShell_profile.ps1
+Documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1
+install.ps1
+{{- end -}}

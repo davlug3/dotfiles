@@ -1,3 +1,4 @@
+{{- if ne .chezmoi.os "windows" -}}
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -29,3 +30,4 @@ echo "Updating font cache..."
 fc-cache -fv "${FONT_DIR}"
 
 echo "JetBrains Mono Nerd Font installed successfully"
+{{- end -}}

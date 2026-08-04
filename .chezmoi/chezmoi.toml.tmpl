@@ -10,6 +10,8 @@
     autoCommit = false
     autoPush = false
 
+{{- if ne .chezmoi.os "windows" }}
 [merge]
     command = "vimdiff"
+{{- end }}
 

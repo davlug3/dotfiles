@@ -132,6 +132,16 @@ style = "blue"
 disabled = false
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Jobs (background tasks)
+# ─────────────────────────────────────────────────────────────────────────────
+[jobs]
+threshold = 1
+number_threshold = 2
+format = "[$symbol$number]($style) "
+symbol = "✦"
+style = "bold blue"
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Command Duration
 # ─────────────────────────────────────────────────────────────────────────────
 [cmd_duration]
@@ -179,6 +189,7 @@ $directory\
 $git_branch$git_status\
 $python$nodejs$rust$golang$docker_context$kubernetes\
 $cmd_duration\
+$jobs\
 $line_break$character"""
 
 right_format = "$time$battery"
