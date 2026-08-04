@@ -1,9 +1,7 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Starship Config — ASCII by default, Nerd Font when STARSHIP_NERD_FONT=1
-# ─────────────────────────────────────────────────────────────────────────────
-# To enable Nerd Font icons: export STARSHIP_NERD_FONT=1 in your shell config
+# Starship Config — modern Unicode/ASCII (no Nerd Font required)
 # ─────────────────────────────────────────────────────────────────────────────
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -38,53 +36,24 @@ mantle    = "#181825"
 crust     = "#11111b"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Conditional symbols based on STARSHIP_NERD_FONT
-# ─────────────────────────────────────────────────────────────────────────────
-{{- $nerd := eq (env "STARSHIP_NERD_FONT") "1" -}}
-{{- $char_success := ternary "➜" ">" $nerd -}}
-{{- $char_error   := ternary "➜" ">" $nerd -}}
-{{- $char_vicmd   := ternary "❮" "<" $nerd -}}
-{{- $git_branch   := ternary " " "git:" $nerd -}}
-{{- $conflicted   := ternary " " "! " $nerd -}}
-{{- $ahead        := ternary "" "^" $nerd -}}
-{{- $behind       := ternary "" "v" $nerd -}}
-{{- $diverged     := ternary "" "<>" $nerd -}}
-{{- $untracked    := ternary "" "?" $nerd -}}
-{{- $stashed      := ternary "" "S" $nerd -}}
-{{- $modified     := ternary "" "M" $nerd -}}
-{{- $deleted      := ternary "" "D" $nerd -}}
-{{- $renamed      := ternary "" "R" $nerd -}}
-{{- $python_sym   := ternary " " "py " $nerd -}}
-{{- $node_sym     := ternary " " "node " $nerd -}}
-{{- $rust_sym     := ternary " " "rs " $nerd -}}
-{{- $go_sym       := ternary " " "go " $nerd -}}
-{{- $docker_sym   := ternary " " "docker " $nerd -}}
-{{- $k8s_sym      := ternary "ﴱ " "k8s " $nerd -}}
-{{- $cmd_dur_sym  := ternary " " "took " $nerd -}}
-{{- $time_sym     := ternary " " "" $nerd -}}
-{{- $bat_full     := ternary "" "100%" $nerd -}}
-{{- $bat_charging := ternary "" "+" $nerd -}}
-{{- $bat_dischg   := ternary "" "-" $nerd -}}
-
-# ─────────────────────────────────────────────────────────────────────────────
 # Character (prompt symbol)
 # ─────────────────────────────────────────────────────────────────────────────
 [character]
-success_symbol = "[{{ $char_success }}](bold green)"
-error_symbol   = "[{{ $char_error }}](bold red)"
-vicmd_symbol   = "[{{ $char_vicmd }}](bold yellow)"
+success_symbol = "[❯](bold green)"
+error_symbol   = "[❯](bold red)"
+vicmd_symbol   = "[❮](bold yellow)"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Username & Hostname
 # ─────────────────────────────────────────────────────────────────────────────
 [username]
-show_always = false
+show_always = true
 style_user = "bold blue"
 style_root = "bold red"
 format = "[$user](fg:blue) "
 
 [hostname]
-ssh_only = true
+ssh_only = false
 format = "@[$hostname](fg:magenta) "
 style = "bold"
 
@@ -95,6 +64,8 @@ style = "bold"
 style = "bold cyan"
 truncation_length = 3
 truncation_symbol = ".../"
+truncate_to_repo = false
+fish_style_pwd_dir_length = 1
 format = "[$path]($style) "
 home_symbol = "~"
 
@@ -102,23 +73,22 @@ home_symbol = "~"
 # Git Branch
 # ─────────────────────────────────────────────────────────────────────────────
 [git_branch]
-symbol = "{{ $git_branch }}"
-format = "on [$symbol$branch](fg:mauve) "
+format = "on [$branch](fg:mauve) "
 style = "bold"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Git Status
 # ─────────────────────────────────────────────────────────────────────────────
 [git_status]
-conflicted = "{{ $conflicted }}"
-ahead = "{{ $ahead }}${count}"
-behind = "{{ $behind }}${count}"
-diverged = "{{ $diverged }}"
-untracked = "{{ $untracked }}"
-stashed = "{{ $stashed }}"
-modified = "{{ $modified }}"
-deleted = "{{ $deleted }}"
-renamed = "{{ $renamed }}"
+conflicted = "! "
+ahead = "^${count}"
+behind = "v${count}"
+diverged = "<>"
+untracked = "?"
+stashed = "S"
+modified = "M"
+deleted = "D"
+renamed = "R"
 typechanged = ""
 style = "red"
 disabled = false
@@ -128,35 +98,35 @@ disabled = false
 # ─────────────────────────────────────────────────────────────────────────────
 
 [python]
-symbol = "{{ $python_sym }}"
+symbol = "py "
 format = "via [$symbol$version](fg:yellow) "
 style = "yellow"
 python_binary = ["python3", "python"]
 pyenv_version_name = true
 
 [nodejs]
-symbol = "{{ $node_sym }}"
+symbol = "node "
 format = "via [$symbol$version](fg:green) "
 style = "green"
 
 [rust]
-symbol = "{{ $rust_sym }}"
+symbol = "rs "
 format = "via [$symbol$version](fg:red) "
 style = "red"
 
 [golang]
-symbol = "{{ $go_sym }}"
+symbol = "go "
 format = "via [$symbol$version](fg:cyan) "
 style = "cyan"
 
 [docker_context]
-symbol = "{{ $docker_sym }}"
+symbol = "docker "
 format = "via [$symbol$context](fg:blue) "
 style = "blue"
 only_with_files = true
 
 [kubernetes]
-symbol = "{{ $k8s_sym }}"
+symbol = "k8s "
 format = "via [$symbol$context(/$namespace)](fg:blue) "
 style = "blue"
 disabled = false
@@ -166,7 +136,7 @@ disabled = false
 # ─────────────────────────────────────────────────────────────────────────────
 [cmd_duration]
 min_time = 2000
-format = "{{ $cmd_dur_sym }}[$duration](fg:yellow) "
+format = "took [$duration](fg:yellow) "
 style = "yellow"
 show_notifications = true
 notification_timeout = 30000
@@ -176,7 +146,7 @@ notification_timeout = 30000
 # ─────────────────────────────────────────────────────────────────────────────
 [time]
 disabled = false
-format = "{{ $time_sym }}[$time](fg:overlay0) "
+format = "🕐 [$time](fg:overlay0) "
 time_format = "%H:%M:%S"
 style = "overlay0"
 
@@ -184,9 +154,9 @@ style = "overlay0"
 # Battery (right side)
 # ─────────────────────────────────────────────────────────────────────────────
 [battery]
-full_symbol = "{{ $bat_full }}"
-charging_symbol = "{{ $bat_charging }}"
-discharging_symbol = "{{ $bat_dischg }}"
+full_symbol = "100%"
+charging_symbol = "+"
+discharging_symbol = "-"
 display = [
   { threshold = 10, style = "bold red" },
   { threshold = 30, style = "bold yellow" },
