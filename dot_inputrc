@@ -1,0 +1,3 @@
+# Ctrl+Backspace sends 0x08 (== Ctrl+H); make it delete the previous word.
+# This also remaps Ctrl+H itself, since the two share the same byte.
+"\C-h": backward-kill-word
