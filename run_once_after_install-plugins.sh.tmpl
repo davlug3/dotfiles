@@ -1,6 +1,9 @@
 {{- if ne .chezmoi.os "windows" -}}
+{{- if env "TERMUX_VERSION" -}}
+#!/data/data/com.termux/files/usr/bin/env bash
+{{- else -}}
 #!/usr/bin/env bash
-
+{{ end }}
 set -e
 
 echo "installing vim-plug..."

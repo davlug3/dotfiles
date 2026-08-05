@@ -1,4 +1,4 @@
-{{- if ne .chezmoi.os "windows" -}}
+{{- if and (ne .chezmoi.os "windows") (not (env "TERMUX_VERSION")) -}}
 #!/usr/bin/env bash
 set -euo pipefail
 

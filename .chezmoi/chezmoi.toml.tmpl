@@ -1,10 +1,11 @@
 {{- $email := promptStringOnce . "email" "GitHub email" -}}
 {{- $name := promptStringOnce . "name" "GitHub username" -}}
+{{- $termux := env "TERMUX_VERSION" -}}
 
 [data]
     email = {{ $email | quote }}
     name = {{ $name | quote }}
-    termux = false
+    termux = {{ if $termux }}true{{ else }}false{{ end }}
 
 [git]
     autoCommit = false
