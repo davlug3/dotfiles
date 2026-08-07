@@ -17,10 +17,10 @@ Installs chezmoi if missing, then runs `chezmoi init --apply` to pull the dotfil
 ### Option B — Official chezmoi installer
 
 ```bash
-sh -c "$(curl -fsLS https://chezmoi.io/get)" -- init --apply davlug3/dotfiles
+sh -c "$(curl -fsLS https://get.chezmoi.io/lb)" -- init --apply davlug3/dotfiles
 ```
 
-Installs chezmoi via the official script and immediately runs `init --apply` on this repo.
+Installs chezmoi via the official script and immediately runs `init --apply` on this repo. Note the `/lb` variant: it installs chezmoi to `~/.local/bin`, which your dotfiles already put on `PATH` (the default `get.chezmoi.io` installs to a relative `bin/` that isn't on `PATH`).
 
 ### Option C — Clone it yourself
 
@@ -87,6 +87,7 @@ Scripts prefixed with `run_once_` execute automatically on first `chezmoi apply`
 
 - **vim-plug** — installs plugin manager and runs `PlugInstall`
 - **JetBrains Mono Nerd Font** — installs the font for non-Termux Unix systems
+- **neovim** — installs the latest neovim binary (official tarball to `~/.local/bin` on Linux/macOS, `pkg` on Termux, winget on Windows)
 
 ### Starship prompt
 

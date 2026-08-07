@@ -1,0 +1,8 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Installs the latest Neovim on Windows via winget.
+# winget is idempotent, so this always runs and guarantees Neovim is present.
+$ErrorActionPreference = 'Stop'
+
+winget install --id Neovim.Neovim --exact --accept-source-agreements --accept-package-agreements
+Write-Host "neovim installed via winget"
+{{- end -}}

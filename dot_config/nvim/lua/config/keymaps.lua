@@ -34,6 +34,17 @@ vim.keymap.set('n', '<leader>ba', ':bufdo bd<CR>', { desc = 'Close all buffers' 
 vim.keymap.set('n', '<leader>l', ':bnext<CR>', { desc = 'Next buffer' })
 vim.keymap.set('n', '<leader>h', ':bprevious<CR>', { desc = 'Previous buffer' })
 
+-- lcd to the git root of the current file
+local function git_root()
+  local root = vim.fs.root(0, { '.git' })
+  return root or vim.uv.cwd()
+end
+
+vim.keymap.set('n', '<leader>cr', function()
+  vim.cmd.lcd(git_root())
+  print('cwd → ' .. vim.fn.getcwd())
+end, { desc = 'lcd to git root' })
+
 -- Visual-mode * / # search for the current selection
 local function visual_selection()
   local saved_reg = vim.fn.getreg('"')

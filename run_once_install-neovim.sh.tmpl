@@ -1,0 +1,45 @@
+{{- if ne .chezmoi.os "windows" -}}
+{{- if env "TERMUX_VERSION" -}}
+#!/data/data/com.termux/files/usr/bin/env bash
+{{- else -}}
+#!/usr/bin/env bash
+{{ end }}
+set -euo pipefail
+
+# Termux: install via the rootless repo binary
+if [ -n "${TERMUX_VERSION:-}" ]; then
+  pkg install -y neovim
+  exit 0
+fi
+
+# Linux/macOS: official latest prebuilt tarball
+BIN_DIR="${HOME}/.local/bin"
+INSTALL_ROOT="${HOME}/.local/share/neovim"
+TEMP_DIR=$(mktemp -d)
+trap 'rm -rf "${TEMP_DIR}"' EXIT
+
+case "$(uname -s)-$(uname -m)" in
+  Linux-x86_64|Linux-amd64)   ASSET="nvim-linux-x86_64.tar.gz" ;;
+  Linux-aarch64|Linux-arm64)  ASSET="nvim-linux-aarch64.tar.gz" ;;
+  Darwin-arm64)               ASSET="nvim-macos-arm64.tar.gz" ;;
+  Darwin-x86_64|Darwin-amd64) ASSET="nvim-macos-x86_64.tar.gz" ;;
+  *)
+    echo "neovim install: unsupported platform $(uname -s)-$(uname -m); skipping" >&2
+    exit 0
+    ;;
+esac
+
+echo "Downloading neovim (${ASSET})..."
+curl -fSL "https://github.com/neovim/neovim/releases/latest/download/${ASSET}" \
+  -o "${TEMP_DIR}/nvim.tar.gz"
+
+mkdir -p "${INSTALL_ROOT}" "${BIN_DIR}"
+tar -xzf "${TEMP_DIR}/nvim.tar.gz" -C "${INSTALL_ROOT}"
+NVIM_BIN="$(find "${INSTALL_ROOT}" -maxdepth 4 -type f -name nvim -path '*/bin/*' | head -1)"
+if [ -z "${NVIM_BIN}" ]; then
+  echo "neovim install: extracted binary not found" >&2
+  exit 1
+fi
+ln -sf "${NVIM_BIN}" "${BIN_DIR}/nvim"
+echo "neovim installed at ${BIN_DIR}/nvim"
+{{- end -}}

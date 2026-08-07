@@ -19,9 +19,9 @@ install_chezmoi() {
     fi
 
     if command -v curl >/dev/null 2>&1; then
-        sh -c "$(curl -fsSL https://chezmoi.io/get)"
+        sh -c "$(curl -fsSL https://get.chezmoi.io/lb)"
     elif command -v wget >/dev/null 2>&1; then
-        sh -c "$(wget -qO- https://chezmoi.io/get)"
+        sh -c "$(wget -qO- https://get.chezmoi.io/lb)"
     else
         echo "error: need curl or wget to install chezmoi" >&2
         exit 1
