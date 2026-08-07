@@ -286,6 +286,23 @@ map <leader>ba :bufdo bd<cr>
 map <leader>l :bnext<cr>
 map <leader>h :bprevious<cr>
 
+" change cwd to current file's directory (<leader>cd, mirrors nvim)
+map <silent> <Leader>cd :lcd <C-R>=expand('%:p:h')<CR><CR>:echo 'cwd → ' . getcwd()<CR>
+
+" change cwd to the git root of the current file (<leader>cr, mirrors nvim)
+function! s:GitRootCwd()
+  let start = expand('%:p:h')
+  let root = finddir('.git', start . ';')
+  if !empty(root)
+    let gitroot = fnamemodify(root, ':p:h:h')
+    execute 'lcd' fnameescape(gitroot)
+    echo 'cwd → ' . getcwd()
+  else
+    echo 'cwd → no git root found'
+  endif
+endfunction
+map <silent> <Leader>cr :call <SID>GitRootCwd()<CR>
+
 
 
 if !has('nvim')
