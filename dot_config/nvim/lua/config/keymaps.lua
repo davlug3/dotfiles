@@ -45,6 +45,11 @@ vim.keymap.set('n', '<leader>cr', function()
   print('cwd → ' .. vim.fn.getcwd())
 end, { desc = 'lcd to git root' })
 
+vim.keymap.set('n', '<leader>cd', function()
+  vim.cmd.lcd(vim.fn.expand('%:h'))
+  print('cwd → ' .. vim.fn.getcwd())
+end, { desc = 'lcd to current file directory' })
+
 -- Visual-mode * / # search for the current selection
 local function visual_selection()
   local saved_reg = vim.fn.getreg('"')
