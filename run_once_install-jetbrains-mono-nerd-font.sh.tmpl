@@ -22,8 +22,6 @@ curl -fSL "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${FO
 echo "Extracting..."
 unzip -q "${TEMP_DIR}/${FONT_NAME}.zip" -d "${TEMP_DIR}/extracted"
 
-find "${TEMP_DIR}/extracted" -name '*.ttf' -o -name '*.otf' | head -1
-
 find "${TEMP_DIR}/extracted" \( -name '*.ttf' -o -name '*.otf' \) -exec cp {} "${FONT_DIR}/" \;
 
 echo "Updating font cache..."

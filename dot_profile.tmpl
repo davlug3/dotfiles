@@ -1,5 +1,5 @@
 # ~/.profile: executed by sh for login shells.
 # Switch to bash if available (for Termux compatibility)
-if [ -z "$BASH_VERSION" ] && [ -x "/bin/bash" ]; then
-    exec "/bin/bash" -l
+if [ -z "$BASH_VERSION" ] && command -v bash >/dev/null 2>&1; then
+    exec bash -l
 fi

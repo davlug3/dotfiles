@@ -36,19 +36,13 @@ cd dotfiles
 irm https://raw.githubusercontent.com/davlug3/dotfiles/main/install.ps1 | iex
 ```
 
-### Windows (PowerShell)
-
-```powershell
-irm https://raw.githubusercontent.com/davlug3/dotfiles/main/install.ps1 | iex
-```
-
 The script installs chezmoi (winget, falling back to the official installer) and runs `chezmoi apply`. On Windows it installs:
 
 - **PowerShell profiles** for both PowerShell 7 (`Documents\PowerShell`) and Windows PowerShell 5.1 (`Documents\WindowsPowerShell`) — each inits **starship**
 - **vim** — `.vimrc` + vim-plug (plugins via `PlugInstall`)
 - **nvim** — config at `~/.config/nvim`, linked to `%LOCALAPPDATA%\nvim` via a junction
 
-Note: the compiled nvim-treesitter parsers (`run_once_after_install-treesitter-parsers.sh.tmpl`) are Unix-only for now.
+Note: nvim-treesitter parsers are installed automatically by nvim-treesitter on first launch (needs a `cc`/clang compiler).
 
 ## Usage
 
@@ -92,6 +86,7 @@ alias brewup="brew update && brew upgrade && brew cleanup"
 Scripts prefixed with `run_once_` execute automatically on first `chezmoi apply`. Currently runs:
 
 - **vim-plug** — installs plugin manager and runs `PlugInstall`
+- **JetBrains Mono Nerd Font** — installs the font for non-Termux Unix systems
 
 ### Starship prompt
 

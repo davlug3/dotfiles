@@ -1,18 +1,7 @@
-# set a fancy prompt with colors
-# Git branch function for prompt
-parse_git_branch() {
-     git branch 2> /dev/null | sed -n 's/^\* \(.*\)/ (\1)/p'
-}
-
-PS1='\[\e[0;38;5;82m\]$ \[\e[0;38;5;45m\]\u \[\e[0;38;5;45m\](\[\e[0;38;5;39m\]\w\[\e[0;38;5;33m\]$(parse_git_branch)\[\e[0;38;5;45m\])\n \[\e[0;1;38;5;45m\]> \[\e[0m\]'
-
-# If this is an xterm set the title to user@host:dir
-case "$TERM" in
-xterm*|rxvt*)
-    PS1="\[\e]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
-    ;;
-*)
-    ;;
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
 esac
 
 # Platform-specific config
@@ -20,6 +9,8 @@ if [ -d /data/data/com.termux/files/usr/bin ]; then
     . ~/.bashrc.termux
 elif [ -n "$WSL_DISTRO_NAME" ]; then
     . ~/.bashrc.wsl
+else
+    eval "$(starship init bash)"
 fi
 
 # Alias definitions.
@@ -33,5 +24,3 @@ export PATH="$HOME/.local/bin:$PATH"
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
-
-eval "$(starship init bash)"
