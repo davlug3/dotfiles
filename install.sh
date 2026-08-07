@@ -19,9 +19,9 @@ install_chezmoi() {
     fi
 
     if command -v curl >/dev/null 2>&1; then
-        sh -c "$(curl -fsSL https://get.chezmoi.io/lb)"
+        sh -c "$(curl -fsSL https://get.chezmoi.io)" -- -b "$HOME/.local/bin"
     elif command -v wget >/dev/null 2>&1; then
-        sh -c "$(wget -qO- https://get.chezmoi.io/lb)"
+        sh -c "$(wget -qO- https://get.chezmoi.io)" -- -b "$HOME/.local/bin"
     else
         echo "error: need curl or wget to install chezmoi" >&2
         exit 1
@@ -35,6 +35,8 @@ main() {
     print_banner
 
     install_chezmoi
+
+    export PATH="$HOME/.local/bin:$PATH"
 
     if $local_repo; then
         if [ ! -d "$HOME/.local/share/chezmoi" ]; then

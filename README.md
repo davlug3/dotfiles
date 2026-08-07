@@ -17,10 +17,10 @@ Installs chezmoi if missing, then runs `chezmoi init --apply` to pull the dotfil
 ### Option B — Official chezmoi installer
 
 ```bash
-sh -c "$(curl -fsLS https://get.chezmoi.io/lb)" -- init --apply davlug3/dotfiles
+sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b "$HOME/.local/bin" init --apply davlug3/dotfiles
 ```
 
-Installs chezmoi via the official script and immediately runs `init --apply` on this repo. Note the `/lb` variant: it installs chezmoi to `~/.local/bin`, which your dotfiles already put on `PATH` (the default `get.chezmoi.io` installs to a relative `bin/` that isn't on `PATH`).
+Installs chezmoi via the official script and immediately runs `init --apply` on this repo. The `-b "$HOME/.local/bin"` flag is required: the default installer puts chezmoi in a **relative `bin/` directory** that isn't on your `PATH` (the `ln get.chezmoi.io/lb` variant only helps if you run it from your home directory). Your dotfiles already prepend `$HOME/.local/bin` to `PATH`.
 
 ### Option C — Clone it yourself
 
