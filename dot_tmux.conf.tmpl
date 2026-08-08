@@ -5,7 +5,7 @@ set -g default-terminal "tmux-256color"
 # Load mobile-friendly config on Termux Android
 set -g update-environment "TERMUX_VERSION"
 {{- if .termux }}
-if-shell "[[ -n \"$TERMUX_VERSION\" ]]" \
+if-shell "[ -n \"\$TERMUX_VERSION\" ]" \
     "source-file ~/.tmux-mobile.conf" ""
 {{- end }}
 setw -g mode-keys vi
