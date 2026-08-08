@@ -1,6 +1,12 @@
 unbind r
 bind r source-file ~/.tmux.conf
 set -g default-terminal "tmux-256color"
+
+# Load mobile-friendly config on Termux Android
+{{- if .termux }}
+if-shell "[[ -n \"$TERMUX_VERSION\" ]]" \
+    "source-file ~/.tmux-mobile.conf" ""
+{{- end }}
 setw -g mode-keys vi
 bind-key h select-pane -L
 bind-key j select-pane -D

@@ -1,0 +1,31 @@
+# Mobile-friendly tmux settings for Termux Android
+# Only sourced when running on Termux Android
+
+# Enable touch support
+set -g mouse on
+
+# Increase scrollback history for easier reading
+set -g history-limit 10000
+
+# Simplify status bar for small screens
+set -g @dracula-show-powerline false
+set -g @dracula-show-flags false
+set -g @dracula-plugins ""
+
+# Optimize for performance on mobile
+set -g repeat-time 600
+set -sg escape-time 10
+
+# Make copy mode more touch-friendly
+bind -T copy-mode-vi v send -X begin-selection
+
+# Use larger pane borders for easier touch targeting
+set -g pane-border-lines heavy
+
+# Battery optimization - reduce refresh
+set -g status-interval 5
+
+# Mobile keyboard considerations
+# Use prefix + [ for copy mode instead of complex bindings
+unbind-key -T copy-mode-vi MouseDragEnd1Pane
+bind-key -T copy-mode-vi m send-keys -X copy-pipe-and-cancel "termux-clipboard-set"
