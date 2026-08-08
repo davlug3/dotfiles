@@ -25,7 +25,14 @@ set -g pane-border-lines heavy
 # Battery optimization - reduce refresh
 set -g status-interval 5
 
-# Mobile keyboard considerations
-# Use prefix + [ for copy mode instead of complex bindings
-unbind-key -T copy-mode-vi MouseDragEnd1Pane
-bind-key -T copy-mode-vi m send-keys -X copy-pipe-and-cancel "termux-clipboard-set"
+# Mobile keyboard considerations - shorter prefix mode timeout
+set -g display-panes-time 500
+
+# Termux clipboard integration
+# Use prefix + C-c to copy to Termux clipboard, prefix + C-v to paste
+bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "termux-clipboard-set"
+bind C-c run "tmux save-buffer - | termux-clipboard-set"
+bind C-v run "tmux set-buffer \"$(termux-clipboard-get)\"; tmux paste-buffer"
+
+# Quick terminal resize for mobile orientation changes
+bind R resize-pane -a
