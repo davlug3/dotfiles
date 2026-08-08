@@ -125,7 +125,7 @@ Inside the file, use `{{ promptStringOnce . "key" "Enter your token" }}` — che
 
 - **bash** — .bashrc (template with OS detection), .bash_profile, .bash_aliases, .bash_logout
 - **git** — .gitconfig
-- **tmux** — with TPM and dracula theme
+- **tmux** — with TPM and dracula theme, plus mobile-friendly config for Termux Android
 - **vim** — with vim-plug, nerdtree, coc.nvim, and more
 - **prompt** — starship config
 
