@@ -1,9 +1,6 @@
 # Mobile-friendly tmux settings for Termux Android
 # Automatically loaded on Termux Android via filesystem detection
 
-# Enable touch support ONLY for essential navigation
-set -g mouse on
-
 # Increase scrollback history for easier reading
 set -g history-limit 10000
 
@@ -38,7 +35,11 @@ bind -T copy-mode-vi j send-keys -X cursor-down
 bind -T copy-mode-vi k send-keys -X cursor-up
 bind -T copy-mode-vi l send-keys -X cursor-right
 
-# Swipe navigation - using Alt+arrow keys for gestures
+# IMPORTANT: Disable mouse in tmux to allow touch gestures to pass through to Neovim
+# This is the key fix - when mouse is off, touch events go directly to the child application
+set -g mouse off
+
+# Swipe navigation - using Alt+h/j/k/l (avoids conflicts with arrow keys)
 # Left/Right arrows navigate between panes (when not in copy mode)
 bind -n M-h if -F "#{pane_in_mode}" "send-keys -X exit" "select-pane -L" \; display "◀ Swipe: Left"
 bind -n M-l if -F "#{pane_in_mode}" "send-keys -X exit" "select-pane -R" \; display "Swipe: Right ▶"
@@ -66,16 +67,20 @@ bind -n M-Y run "tmux save-buffer - | termux-clipboard-set"
 # Quick save session (double-tap gesture)
 bind -n M-W run "tmux capture-pane -pS -100 > ~/tmux_session_$(date +%s).txt && tmux display 'Session saved'"
 
-# Important: Pass arrow keys directly to applications when not in prefix mode
-# This allows Neovim to receive actual swipe events
-bind -n WheelUpCommand "send-keys -X scroll-up"
-bind -n WheelDownCommand "send-keys -X scroll-down"
+# Enable focus events for better terminal integration
+set -g focus-events on
 
-# For arrow keys in copy mode, ensure they're handled properly
+# CRITICAL: Ensure terminal sends proper key sequences
+# This helps terminal emulators correctly send arrow keys
+set -g default-terminal "tmux-256color"
+set -ga terminal-overrides ",*256col*:Tc"
+set -ga terminal-overrides ',*:Smulx=\E[4::%p1%dm'
+
+# For terminals that support it, enable direct key passthrough
+set -g allow-passthrough on
+
+# Ensure arrow keys are passed through to child applications
 unbind-key -T root Up
 unbind-key -T root Down
 unbind-key -T root Left
 unbind-key -T root Right
-
-# Enable focus events for better terminal integration
-set -g focus-events on
