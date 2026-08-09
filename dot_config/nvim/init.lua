@@ -11,3 +11,10 @@ require('lazy').setup({
 require('config.options')
 require('config.keymaps')
 require('config.lsp')
+
+-- Load Termux Android mobile-specific configuration
+-- Checks if running in Termux environment via ANDROID_ROOT or TERMUX_VERSION
+if os.getenv("ANDROID_ROOT") or os.getenv("TERMUX_VERSION") then
+  require('config.mobile')
+  require('config.mobile_keymaps')
+end

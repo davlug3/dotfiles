@@ -36,3 +36,26 @@ bind C-v run "tmux set-buffer \"$(termux-clipboard-get)\"; tmux paste-buffer"
 
 # Quick terminal resize for mobile orientation changes
 bind R refresh-client -S
+
+# Swipe-like gesture emulation for navigation
+# Using Ctrl+h/j/k/l as intuitive thumb-accessible keys
+
+# Horizontal swipe-like navigation (left/right between panes)
+bind -n C-h if -F "#{pane_in_mode}" "send-keys -X exit" "select-pane -L" \; display-panes
+bind -n C-l if -F "#{pane_in_mode}" "send-keys -X exit" "select-pane -R" \; display-panes
+
+# Vertical swipe-like navigation (up/down between windows)
+bind -n C-k if -F "#{pane_in_mode}" "send-keys -X exit" "select-window -t :-" \; display-panes
+bind -n C-j if -F "#{pane_in_mode}" "send-keys -X exit" "select-window -t :+" \; display-panes
+
+# Quick window switching with visual feedback
+bind -n M-h if -F "#{pane_in_mode}" "send-keys -X exit" "select-pane -L" \; display "Swipe: Left"
+bind -n M-l if -F "#{pane_in_mode}" "send-keys -X exit" "select-pane -R" \; display "Swipe: Right"
+bind -n M-k if -F "#{pane_in_mode}" "send-keys -X exit" "select-window -t :-" \; display "Swipe: Up"
+bind -n M-j if -F "#{pane_in_mode}" "send-keys -X exit" "select-window -t :+" \; display "Swipe: Down"
+
+# Zoom toggle for pinch-like behavior
+bind -n M-z resize-pane -Z \; display "Pinch: #{window_zoom}"
+
+# Quick save-all (double-tap gesture)
+bind -n M-s run "tmux capture-pane -pS -100 > ~/tmux_session_$(date +%s).txt && tmux display 'Session saved'"
