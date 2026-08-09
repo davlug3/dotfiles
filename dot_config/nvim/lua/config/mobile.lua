@@ -1,27 +1,60 @@
 -- Mobile-friendly Neovim configuration
 -- Only loaded when running on Termux Android
--- Provides gesture-like navigation and touch-friendly settings
+-- Provides enhanced touch support and visual feedback
 
--- Force cursor-only movement (disable all scrolling behavior)
-vim.opt.scrolloff = 0  -- Never scroll ahead of cursor
-vim.opt.sidescrolloff = 0  -- Never sideway-scroll ahead of cursor
-vim.opt.wrap = false  -- Disable wrapping for precise cursor control
-vim.opt.linebreak = false  -- Don't break at word boundaries
+-- Set flag to indicate mobile mode is active
+vim.g.mobile_mode = true
 
--- Visual settings optimized for touch
+-- Touch Gesture Handling
+-- CRITICAL: Disable mouse to prevent scrolling interference
+-- This ensures touch gestures only move the cursor
+vim.opt.mouse = ""
+
+-- Disable automatic scrolling when cursor moves near edges
+vim.opt.scrolloff = 0
+vim.opt.sidescrolloff = 0
+
+-- Disable line wrapping for precise cursor positioning
+vim.opt.wrap = false
+vim.opt.linebreak = false
+
+-- Visual Optimizations for Touch
+-- Better cursor visibility
 vim.g.guicursor = "n-v:block-Cursor/lCursor,i:ver25-Cursor,r:hor20"
-vim.opt.signcolumn = "yes"  -- Prevents text shifting
-vim.opt.number = true  -- Show line numbers
-vim.opt.relativenumber = false  -- Absolute line numbers for easier touch targeting
-vim.opt.cursorline = true  -- Highlight current line for better touch targeting
-vim.opt.showmode = true  -- Show current mode
+vim.opt.cursorline = true
+vim.opt.cursorcolumn = false
 
--- Better visual selection for touch
-vim.opt.hlsearch = true  -- Highlight search matches
-vim.opt.incsearch = true  -- Incremental search
-vim.opt.visualbell = true  -- Use visual bell instead of audio
-vim.opt.scrolloff = 8  -- Keep some context though
-vim.opt.sidescrolloff = 8
+-- Touch-friendly line numbers
+vim.opt.number = true
+vim.opt.relativenumber = false
 
--- Disable mouse scrolling behavior to prevent interference with swipes
-vim.opt.mouse = ""  -- Disable mouse entirely to prevent scroll events
+-- Better visual feedback
+vim.opt.showmode = true
+vim.opt.showcmd = true
+vim.opt.ruler = false
+
+-- Visual indicators for mobile mode
+vim.opt.laststatus = 2
+vim.opt.showtabline = 2
+
+-- Performance Optimizations
+vim.opt.lazyredraw = true
+vim.opt.ttyfast = true
+vim.opt.updatecount = 5000
+vim.opt.updatetime = 300
+
+-- Mobile-Specific Settings
+vim.opt.signcolumn = "yes"
+vim.opt.foldcolumn = "auto"
+
+-- Visual bell instead of audio
+vim.opt.visualbell = true
+vim.opt.errorbells = false
+
+-- Better completion for touch
+vim.opt.completeopt = "menuone,noinsert,noselect"
+
+-- Simple statusline for mobile
+vim.opt.statusline = " %{mode()} %f %h%m %=%-14.(%l:%c%V%) %P"
+
+vim.g.mobile_config_loaded = true
