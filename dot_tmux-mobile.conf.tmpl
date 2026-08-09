@@ -1,8 +1,8 @@
 # Mobile-friendly tmux settings for Termux Android
 # Automatically loaded on Termux Android via filesystem detection
 
-# CRITICAL: Disable mouse to let touch events reach child apps (Neovim)
-set -g mouse off
+# Enable touch support for basic functionality
+set -g mouse on
 
 # Increase scrollback history for easier reading (keep moderate for performance)
 set -g history-limit 5000

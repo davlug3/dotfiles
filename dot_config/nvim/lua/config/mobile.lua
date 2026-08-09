@@ -6,8 +6,9 @@
 vim.g.mobile_mode = true
 
 -- Touch Gesture Handling
--- CRITICAL: Disable mouse to prevent scrolling interference
+-- Disable mouse in Neovim to prevent scrolling interference
 -- This ensures touch gestures only move the cursor
+-- Note: tmux will still handle double-click and send C-m to Neovim
 vim.opt.mouse = ""
 
 -- Disable automatic scrolling when cursor moves near edges

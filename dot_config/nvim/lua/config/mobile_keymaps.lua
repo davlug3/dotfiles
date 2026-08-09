@@ -8,6 +8,15 @@
 vim.keymap.set('n', '<Right>', 'l', { noremap = true, silent = true, desc = "Swipe Right - Move cursor right" })
 vim.keymap.set('n', '<Left>', 'h', { noremap = true, silent = true, desc = "Swipe Left - Move cursor left" })
 
+-- Fallback mappings for terminals that might send different sequences for horizontal swipes
+-- Some terminals send CSI sequences for touch gestures
+vim.keymap.set('n', '\x1b[C', 'l', { noremap = true, silent = true, desc = "Swipe Right (alt code)" })
+vim.keymap.set('n', '\x1b[D', 'h', { noremap = true, silent = true, desc = "Swipe Left (alt code)" })
+
+-- Some terminals might send these for horizontal touch gestures
+vim.keymap.set('n', '\x1b[1C', 'l', { noremap = true, silent = true, desc = "Swipe Right (single modifier)" })
+vim.keymap.set('n', '\x1b[1D', 'h', { noremap = true, silent = true, desc = "Swipe Left (single modifier)" })
+
 -- Vertical swipes - move cursor up/down (no scrolling ever!)
 vim.keymap.set('n', '<Up>', 'k', { noremap = true, silent = true, desc = "Swipe Up - Move cursor up" })
 vim.keymap.set('n', '<Down>', 'j', { noremap = true, silent = true, desc = "Swipe Down - Move cursor down" })
