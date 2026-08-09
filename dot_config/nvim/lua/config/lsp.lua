@@ -8,6 +8,16 @@ local servers = {
   'jsonls',
 }
 
+-- Remove lua_ls from Mason installation if already installed system-wide
+if vim.fn.executable('lua-language-server') == 1 then
+  for i, srv in ipairs(servers) do
+    if srv == 'lua_ls' then
+      table.remove(servers, i)
+      break
+    end
+  end
+end
+
 -- Try to add rust_analyzer if rustup or rustc is available
 if vim.fn.executable('rustc') == 1 or vim.fn.executable('rustup') == 1 then
   table.insert(servers, 'rust_analyzer')
