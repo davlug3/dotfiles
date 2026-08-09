@@ -30,6 +30,21 @@ vim.keymap.set('i', '<DoubleClick>', '<Esc><CR>', { noremap = true, silent = tru
 vim.keymap.set('n', '<C-m>', '<CR>', { noremap = true, silent = true, desc = "Double-click (tmux) - Open/Expand" })
 vim.keymap.set('i', '<C-m>', '<Esc><CR>', { noremap = true, silent = true, desc = "Double-click (tmux) - Exit and open" })
 
+-- HORIZONTAL SWIPE TRANSLATION
+-- Additional mappings for various terminal touch event translations
+
+-- Some terminals emit these for horizontal swipes
+vim.keymap.set('n', '<S-Left>', 'H', { noremap = true, silent = true, desc = "Shift+Left - Jump to line start" })
+vim.keymap.set('n', '<S-Right>', 'L', { noremap = true, silent = true, desc = "Shift+Right - Jump to line end" })
+
+-- Ctrl+Left/Right for word movement (common in some terminals)
+vim.keymap.set('n', '<C-Left>', 'b', { noremap = true, silent = true, desc = "Ctrl+Left - Move back a word" })
+vim.keymap.set('n', '<C-Right>', 'w', { noremap = true, silent = true, desc = "Ctrl+Right - Move forward a word" })
+
+-- Handle any other horizontal touch gestures in insert mode
+vim.keymap.set('i', '<Left>', '<Left>', { noremap = true, silent = true, desc = "Insert mode - Left cursor" })
+vim.keymap.set('i', '<Right>', '<Right>', { noremap = true, silent = true, desc = "Insert mode - Right cursor" })
+
 -- BUFFER NAVIGATION
 
 -- Swipe left/right on screen edges to navigate buffers
