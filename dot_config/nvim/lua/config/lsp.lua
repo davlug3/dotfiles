@@ -1,7 +1,6 @@
 local servers = {
   'ts_ls',
   'pyright',
-  'rust_analyzer',
   'terraformls',
   'lua_ls',
   'html',
@@ -9,11 +8,23 @@ local servers = {
   'jsonls',
 }
 
+-- Try to add rust_analyzer if rustup or rustc is available
+if vim.fn.executable('rustc') == 1 or vim.fn.executable('rustup') == 1 then
+  table.insert(servers, 'rust_analyzer')
+end
+
 require('mason').setup()
 require('mason-lspconfig').setup({
   ensure_installed = servers,
-  automatic_installation = true,
+  automatic_installation = false, -- Only install servers that are explicitly requested
 })
+
+-- Configure lua_ls to use system installation if available
+if vim.fn.executable('lua-language-server') == 1 then
+  vim.lsp.config['lua_ls'] = {
+    cmd = { 'lua-language-server' },
+  }
+end
 
 vim.lsp.config['*'] = {
   capabilities = require('cmp_nvim_lsp').default_capabilities(),
