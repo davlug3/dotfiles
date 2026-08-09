@@ -29,33 +29,32 @@ set -g status-interval 5
 set -g display-panes-time 500
 
 # Termux clipboard integration
-# Use prefix + C-c to copy to Termux clipboard, prefix + C-v to paste
 bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "termux-clipboard-set"
-bind C-c run "tmux save-buffer - | termux-clipboard-set"
-bind C-v run "tmux set-buffer \"$(termux-clipboard-get)\"; tmux paste-buffer"
+bind C-S send-keys -X copy-pipe-and-cancel "termux-clipboard-set"
 
 # Quick terminal resize for mobile orientation changes
 bind R refresh-client -S
 
 # Swipe-like gesture emulation for navigation
-# Using Ctrl+h/j/k/l as intuitive thumb-accessible keys
+# Using less-common key combinations that won't conflict with standard tmux/vim usage
 
 # Horizontal swipe-like navigation (left/right between panes)
-bind -n C-h if -F "#{pane_in_mode}" "send-keys -X exit" "select-pane -L" \; display-panes
-bind -n C-l if -F "#{pane_in_mode}" "send-keys -X exit" "select-pane -R" \; display-panes
+bind -n M-, if -F "#{pane_in_mode}" "send-keys -X exit" "select-pane -L" \; display "◀ Swipe: Left"
+bind -n M-. if -F "#{pane_in_mode}" "send-keys -X exit" "select-pane -R" \; display "Swipe: Right ▶"
 
 # Vertical swipe-like navigation (up/down between windows)
-bind -n C-k if -F "#{pane_in_mode}" "send-keys -X exit" "select-window -t :-" \; display-panes
-bind -n C-j if -F "#{pane_in_mode}" "send-keys -X exit" "select-window -t :+" \; display-panes
+bind -n M-/ if -F "#{pane_in_mode}" "send-keys -X exit" "select-window -t :-" \; display "▲ Swipe: Up"
+bind -n M-p if -F "#{pane_in_mode}" "send-keys -X exit" "select-window -t :+" \; display "▼ Swipe: Down"
 
-# Quick window switching with visual feedback
-bind -n M-h if -F "#{pane_in_mode}" "send-keys -X exit" "select-pane -L" \; display "Swipe: Left"
-bind -n M-l if -F "#{pane_in_mode}" "send-keys -X exit" "select-pane -R" \; display "Swipe: Right"
-bind -n M-k if -F "#{pane_in_mode}" "send-keys -X exit" "select-window -t :-" \; display "Swipe: Up"
-bind -n M-j if -F "#{pane_in_mode}" "send-keys -X exit" "select-window -t :+" \; display "Swipe: Down"
+# Quick window switching with visual feedback (alternative set)
+bind -n M-h previous-window \; display "◀ Swipe: Prev Window"
+bind -n M-l next-window \; display "Swipe: Next Window ▶"
 
 # Zoom toggle for pinch-like behavior
 bind -n M-z resize-pane -Z \; display "Pinch: #{window_zoom}"
 
 # Quick save-all (double-tap gesture)
-bind -n M-s run "tmux capture-pane -pS -100 > ~/tmux_session_$(date +%s).txt && tmux display 'Session saved'"
+bind -n M-S run "tmux capture-pane -pS -100 > ~/tmux_session_$(date +%s).txt && tmux display 'Session saved'"
+
+# Terminal paste from clipboard
+bind -n M-v run "tmux set-buffer \"$(termux-clipboard-get 2>/dev/null)\" && tmux paste-buffer" 2>&1
