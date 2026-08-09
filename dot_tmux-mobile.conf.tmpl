@@ -1,31 +1,42 @@
 # Mobile-friendly tmux settings for Termux Android
 # Automatically loaded on Termux Android via filesystem detection
 
-# Enable touch support for gesture handling
-set -g mouse on
+# CRITICAL: Disable mouse to let touch events reach child apps (Neovim)
+set -g mouse off
 
-# Increase scrollback history for easier reading
-set -g history-limit 10000
+# Increase scrollback history for easier reading (keep moderate for performance)
+set -g history-limit 5000
 
-# Performance optimizations
+# Simplify status bar for small screens
+set -g @dracula-show-powerline false
+set -g @dracula-show-flags false
+set -g @dracula-plugins ""
+
+# Optimize for performance on mobile
 set -g repeat-time 300
 set -sg escape-time 10
-set -g display-panes-time 300
 
-# Visual enhancements for touch targeting
+# Make copy mode more touch-friendly
+bind -T copy-mode-vi v send -X begin-selection
+
+# Use larger pane borders for easier touch targeting
 set -g pane-border-lines single
 
 # Battery optimization - reduce refresh
 set -g status-interval 5
 
-# Enable focus events and passthrough for better terminal integration
-set -g focus-events on
-set -g allow-passthrough on
+# Mobile keyboard considerations - shorter prefix mode timeout
+set -g display-panes-time 300
 
-# Proper terminal configuration for touch support
-set -g default-terminal "tmux-256color"
-set -ga terminal-overrides ",*256col*:Tc"
-set -ga terminal-overrides ',*:Smulx=\E[4::%p1%dm'
+# Termux clipboard integration
+bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "termux-clipboard-set"
+bind -T copy-mode-vi p send-keys -X copy-pipe-and-cancel "termux-clipboard-get"
+
+# Copy mode navigation for precise cursor movement
+bind -T copy-mode-vi h send-keys -X cursor-left
+bind -T copy-mode-vi j send-keys -X cursor-down
+bind -T copy-mode-vi k send-keys -X cursor-up
+bind -T copy-mode-vi l send-keys -X cursor-right
 
 # ─── DOUBLE-CLICK HANDLING ───────────────────────────────────────────────
 # Make double-click send Enter to applications
@@ -39,17 +50,6 @@ bind-key -n TripleClick1Pane send-keys C-m
 # In copy mode, use mouse for scrolling (needed for navigation)
 bind -T copy-mode-vi WheelUpPane send-keys -X scroll-half-page-up
 bind -T copy-mode-vi WheelDownPane send-keys -X scroll-half-page-down
-
-# Copy mode enhancements for touch
-bind -T copy-mode-vi v send -X begin-selection
-bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "termux-clipboard-set"
-bind -T copy-mode-vi p send-keys -X copy-pipe-and-cancel "termux-clipboard-get"
-
-# Copy mode navigation for precise cursor movement
-bind -T copy-mode-vi h send-keys -X cursor-left
-bind -T copy-mode-vi j send-keys -X cursor-down
-bind -T copy-mode-vi k send-keys -X cursor-up
-bind -T copy-mode-vi l send-keys -X cursor-right
 
 # ─── SWIPE NAVIGATION ────────────────────────────────────────────────────
 # Using Alt+directional keys for gestures (won't conflict with app gestures)
@@ -72,7 +72,23 @@ bind -n M-P run "tmux set-buffer \"$(termux-clipboard-get 2>/dev/null)\"; tmux p
 bind -n M-Y run "tmux save-buffer - | termux-clipboard-set"
 bind -n M-W run "tmux capture-pane -pS -100 > ~/tmux_session_$(date +%s).txt && tmux display 'Session saved'"
 
-# ─── CLEAN STATUS BAR FOR MOBILE ────────────────────────────────────────
+# ─── KEY PASSTHROUGH FOR CHILD APPLICATIONS ──────────────────────────────
+# Ensure arrow keys pass through to applications when not in prefix mode
+unbind-key -T root Up
+unbind-key -T root Down
+unbind-key -T root Left
+unbind-key -T root Right
+
+# Enable focus events and direct passthrough for better touch integration
+set -g focus-events on
+set -g allow-passthrough on
+
+# Proper terminal configuration for touch support
+set -g default-terminal "tmux-256color"
+set -ga terminal-overrides ",*256col*:Tc"
+set -ga terminal-overrides ',*:Smulx=\E[4::%p1%dm'
+
+# ─── Clean Status Bar for Mobile ────────────────────────────────────────
 set -g status-style "fg=white,bg=black"
 set -g status-left "#[fg=green] [#S] "
 set -g status-right "#[fg=cyan] %Y-%m-%d %H:%M "
