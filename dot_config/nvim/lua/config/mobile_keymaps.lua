@@ -2,8 +2,7 @@
 -- These emulate swipe gestures using easily accessible thumb keys
 -- Only loaded when running on Termux Android
 
--- Set mobile-friendly leader
-vim.g.mapleader = " "
+-- Note: vim.g.mapleader is already set in init.lua to " "
 
 -- Real cursor movement with arrow keys (actual swipe gestures)
 -- These are designed to work with terminal emulators that

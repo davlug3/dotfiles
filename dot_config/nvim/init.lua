@@ -1,3 +1,6 @@
+-- Set leader key BEFORE loading plugins (required by lazy.nvim)
+vim.g.mapleader = " "
+
 vim.opt.rtp:prepend(vim.fn.stdpath('data') .. '/lazy/lazy.nvim')
 
 require('lazy').setup({
