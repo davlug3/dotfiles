@@ -26,6 +26,10 @@ vim.keymap.set('n', '<TripleClick>', '<CR>', { noremap = true, silent = true, de
 -- In insert mode, double-click exits to normal mode and triggers open
 vim.keymap.set('i', '<DoubleClick>', '<Esc><CR>', { noremap = true, silent = true, desc = "Double-click - Exit and open" })
 
+-- When running inside tmux, also handle the C-m that tmux sends for double-click
+vim.keymap.set('n', '<C-m>', '<CR>', { noremap = true, silent = true, desc = "Double-click (tmux) - Open/Expand" })
+vim.keymap.set('i', '<C-m>', '<Esc><CR>', { noremap = true, silent = true, desc = "Double-click (tmux) - Exit and open" })
+
 -- BUFFER NAVIGATION
 
 -- Swipe left/right on screen edges to navigate buffers

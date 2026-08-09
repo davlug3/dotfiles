@@ -28,12 +28,12 @@ set -ga terminal-overrides ",*256col*:Tc"
 set -ga terminal-overrides ',*:Smulx=\E[4::%p1%dm'
 
 # ─── DOUBLE-CLICK HANDLING ───────────────────────────────────────────────
-# Override double-click to send Enter key to applications
-# This makes double-tap work as Enter in Neovim
+# Make double-click send Enter to applications
+# In tmux, capture double-click and send Ctrl-M (which terminal apps interpret as Enter)
 unbind-key -T root DoubleClick1Pane
 unbind-key -T root TripleClick1Pane
-bind-key -n DoubleClick1Pane run "tmux send-keys C-m"
-bind-key -n TripleClick1Pane run "tmux send-keys C-m"
+bind-key -n DoubleClick1Pane send-keys C-m
+bind-key -n TripleClick1Pane send-keys C-m
 
 # ─── MOUSE SCROLL HANDLING ───────────────────────────────────────────────
 # In copy mode, use mouse for scrolling (needed for navigation)
