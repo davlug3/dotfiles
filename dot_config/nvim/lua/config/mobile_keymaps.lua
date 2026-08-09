@@ -18,6 +18,14 @@ vim.keymap.set('n', '<ScrollWheelRight>', 'l', { noremap = true, silent = true }
 vim.keymap.set('n', '<ScrollWheelUp>', 'k', { noremap = true, silent = true })
 vim.keymap.set('n', '<ScrollWheelDown>', 'j', { noremap = true, silent = true })
 
+-- DOUBLE-CLICK AS ENTER FUNCTIONALITY
+-- When terminal sends double-click events, treat them as Enter key
+vim.keymap.set('n', '<DoubleClick>', '<CR>', { noremap = true, silent = true, desc = "Double-click - Open/Expand" })
+vim.keymap.set('n', '<TripleClick>', '<CR>', { noremap = true, silent = true, desc = "Triple-click - Open/Expand" })
+
+-- In insert mode, double-click exits to normal mode and triggers open
+vim.keymap.set('i', '<DoubleClick>', '<Esc><CR>', { noremap = true, silent = true, desc = "Double-click - Exit and open" })
+
 -- BUFFER NAVIGATION
 
 -- Swipe left/right on screen edges to navigate buffers
@@ -38,21 +46,17 @@ vim.keymap.set('n', '<End>', '<C-w>b<C-w>L', { noremap = true, silent = true, de
 
 -- Multi-key gesture sequences for common operations
 
--- Swipe-W = Write/save gesture sequence
-vim.keymap.set('n', '<Leader>w', ':w<CR>:echo " Saved"<CR>', 
-               { noremap = true, silent = true, desc = "Swipe-W - Quick save" })
+-- Save gesture (like double-tap save)
+vim.keymap.set('n', '<Leader>s', ':w<CR>:echo " Saved"<CR>', 
+               { noremap = true, silent = true, desc = "Double-tap - Quick save" })
 
--- Swipe-Q = Quick exit sequence
+-- Exit sequence
 vim.keymap.set('n', '<Leader>q', ':q<CR>', 
-               { noremap = true, silent = true, desc = "Swipe-Q - Quick exit" })
+               { noremap = true, silent = true, desc = "Swipe Down - Quick exit" })
 
 -- Pinch-to-zoom equivalent (toggle zoom)
 vim.keymap.set('n', '<Leader>z', ':wincmd _<CR>:wincmd |<CR>', 
                { noremap = true, silent = true, desc = "Pinch - Toggle zoom" })
-
--- Double-tap equivalent (quick save and center)
-vim.keymap.set('n', '<Leader>s', ':w<CR>:echo " Saved"<CR>', 
-               { noremap = true, silent = true, desc = "Double-tap - Quick save" })
 
 -- PRECISION MOVEMENT
 
@@ -82,16 +86,17 @@ end
 -- Quick help overlay for mobile gestures
 vim.keymap.set('n', '<Leader>?', function()
   local help_text = {
-    " MOBILE MODE - SWIPE GESTURES",
+    " MOBILE MODE - TOUCH GESTURES",
     "",
-    "ARROW KEYS      Move cursor",
+    "ARROW KEYS      Move cursor (no scrolling)",
+    "DOUBLE-CLICK    Open/Expand (acts as Enter)",
     "<Leader>[/]    Previous/Next buffer",
     "<Leader>{/}    Up/Down windows",
     "<Home>/<End>   Diagonal window navigation",
-    "<PageUp/Dn>   Cursor up/down (no scroll)",
+    "<PageUp/Dn>   Cursor up/down (not scroll)",
     "<Tab>         Center cursor",
-    "<Leader>w     Quick save",
-    "<Leader>z     Toggle zoom (pinch)",
+    "<Leader>s     Quick save (double-tap equivalent)",
+    "<Leader>z     Toggle zoom (pinch equivalent)",
     "<Leader>y/p   Clipboard copy/paste",
     "<Leader>?     Show this help",
     "",
