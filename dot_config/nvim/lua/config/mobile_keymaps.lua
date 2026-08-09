@@ -1,12 +1,26 @@
 -- Mobile gesture-like keybindings
--- These emulate swipe gestures using easily accessible thumb keys
+-- These emulate swipe gestures that ONLY move the cursor (no scrolling)
 -- Only loaded when running on Termux Android
 
 -- Note: vim.g.mapleader is already set in init.lua to " "
 
--- Real cursor movement with arrow keys (actual swipe gestures)
--- These are designed to work with terminal emulators that
--- translate touch swipes into arrow key events
+-- SWIPE GESTURES - CURSOR MOVEMENT ONLY (NO SCROLLING)
+-- These mappings ensure that touch gestures only move the cursor,
+-- not scroll the viewport
+
+-- Horizontal swipes - move cursor left/right (no scrolling ever)
+vim.keymap.set('n', '<Right>', 'l', { noremap = true, silent = true, desc = "Swipe Right - Move cursor right" })
+vim.keymap.set('n', '<Left>', 'h', { noremap = true, silent = true, desc = "Swipe Left - Move cursor left" })
+
+-- Vertical swipes - move cursor up/down (no scrolling ever!)
+vim.keymap.set('n', '<Up>', 'k', { noremap = true, silent = true, desc = "Swipe Up - Move cursor up" })
+vim.keymap.set('n', '<Down>', 'j', { noremap = true, silent = true, desc = "Swipe Down - Move cursor down" })
+
+-- Disable any scrollbar-like behavior (converts to cursor movement)
+vim.keymap.set('n', '<ScrollWheelLeft>', 'h', { noremap = true, silent = true })
+vim.keymap.set('n', '<ScrollWheelRight>', 'l', { noremap = true, silent = true })
+vim.keymap.set('n', '<ScrollWheelUp>', 'k', { noremap = true, silent = true })
+vim.keymap.set('n', '<ScrollWheelDown>', 'j', { noremap = true, silent = true })
 
 -- Buffer navigation (swipe left/right on screen edges)
 vim.keymap.set('n', '<Leader>[', ':bp<CR>', { noremap = true, silent = true, desc = "Swipe Left - Previous buffer" })
@@ -15,16 +29,6 @@ vim.keymap.set('n', '<Leader>]', ':bn<CR>', { noremap = true, silent = true, des
 -- Window navigation (swipe within editor area)
 vim.keymap.set('n', '<Leader>{', '<C-w>k', { noremap = true, silent = true, desc = "Swipe Up - Window above" })
 vim.keymap.set('n', '<Leader>}', '<C-w>j', { noremap = true, silent = true, desc = "Swipe Down - Window below" })
-
--- Precise cursor movement for fine control after coarse swipes
-vim.keymap.set('n', '<Right>', 'l', { noremap = true, silent = true, desc = "Cursor right" })
-vim.keymap.set('n', '<Left>', 'h', { noremap = true, silent = true, desc = "Cursor left" })
-vim.keymap.set('n', '<Up>', 'k', { noremap = true, silent = true, desc = "Cursor up" })
-vim.keymap.set('n', '<Down>', 'j', { noremap = true, silent = true, desc = "Cursor down" })
-
--- Half-screen jumps for quick navigation (swipe then tap)
-vim.keymap.set('n', '<PageDown>', '<C-d>', { noremap = true, silent = true, desc = "Half page down" })
-vim.keymap.set('n', '<PageUp>', '<C-u>', { noremap = true, silent = true, desc = "Half page up" })
 
 -- Diagonal swipe navigation
 vim.keymap.set('n', '<Home>', '<C-w>t<C-w>H', { noremap = true, silent = true, desc = "Diagonal Swipe - Top-left split" })
@@ -43,3 +47,7 @@ if vim.fn.executable('termux-clipboard-get') == 1 then
   vim.keymap.set('n', '<Leader>y', '"+y', { noremap = true, silent = true, desc = "Copy to clipboard" })
   vim.keymap.set('n', '<Leader>p', '"+p', { noremap = true, silent = true, desc = "Paste from clipboard" })
 end
+
+-- Ensure cursor stays visible during movement without scrolling
+vim.opt.scrolloff = 0  -- Never scroll ahead of cursor
+vim.opt.sidescrolloff = 0  -- Never sideway-scroll ahead of cursor

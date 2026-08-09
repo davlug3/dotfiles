@@ -1,7 +1,7 @@
 # Mobile-friendly tmux settings for Termux Android
 # Automatically loaded on Termux Android via filesystem detection
 
-# Enable touch support
+# Enable touch support ONLY for essential navigation
 set -g mouse on
 
 # Increase scrollback history for easier reading
@@ -29,7 +29,6 @@ set -g status-interval 5
 set -g display-panes-time 500
 
 # Termux clipboard integration
-# Use prefix + Y to copy to Termux clipboard, prefix + P to paste
 bind -T copy-mode-vi y send-keys -X copy-pipe-and-cancel "termux-clipboard-set"
 bind -T copy-mode-vi p send-keys -X copy-pipe-and-cancel "termux-clipboard-get"
 
@@ -39,8 +38,8 @@ bind -T copy-mode-vi j send-keys -X cursor-down
 bind -T copy-mode-vi k send-keys -X cursor-up
 bind -T copy-mode-vi l send-keys -X cursor-right
 
-# Swipe navigation - using terminal arrow keys directly
-# Left/Right arrows navigate between panes
+# Swipe navigation - using Alt+arrow keys for gestures
+# Left/Right arrows navigate between panes (when not in copy mode)
 bind -n M-h if -F "#{pane_in_mode}" "send-keys -X exit" "select-pane -L" \; display "◀ Swipe: Left"
 bind -n M-l if -F "#{pane_in_mode}" "send-keys -X exit" "select-pane -R" \; display "Swipe: Right ▶"
 
@@ -66,3 +65,17 @@ bind -n M-Y run "tmux save-buffer - | termux-clipboard-set"
 
 # Quick save session (double-tap gesture)
 bind -n M-W run "tmux capture-pane -pS -100 > ~/tmux_session_$(date +%s).txt && tmux display 'Session saved'"
+
+# Important: Pass arrow keys directly to applications when not in prefix mode
+# This allows Neovim to receive actual swipe events
+bind -n WheelUpCommand "send-keys -X scroll-up"
+bind -n WheelDownCommand "send-keys -X scroll-down"
+
+# For arrow keys in copy mode, ensure they're handled properly
+unbind-key -T root Up
+unbind-key -T root Down
+unbind-key -T root Left
+unbind-key -T root Right
+
+# Enable focus events for better terminal integration
+set -g focus-events on
