@@ -8,22 +8,22 @@
 vim.keymap.set('n', '<Right>', 'l', { noremap = true, silent = true, desc = "Swipe Right - Move cursor right" })
 vim.keymap.set('n', '<Left>', 'h', { noremap = true, silent = true, desc = "Swipe Left - Move cursor left" })
 
--- Alternative horizontal swipe mappings that some terminals send
--- Handle various escape sequences that might be sent for horizontal gestures
-vim.keymap.set('n', '<Esc>[C', 'l', { noremap = true, silent = true, desc = "Swipe Right (alt-esc)" })
-vim.keymap.set('n', '<Esc>[D', 'h', { noremap = true, silent = true, desc = "Swipe Left (alt-esc)" })
+-- Shift-swipe gestures for enhanced horizontal navigation
+-- These work in terminals that support shift-modified events
+vim.keymap.set('n', '<S-Right>', 'W', { noremap = true, silent = true, desc = "Shift+Swipe Right - Jump to next word" })
+vim.keymap.set('n', '<S-Left>', 'E', { noremap = true, silent = true, desc = "Shift+Swipe Left - Jump to previous word" })
 
--- Handle extended CSI sequences
-vim.keymap.set('n', '\x1b[1C', 'l', { noremap = true, silent = true, desc = "Swipe Right (extended)" })
-vim.keymap.set('n', '\x1b[1D', 'h', { noremap = true, silent = true, desc = "Swipe Left (extended)" })
-
--- Try to handle terminal-specific sequences
-vim.keymap.set('n', '<Right>', 'l', { noremap = true, silent = true, desc = "Swipe Right - Move cursor right" })
-vim.keymap.set('n', '<Left>', 'h', { noremap = true, silent = true, desc = "Swipe Left - Move cursor left" })
+-- Ctrl+arrows for larger jumps
+vim.keymap.set('n', '<C-Right>', 'W', { noremap = true, silent = true, desc = "Ctrl+Right - Jump forward" })
+vim.keymap.set('n', '<C-Left>', 'E', { noremap = true, silent = true, desc = "Ctrl+Left - Jump backward" })
 
 -- Vertical swipes - move cursor up/down (no scrolling ever!)
 vim.keymap.set('n', '<Up>', 'k', { noremap = true, silent = true, desc = "Swipe Up - Move cursor up" })
 vim.keymap.set('n', '<Down>', 'j', { noremap = true, silent = true, desc = "Swipe Down - Move cursor down" })
+
+-- Shift-swipe vertical for larger movements
+vim.keymap.set('n', '<S-Up>', 'k', { noremap = true, silent = true, desc = "Shift+Swipe Up - Move cursor up" })
+vim.keymap.set('n', '<S-Down>', 'j', { noremap = true, silent = true, desc = "Shift+Swipe Down - Move cursor down" })
 
 -- Disable any scrollbar-like behavior (converts to cursor movement)
 vim.keymap.set('n', '<ScrollWheelLeft>', 'h', { noremap = true, silent = true })
@@ -106,6 +106,8 @@ vim.keymap.set('n', '<Leader>?', function()
     " MOBILE MODE - TOUCH GESTURES",
     "",
     "ARROW KEYS      Move cursor (no scrolling)",
+    "SHIFT+ARROWS    Word/line jumps",
+    "CTRL+ARROWS     Fast navigation",
     "DOUBLE-CLICK    Open/Expand (acts as Enter)",
     "<Leader>[/]    Previous/Next buffer",
     "<Leader>{/}    Up/Down windows",

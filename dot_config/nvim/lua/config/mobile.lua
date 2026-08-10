@@ -8,7 +8,6 @@ vim.g.mobile_mode = true
 -- Touch Gesture Handling
 -- Disable mouse in Neovim to prevent scrolling interference
 -- This ensures touch gestures only move the cursor
--- Note: tmux will still handle double-click and send C-m to Neovim
 vim.opt.mouse = ""
 
 -- Disable automatic scrolling when cursor moves near edges
@@ -20,7 +19,7 @@ vim.opt.wrap = false
 vim.opt.linebreak = false
 
 -- ─── HORIZONTAL SWIPE DETECTION ────────────────────────────────────────
--- Enhanced horizontal swipe detection that handles various terminal behaviors
+-- Handle terminal sequences that might represent horizontal touch gestures
 -- Debug: set to true to log all received key sequences
 local debug_swipes = false
 
@@ -34,7 +33,7 @@ vim.on_key(function(key, _)
     print("KEY: [" .. hex_key .. "] name: " .. vim.fn.keytrans(key))
   end
 
-  -- Try to handle any escape sequence ending in C or D (horizontal gestures)
+  -- Handle any escape sequence ending in C or D (horizontal gestures)
   if #key >= 2 and key:sub(1, 1) == "\x1b" and (key:sub(-1) == "C" or key:sub(-1) == "D") then
     if key:sub(-1) == "C" then
       -- Convert any horizontal right gesture to cursor right
@@ -45,19 +44,6 @@ vim.on_key(function(key, _)
       vim.api.nvim_feedkeys("h", "nt", false)
       return false
     end
-  end
-
-  -- Also handle standard arrow keys explicitly
-  local standard_mappings = {
-    ["\x1b[C"] = "l",  -- Right arrow -> cursor right
-    ["\x1b[D"] = "h",  -- Left arrow -> cursor left
-  }
-
-  if standard_mappings[key] then
-    vim.schedule(function()
-      vim.api.nvim_feedkeys(standard_mappings[key], "nt", false)
-    end)
-    return false
   end
 end)
 
