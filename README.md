@@ -54,6 +54,29 @@ chezmoi apply                # apply changes to $HOME
 chezmoi update               # pull latest from GitHub and reapply
 ```
 
+## Mobile Usage Notes (Termux Android)
+
+### Touch Gestures
+- **Vertical swipes** (up/down arrows) - Move cursor line-by-line
+- **Double-click** - Acts as Enter key in applications
+- **Alt + h/j/k/l** - Navigate between tmux panes/windows
+- **Alt + z** - Toggle pane zoom (pinch equivalent)
+- **Alt + R** - Refresh screen (orientation changes)
+- **Alt + Y/P** - Copy/paste to Termux clipboard
+
+### Navigation Alternatives
+Since most Android terminal emulators don't translate horizontal touch gestures to key events, use these alternatives:
+- `M-h` / `M-l` - Navigate between tmux panes (left/right)
+- `M-j` / `M-k` - Navigate between tmux windows (up/down)
+- `<Leader>[` / `<Leader>]` - Previous/next buffer
+- `<PageUp>` / `<PageDown>` - Move cursor (not scroll)
+
+### Tips for Better Touch Experience
+1. Use landscape mode for better visibility
+2. Enable larger fonts in your terminal settings
+3. Try different terminal apps for better gesture support
+4. Use Vim's `/` or `?` for quick navigation
+
 ## Features
 
 ### Templates

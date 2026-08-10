@@ -8,6 +8,19 @@
 vim.keymap.set('n', '<Right>', 'l', { noremap = true, silent = true, desc = "Swipe Right - Move cursor right" })
 vim.keymap.set('n', '<Left>', 'h', { noremap = true, silent = true, desc = "Swipe Left - Move cursor left" })
 
+-- Alternative horizontal swipe mappings that some terminals send
+-- Handle various escape sequences that might be sent for horizontal gestures
+vim.keymap.set('n', '<Esc>[C', 'l', { noremap = true, silent = true, desc = "Swipe Right (alt-esc)" })
+vim.keymap.set('n', '<Esc>[D', 'h', { noremap = true, silent = true, desc = "Swipe Left (alt-esc)" })
+
+-- Handle extended CSI sequences
+vim.keymap.set('n', '\x1b[1C', 'l', { noremap = true, silent = true, desc = "Swipe Right (extended)" })
+vim.keymap.set('n', '\x1b[1D', 'h', { noremap = true, silent = true, desc = "Swipe Left (extended)" })
+
+-- Try to handle terminal-specific sequences
+vim.keymap.set('n', '<Right>', 'l', { noremap = true, silent = true, desc = "Swipe Right - Move cursor right" })
+vim.keymap.set('n', '<Left>', 'h', { noremap = true, silent = true, desc = "Swipe Left - Move cursor left" })
+
 -- Vertical swipes - move cursor up/down (no scrolling ever!)
 vim.keymap.set('n', '<Up>', 'k', { noremap = true, silent = true, desc = "Swipe Up - Move cursor up" })
 vim.keymap.set('n', '<Down>', 'j', { noremap = true, silent = true, desc = "Swipe Down - Move cursor down" })
