@@ -16,8 +16,8 @@ require('config.keymaps')
 require('config.lsp')
 
 -- Load Termux Android mobile-specific configuration
--- Checks if running in Termux environment via ANDROID_ROOT or TERMUX_VERSION
-if os.getenv("ANDROID_ROOT") or os.getenv("TERMUX_VERSION") then
+-- Uses filesystem detection for reliable Termux identification
+if vim.fn.isdirectory("/data/data/com.termux") == 1 then
   require('config.mobile')
   require('config.mobile_keymaps')
 end
