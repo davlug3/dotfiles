@@ -1,5 +1,7 @@
 {{- if ne .chezmoi.os "windows" -}}
-{{- if not env "TERMUX_VERSION" -}}
+{{- if env "TERMUX_VERSION" -}}
+{{- /* ripgrep is installed via `pkg install ripgrep` in the Termux deps script */ -}}
+{{- else -}}
 #!/usr/bin/env bash
 # Install ripgrep for use with Telescope live_grep.
 # If rg is already on $PATH Telescope will use it automatically;
