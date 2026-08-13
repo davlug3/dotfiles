@@ -1,0 +1,66 @@
+{{- if ne .chezmoi.os "windows" -}}
+{{- if not env "TERMUX_VERSION" -}}
+#!/usr/bin/env bash
+# Install ripgrep for use with Telescope live_grep.
+# If rg is already on $PATH Telescope will use it automatically;
+# otherwise a native grep fallback is configured in lua/plugins/telescope.lua.
+set -euo pipefail
+
+if command -v rg &>/dev/null; then
+  echo "ripgrep already installed: $(rg --version | head -1)"
+  exit 0
+fi
+
+BIN_DIR="${HOME}/.local/bin"
+TEMP_DIR=$(mktemp -d)
+trap 'rm -rf "${TEMP_DIR}"' EXIT
+
+mkdir -p "${BIN_DIR}"
+
+OS="$(uname -s)"
+ARCH="$(uname -m)"
+
+case "${OS}-${ARCH}" in
+  Linux-x86_64|Linux-amd64)  TARGET="x86_64-unknown-linux-gnu" ;;
+  Linux-aarch64|Linux-arm64) TARGET="aarch64-unknown-linux-gnu" ;;
+  Darwin-arm64)              TARGET="aarch64-apple-darwin" ;;
+  Darwin-x86_64|Darwin-amd64) TARGET="x86_64-apple-darwin" ;;
+  *)
+    echo "ripgrep install: unsupported platform ${OS}-${ARCH}; skipping" >&2
+    exit 0
+    ;;
+esac
+
+# Resolve the latest release tag via the GitHub API
+TAG=$(curl -fsSL https://api.github.com/repos/BurntSushi/ripgrep/releases/latest \
+  | grep -m1 '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+
+if [ -z "${TAG}" ]; then
+  echo "ripgrep install: could not determine latest release tag; skipping" >&2
+  exit 0
+fi
+
+# Strip leading 'v' from tag (e.g. v24.1.1 -> 24.1.1)
+VERSION="${TAG#v}"
+
+# Linux builds use -musl for maximum binary compatibility
+ASSET="ripgrep-${VERSION}-${TARGET}.tar.gz"
+if [[ "${OS}" == "Linux" ]]; then
+  ASSET="ripgrep-${VERSION}-${TARGET}-musl.tar.gz"
+fi
+
+URL="https://github.com/BurntSushi/ripgrep/releases/download/${TAG}/${ASSET}"
+echo "Downloading ripgrep ${TAG} (${ASSET})..."
+curl -fSL "${URL}" -o "${TEMP_DIR}/rg.tar.gz"
+
+tar -xzf "${TEMP_DIR}/rg.tar.gz" -C "${TEMP_DIR}"
+RG_BIN="$(find "${TEMP_DIR}" -maxdepth 2 -type f -name 'rg' | head -1)"
+if [ -z "${RG_BIN}" ]; then
+  echo "ripgrep install: extracted binary not found; skipping" >&2
+  exit 0
+fi
+cp "${RG_BIN}" "${BIN_DIR}/rg"
+chmod +x "${BIN_DIR}/rg"
+echo "ripgrep installed at ${BIN_DIR}/rg"
+{{- end -}}
+{{- end -}}

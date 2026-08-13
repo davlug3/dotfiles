@@ -44,6 +44,8 @@ The script installs chezmoi (winget, falling back to the official installer) and
 
 Note: nvim-treesitter parsers are installed automatically by nvim-treesitter on first launch (needs a `cc`/clang compiler).
 
+On Linux/macOS, **ripgrep** (`rg`) is automatically installed to `~/.local/bin` on first run for fast fuzzy finding with Telescope. On Termux and Windows (winget), ripgrep is installed from the platform package manager. If ripgrep is unavailable, Telescope falls back to native `grep`.
+
 ## Usage
 
 ```bash
@@ -123,6 +125,7 @@ Scripts prefixed with `run_once_` execute automatically on first `chezmoi apply`
 - **vim-plug** — installs plugin manager and runs `PlugInstall`
 - **JetBrains Mono Nerd Font** — installs the font for non-Termux Unix systems
 - **neovim** — installs the latest neovim binary (official tarball to `~/.local/bin` on Linux/macOS, `pkg` on Termux, winget on Windows)
+- **ripgrep** — installs `rg` for fast Telescope live_grep (prebuilt binary on Linux/macOS, `pkg` on Termux, winget on Windows); Telescope falls back to native `grep` if rg is missing
 
 ### Starship prompt
 

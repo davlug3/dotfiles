@@ -1,0 +1,15 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Install ripgrep for use with Telescope live_grep.
+# If rg is already on PATH Neovim/Telescope will use it automatically;
+# otherwise a native grep fallback is configured in lua/plugins/telescope.lua.
+$ErrorActionPreference = 'Stop'
+
+if (Get-Command rg -ErrorAction SilentlyContinue) {
+    $version = (& rg --version | Select-Object -First 1)
+    Write-Host "ripgrep already installed: $version"
+    exit 0
+}
+
+winget install --id Microsoft.Grep --exact --accept-source-agreements --accept-package-agreements
+Write-Host "ripgrep installed via winget"
+{{- end -}}
