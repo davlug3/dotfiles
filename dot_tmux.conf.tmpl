@@ -7,10 +7,6 @@ set -g default-terminal "tmux-256color"
 if-shell "test -d /data/data/com.termux" \
     "source-file ~/.tmux-mobile.conf" ""
 setw -g mode-keys vi
-bind-key h select-pane -L
-bind-key j select-pane -D
-bind-key k select-pane -U
-bind-key l select-pane -R
 
 set -g @tpm_plugins 'tpm'
 if "test ! -d ~/.tmux/plugins/tpm" \
@@ -25,7 +21,8 @@ set -g @dracula-show-powerline true
 set -g @dracula-show-flags true
 set -g @dracula-day-month true
 set -g @dracula-fixed-location "Manila"
-set -g @dracula-plugins "weather"
+set -g @dracula-show-fahrenheit false
+set -g @dracula-plugins "weather time"
 set -g @dracula-show-left-icon session
 set -g @dracula-left-icon-padding 1
 set -g @dracula-battery-label "Battery"
