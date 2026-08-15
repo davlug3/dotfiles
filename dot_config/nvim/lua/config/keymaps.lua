@@ -1,9 +1,12 @@
--- Saving shortcut
-vim.keymap.set('n', '<leader>w', ':w!<CR>', { desc = 'Save' })
+-- Toggle word wrap (wrap + linebreak)
+vim.keymap.set('n', '<leader>w', function()
+  vim.opt.wrap = not vim.opt.wrap:get()
+  vim.opt.linebreak = vim.opt.wrap:get()
+end, { desc = 'Toggle word wrap' })
 -- Edit vimrc
 vim.keymap.set('n', '<leader>,', ':vs ~/.vimrc<CR>', { desc = 'Edit vimrc' })
 -- Reload vimrc
-vim.keymap.set('n', '<F5>', ':source ~/.vimrc<CR>', { desc = 'Reload vimrc' })
+vim.keymap.set('n', '<leader>5', ':source $MYVIMRC<CR>', { desc = 'Reload nvim config' })
 
 -- Toggle between tabs and splits
 local function toggle_tab()

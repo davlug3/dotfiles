@@ -8,7 +8,7 @@ return {
       'MunifTanjim/nui.nvim',
     },
     keys = {
-      { '<leader>1', '<cmd>Neotree toggle<CR>', desc = 'Toggle Neo-tree' },
+      { '<leader>e', '<cmd>Neotree toggle<CR>', desc = 'Toggle Neo-tree' },
     },
     opts = {
       default_component_configs = {
