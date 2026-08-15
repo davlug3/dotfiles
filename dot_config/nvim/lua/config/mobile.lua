@@ -51,11 +51,11 @@ end)
 -- Better cursor visibility
 vim.g.guicursor = "n-v:block-Cursor/lCursor,i:ver25-Cursor,r:hor20"
 vim.opt.cursorline = true
-vim.opt.cursorcolumn = false
+vim.opt.cursorcolumn = true
 
 -- Touch-friendly line numbers
 vim.opt.number = true
-vim.opt.relativenumber = false
+vim.opt.relativenumber = true
 
 -- Better visual feedback
 vim.opt.showmode = true
@@ -76,14 +76,14 @@ vim.opt.updatetime = 300
 vim.opt.signcolumn = "yes"
 vim.opt.foldcolumn = "auto"
 
--- Visual bell instead of audio
+-- Visual bell instead of audio h
 vim.opt.visualbell = true
 vim.opt.errorbells = false
 
 -- Better completion for touch
-vim.opt.completeopt = "menuone,noinsert,noselect"
+vim.opt.completeopt = "menuone,noinsert,noselect,preview"
 
 -- Simple statusline for mobile
-vim.opt.statusline = " %{mode()} %f %h%m %=%-14.(%l:%c%V%) %P"
+vim.opt.statusline = "%{mode()} %f %h%m %=%-14.(%l:%c%V%) %P"
 
 vim.g.mobile_config_loaded = true

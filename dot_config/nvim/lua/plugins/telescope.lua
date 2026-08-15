@@ -61,7 +61,7 @@ return {
     end,
     keys = {
       { '<F1>',         '<cmd>Telescope find_files<CR>',                desc = 'Find files' },
-      { '<leader>fs',   '<cmd>Telescope find_files hidden=true<CR>',    desc = 'Find files (hidden)' },
+      { '<leader>ff',   '<cmd>Telescope find_files hidden=true<CR>',    desc = 'Find files (hidden)' },
       { '<leader>fg',   '<cmd>Telescope live_grep<CR>',                 desc = 'Live grep' },
       { '<leader>fG',   '<cmd>Telescope grep_cword<CR>',                desc = 'Grep word under cursor' },
       { '<leader>f;',   '<cmd>Telescope grep_last_word<CR>',            desc = 'Grep last searched word' },
