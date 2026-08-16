@@ -80,9 +80,14 @@ vim.keymap.set('n', '<Leader>z', ':wincmd _<CR>:wincmd |<CR>',
 -- Tab centers cursor after navigation
 vim.keymap.set('n', '<Tab>', 'zz', { noremap = true, silent = true, desc = "Center cursor after swipe" })
 
--- Half-page jumps converted to cursor movement
-vim.keymap.set('n', '<PageDown>', 'j', { noremap = true, silent = true, desc = "Page Down - Move cursor down (not scroll)" })
-vim.keymap.set('n', '<PageUp>', 'k', { noremap = true, silent = true, desc = "Page Up - Move cursor up (not scroll)" })
+-- PageUp / PageDown : RESTORED TO DEFAULT (full-page scroll)
+-- Neovim's built-in default maps these to a full-page scroll:
+--   <PageDown> ~ CTRL-F  (scroll forwards/down a page)
+--   <PageUp>   ~ CTRL-B  (scroll backwards/up a page)
+-- (see runtime doc scroll.txt: "<PageDown> or ... CTRL-F", "<PageUp or ... CTRL-B").
+-- The mobile keymap previously hijacked them to single-line cursor movement
+-- ('j'/'k'); they are now left untouched so they behave as standard page
+-- navigation keys, as expected in a default Neovim install.
 
 -- TERMINAL INTEGRATION
 
@@ -112,7 +117,7 @@ vim.keymap.set('n', '<Leader>?', function()
     "<Leader>[/]    Previous/Next buffer",
     "<Leader>{/}    Up/Down windows",
     "<Home>/<End>   Diagonal window navigation",
-    "<PageUp/Dn>   Cursor up/down (not scroll)",
+    "<PageUp/Dn>   Scroll full page up/down (default)",
     "<Tab>         Center cursor",
     "<Leader>s     Quick save (double-tap equivalent)",
     "<Leader>z     Toggle zoom (pinch equivalent)",
