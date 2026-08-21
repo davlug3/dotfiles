@@ -88,7 +88,7 @@ alias brewup="brew update && brew upgrade && brew cleanup"
 Scripts prefixed with `run_once_` execute automatically on first `chezmoi apply`. Currently runs:
 
 - **vim-plug** — installs plugin manager and runs `PlugInstall`
-- **JetBrains Mono Nerd Font** — installs the font for non-Termux Unix systems
+- **JetBrains Mono Nerd Font** — installs the font for Unix systems (desktop font cache on Linux/macOS, terminal font via `~/.termux/font.ttf` on Termux)
 - **neovim** — installs the latest neovim binary (official tarball to `~/.local/bin` on Linux/macOS, `pkg` on Termux, winget on Windows)
 - **ripgrep** — installs `rg` for fast Telescope live_grep (prebuilt binary on Linux/macOS, `pkg` on Termux, winget on Windows); Telescope falls back to native `grep` if rg is missing
 
@@ -103,6 +103,10 @@ curl -sS https://starship.rs/install.sh | sh
 # Add to ~/.bashrc
 eval "$(starship init bash)"
 ```
+
+### Keymap discovery
+
+Neovim ships with [`folke/which-key.nvim`](https://github.com/folke/which-key.nvim) for interactive keymap discovery. Press `<Space>` (your leader) and a popup lists every mapping starting with it — keep typing to drill in. Browse everything at once with `<Leader>` `?`, or inspect a specific mode from the command line with `:nmap`, `:map <Leader>`, or `:filter /pattern/ nmap`.
 
 ## Secrets
 

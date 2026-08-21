@@ -1,6 +1,15 @@
-{{- if and (ne .chezmoi.os "windows") (not (env "TERMUX_VERSION")) -}}
+{{- if ne .chezmoi.os "windows" -}}
+{{- if env "TERMUX_VERSION" -}}
+#!/data/data/com.termux/files/usr/bin/env bash
+{{- else -}}
 #!/usr/bin/env bash
+{{ end }}
 set -euo pipefail
+
+# JetBrains Mono Nerd Font — gives the terminal + GUI apps the glyphs your
+# config (neo-tree, lualine, which-key...) relies on. On desktop Unix it's
+# added to the font directory + cache; on Termux it's also set as the
+# terminal font (~/.termux/font.ttf) so glyphs render inside the terminal.
 
 FONT_NAME="JetBrainsMono"
 FONT_DIR="${HOME}/.local/share/fonts"
@@ -8,24 +17,53 @@ INSTALLED_MARKER="${FONT_DIR}/${FONT_NAME}NerdFontMono-Regular.ttf"
 TEMP_DIR=$(mktemp -d)
 trap 'rm -rf "${TEMP_DIR}"' EXIT
 
-if [[ -f "${INSTALLED_MARKER}" ]]; then
-  echo "JetBrains Mono Nerd Font already installed"
-  exit 0
-fi
-
 mkdir -p "${FONT_DIR}"
 
-echo "Downloading ${FONT_NAME} Nerd Font..."
-curl -fSL "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${FONT_NAME}.zip" \
-  -o "${TEMP_DIR}/${FONT_NAME}.zip"
+# Download + install to the font directory (idempotent: skip if already present)
+if [[ ! -f "${INSTALLED_MARKER}" ]]; then
+  echo "Downloading ${FONT_NAME} Nerd Font..."
+  curl -fSL "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${FONT_NAME}.zip" \
+    -o "${TEMP_DIR}/${FONT_NAME}.zip"
 
-echo "Extracting..."
-unzip -q "${TEMP_DIR}/${FONT_NAME}.zip" -d "${TEMP_DIR}/extracted"
+  echo "Extracting..."
+  # chezmoi runs this script before the general termux-deps script, so make
+  # sure we have an unzipper when on Termux.
+  if [ -n "${TERMUX_VERSION:-}" ]; then
+    command -v unzip >/dev/null 2>&1 || pkg install -y unzip >/dev/null
+  fi
+  if command -v unzip >/dev/null 2>&1; then
+    unzip -q "${TEMP_DIR}/${FONT_NAME}.zip" -d "${TEMP_DIR}/extracted"
+  elif command -v python3 >/dev/null 2>&1; then
+    python3 -m zipfile -e "${TEMP_DIR}/${FONT_NAME}.zip" "${TEMP_DIR}/extracted"
+  else
+    echo "Need 'unzip' or 'python3' to extract the font archive. On Termux: pkg install unzip" >&2
+    exit 1
+  fi
 
-find "${TEMP_DIR}/extracted" \( -name '*.ttf' -o -name '*.otf' \) -exec cp {} "${FONT_DIR}/" \;
+  find "${TEMP_DIR}/extracted" \( -name '*.ttf' -o -name '*.otf' \) -exec cp {} "${FONT_DIR}/" \;
+else
+  echo "JetBrains Mono Nerd Font already installed"
+fi
 
-echo "Updating font cache..."
-fc-cache -fv "${FONT_DIR}"
+# Desktop Unix: refresh the font cache so apps pick up the new font
+if command -v fc-cache >/dev/null 2>&1; then
+  echo "Updating font cache..."
+  fc-cache -fv "${FONT_DIR}"
+else
+  echo "fontconfig not found — skipping font cache update (terminal font still usable)"
+fi
+
+# Termux/Android: set the terminal font so Nerd glyphs render in the app
+if [ -n "${TERMUX_VERSION:-}" ]; then
+  mkdir -p "${HOME}/.termux"
+  cp "${INSTALLED_MARKER}" "${HOME}/.termux/font.ttf"
+  if command -v termux-font >/dev/null 2>&1; then
+    termux-font "${HOME}/.termux/font.ttf"
+  else
+    echo "Install termux-tools (pkg install termux-tools) to apply the font to the running session."
+  fi
+  echo "JetBrains Mono Nerd Font set as the Termux terminal font (~/.termux/font.ttf)"
+fi
 
 echo "JetBrains Mono Nerd Font installed successfully"
 {{- end -}}

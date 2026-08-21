@@ -81,3 +81,8 @@ vim.api.nvim_create_autocmd('BufWritePre', {
   pattern = '*.txt,*.js,*.py,*.wiki,*.sh,*.coffee,*.php',
   callback = clean_extra_spaces,
 })
+
+-- List all keymaps in an interactive which-key popup (leader + ?)
+vim.keymap.set('n', '<Leader>?', function()
+  require('which-key').show()
+end, { desc = 'List all keymaps (which-key)' })
