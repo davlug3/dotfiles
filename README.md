@@ -56,41 +56,6 @@ chezmoi apply                # apply changes to $HOME
 chezmoi update               # pull latest from GitHub and reapply
 ```
 
-## Mobile Usage Notes (Termux Android)
-
-### Touch Gestures
-- **Vertical swipes** (up/down arrows) - Move cursor line-by-line (no scrolling)
-- **Horizontal swipes** (left/right arrows) - Move cursor left/right (no scrolling)
-- **Shift+swipes** (Shift+arrows) - Word-level navigation (jump by words)
-- **Ctrl+swipes** (Ctrl+arrows) - Additional fast navigation options
-- **Double-click** - Acts as Enter key in Neovim and tmux
-- **Alt + h/j/k/l** - Navigate between tmux panes/windows
-- **Alt + z** - Toggle pane zoom (pinch equivalent)
-- **Alt + R** - Refresh screen (orientation changes)
-- **Alt + Y/P** - Copy/paste to Termux clipboard
-
-### Navigation Alternatives
-Since most Android terminal emulators don't consistently translate horizontal touch gestures to key events:
-- `M-h` / `M-l` - Navigate between tmux panes (left/right)
-- `M-j` / `M-k` - Navigate between tmux windows (up/down)
-- `<Leader>[` / `<Leader>]` - Previous/next buffer
-- `<PageUp>` / `<PageDown>` - Move cursor (not scroll)
-- `<Home>` / `<End>` - Navigate to split corners (diagonal)
-
-### Enhanced Gesture Features
-The mobile configuration includes:
-- **Floating help** - Press `<Leader>?` to see all gestures in a popup
-- **Touch-friendly display** - Cursor highlighting, simplified statusline
-- **Clipboard integration** - `<Leader>y`/`<Leader>p` for system copy/paste
-- **Visual feedback** - Confirmation messages for saves, etc.
-
-### Tips for Better Touch Experience
-1. Use landscape mode for better visibility
-2. Enable larger fonts in your terminal settings
-3. Try different terminal apps for better gesture support
-4. Use Vim's `/` or `?` for quick navigation
-5. Enable debug mode in `mobile.lua` to see what key sequences your terminal sends
-
 ## Features
 
 ### Templates
@@ -163,7 +128,7 @@ Inside the file, use `{{ promptStringOnce . "key" "Enter your token" }}` — che
 
 - **bash** — .bashrc (template with OS detection), .bash_profile, .bash_aliases, .bash_logout
 - **git** — .gitconfig
-- **tmux** — with TPM and dracula theme, plus mobile-friendly config for Termux Android
+- **tmux** — with TPM and dracula theme
 - **vim** — with vim-plug, nerdtree, coc.nvim, and more
 - **prompt** — starship config
 

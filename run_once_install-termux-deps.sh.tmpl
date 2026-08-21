@@ -1,6 +1,6 @@
 {{- if eq .chezmoi.os "android" -}}
 #!/data/data/com.termux/files/usr/bin/env bash
-# Install Termux-specific dependencies for mobile-friendly development
+# Install Termux-specific dependencies for development
 set -euo pipefail
 
 # Essential packages for development environment
@@ -15,13 +15,6 @@ pkg install -y \
   unzip \
   wget \
   curl
-
-# Optional: Install Termux:API for enhanced mobile integration
-# Run 'pkg install termux-api' if not present
-if ! command -v termux-clipboard-get &>/dev/null; then
-  echo "Consider installing termux-api for clipboard integration:"
-  echo "  pkg install termux-api"
-fi
 
 echo "Termux dependencies installed successfully"
 {{- end -}}

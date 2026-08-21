@@ -14,10 +14,3 @@ require('lazy').setup({
 require('config.options')
 require('config.keymaps')
 require('config.lsp')
-
--- Load Termux Android mobile-specific configuration
--- Uses filesystem detection for reliable Termux identification
-if vim.fn.isdirectory("/data/data/com.termux") == 1 then
-  require('config.mobile')
-  require('config.mobile_keymaps')
-end

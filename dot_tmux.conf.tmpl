@@ -2,10 +2,6 @@ unbind r
 bind r source-file ~/.tmux.conf
 set -g default-terminal "tmux-256color"
 
-# Load mobile-friendly config on Termux Android
-# Uses filesystem check as it's more reliable than environment vars
-if-shell "test -d /data/data/com.termux" \
-    "source-file ~/.tmux-mobile.conf" ""
 setw -g mode-keys vi
 
 set -g @tpm_plugins 'tpm'
