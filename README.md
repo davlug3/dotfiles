@@ -12,7 +12,7 @@ Either one-liner below installs chezmoi (if needed) and applies the dotfiles. Pi
 curl -fsSL https://raw.githubusercontent.com/davlug3/dotfiles/main/install.sh | bash
 ```
 
-Installs chezmoi if missing, then runs `chezmoi init --apply` to pull the dotfiles from GitHub.
+Installs chezmoi if missing (and ensures `git` + `starship` are present first — bootstrapping them from the system package manager or the official installers when absent), then runs `chezmoi init --apply` to pull the dotfiles from GitHub.
 
 ### Option B — Official chezmoi installer
 
