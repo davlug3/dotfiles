@@ -18,6 +18,41 @@ _pkg_install() {
     fi
 }
 
+install_starship() {
+    if have starship; then
+        echo ">>> starship already installed"
+        return
+    fi
+
+    echo ">>> starship not found; installing..."
+
+    # Strategy 1: native package manager
+    if have apt-get || have dnf || have pacman || have brew || have pkg; then
+        echo ">>> trying package manager..."
+        if _pkg_install starship 2>/dev/null; then
+            echo ">>> starship installed via package manager"
+            return
+        fi
+        echo ">>> package manager install failed; falling back to official installer..."
+    fi
+
+    # Strategy 2: official starship.rs installer
+    # mkdir -p ensures the target directory exists (fixes "does not appear to
+    # be a directory" error on fresh systems where ~/.local/bin doesn't exist)
+    mkdir -p "$HOME/.local/bin"
+    if have curl; then
+        curl -sS https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin"
+    elif have wget; then
+        wget -qO- https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin"
+    else
+        echo "error: need curl or wget to install starship" >&2
+        exit 1
+    fi
+    [ -x "$HOME/.local/bin/starship" ] || {
+        echo "error: starship was not installed" >&2; exit 1;
+    }
+}
+
 # Ensure prerequisites for a brand-new machine are present:
 #   * git      — required by chezmoi to initialize from the repo
 #   * starship — referenced by .bashrc / .bashrc.termux (`starship init bash`)
@@ -29,20 +64,7 @@ install_dependencies() {
         have git || { echo "error: git was not installed" >&2; exit 1; }
     fi
 
-    if ! have starship; then
-        echo ">>> starship not found; installing to \$HOME/.local/bin..."
-        if have curl; then
-            curl -sS https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin"
-        elif have wget; then
-            wget -qO- https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin"
-        else
-            echo "error: need curl or wget to install starship" >&2
-            exit 1
-        fi
-        [ -x "$HOME/.local/bin/starship" ] || {
-            echo "error: starship was not installed" >&2; exit 1;
-        }
-    fi
+    install_starship
 }
 
 print_banner() {
@@ -77,10 +99,13 @@ main() {
 
     print_banner
 
+    # Ensure $HOME/.local/bin exists for both starship and chezmoi installers
+    # (fixes "does not appear to be a directory" error on fresh systems)
+    mkdir -p "$HOME/.local/bin"
+    export PATH="$HOME/.local/bin:$PATH"
+
     install_dependencies
     install_chezmoi
-
-    export PATH="$HOME/.local/bin:$PATH"
 
     if $local_repo; then
         if [ ! -d "$HOME/.local/share/chezmoi" ]; then
