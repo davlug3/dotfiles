@@ -18,6 +18,23 @@ _pkg_install() {
     fi
 }
 
+install_neovim() {
+    if have nvim; then
+        echo ">>> neovim already installed"
+        return
+    fi
+
+    echo ">>> neovim not found; installing..."
+
+    mkdir -p "$HOME/.local/bin"
+
+    curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
+    sudo rm -rf "$HOME/.local/bin/nvim-linux-x86_64"
+    sudo tar -C "$HOME/.local/bin -xzf nvim-linux-x86_64.tar.gz"
+    export PATH="$PATH:$HOME/.local/bin/nvim-linux-x86_64/bin"
+}
+
+
 install_starship() {
     if have starship; then
         echo ">>> starship already installed"
@@ -65,6 +82,7 @@ install_dependencies() {
     fi
 
     install_starship
+    install_neovim
 }
 
 print_banner() {
@@ -100,7 +118,6 @@ main() {
     print_banner
 
     # Ensure $HOME/.local/bin exists for both starship and chezmoi installers
-    # (fixes "does not appear to be a directory" error on fresh systems)
     mkdir -p "$HOME/.local/bin"
     export PATH="$HOME/.local/bin:$PATH"
 

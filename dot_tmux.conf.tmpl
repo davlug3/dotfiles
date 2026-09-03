@@ -27,13 +27,14 @@ set -g @dracula-border-contrast true
 set -g @dracula-cpu-usage-label "CPU"
 set -g status-position bottom
 
-# Extended-keyboard (CSI-u) support.
-# tmux auto-detects extkeys for mintty/iTerm2/foot/WezTerm/ghostty/XTerm, but
-# NOT alacritty, so declare it here. Scoped to alacritty so a conhost or VS Code
-# attach can't accidentally inherit it and re-trigger the hex-garbage bug.
+# Extended-keyboard (CSI-u) support — conditional on terminal type.
+# tmux's extended-keys is a global option that sends modifyOtherKeys sequences
+# to ALL terminals. VS Code's xterm.js partially implements it and produces
+# hex-garbage input in apps like Opencode. So we only enable it for alacritty.
 set -g -a terminal-features '*alacritty*:extkeys'
-set -g extended-keys on
-set -g extended-keys-format csi-u
+if-shell 'echo "#{client_termtype}" | grep -qi alacritty' \
+    'set -g extended-keys on ; set -g extended-keys-format csi-u' \
+    'set -g extended-keys off'
 
 run '~/.tmux/plugins/tpm/tpm'
 
