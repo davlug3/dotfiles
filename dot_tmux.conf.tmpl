@@ -9,7 +9,8 @@ if "test ! -d ~/.tmux/plugins/tpm" \
    "run 'git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && ~/.tmux/plugins/tpm/bin/install_plugins'"
 
 set -g @plugin 'tmux-plugins/tpm'
-set -g @plugin 'christoomey/vim-tmux-navigator'
+# vim-tmux-navigator removed: use prefix+h/j/k/l for tmux pane focus,
+# and Ctrl+W+h/j/k/l in vim for vim split focus (both native, no plugin)
 set -g @plugin 'dracula/tmux'
 
 
@@ -36,11 +37,22 @@ set -g extended-keys-format csi-u
 
 run '~/.tmux/plugins/tpm/tpm'
 
-# vim-tmux-navigator binds root C-h -> select-pane -L, which hijacks the
-# 0x08 byte that most terminals send for Ctrl+Backspace (== Ctrl+H).
-# Unbind it so Ctrl+Backspace passes through to the shell instead of
-# jumping panes. Ctrl+j/k/l navigation and prefix h/j/k/l still work.
+# No vim-tmux-navigator: use prefix+h/j/k/l for tmux pane focus,
+# and Ctrl+W+h/j/k/l in vim for vim split focus (both native, no plugin).
+
 unbind-key -n C-h
+unbind-key -n C-j
+unbind-key -n C-k
+unbind-key -n C-l
+
+# Prefix + h/j/k/l: focus pane in direction (vim-style)
+bind-key -r -T prefix h select-pane -L
+bind-key -r -T prefix j select-pane -D
+bind-key -r -T prefix k select-pane -U
+bind-key -r -T prefix l select-pane -R
+
+# Ctrl+h/j/k are intentionally NOT bound at root level — passed through to shell
+# for normal backspace/Ctrl+J/Ctrl+K behavior. Pane focus is prefix+h/j/k/l only.
 
 
 
