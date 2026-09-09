@@ -12,6 +12,19 @@ return {
     },
     opts = {
       default_component_configs = {
+        git_status = {
+          symbols = {
+            added = 'A',
+            modified = 'M',
+            deleted = 'D',
+            renamed = 'R',
+            untracked = '?',
+            ignored = '!',
+            unstaged = 'M',
+            staged = 'S',
+            conflict = '!',
+          },
+        },
         icon = {
           folder_closed = '▸',
           folder_open = '▾',
@@ -83,7 +96,11 @@ return {
           end,
         },
       },
-      filesystem = { follow_current_file = { enabled = true } },
+      filesystem = {
+        follow_current_file = { enabled = true },
+        filtered_items = { hide_gitignored = false },
+      },
+      enable_git_status = true,
     },
   },
 }

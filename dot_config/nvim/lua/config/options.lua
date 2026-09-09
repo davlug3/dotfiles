@@ -14,6 +14,7 @@ vim.opt.ruler = true
 vim.opt.cmdheight = 1
 vim.opt.cursorline = true
 vim.opt.foldcolumn = '1'
+vim.opt.signcolumn = 'yes'
 vim.opt.hidden = true
 vim.opt.background = 'dark'
 

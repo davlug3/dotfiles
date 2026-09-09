@@ -71,6 +71,10 @@ return {
       { '<leader>fr',   '<cmd>Telescope oldfiles<CR>',                  desc = 'Recent files' },
       { '<leader>fo',   '<cmd>Telescope commands<CR>',                  desc = 'Commands' },
       { '<leader>fR',   '<cmd>Telescope resume<CR>',                    desc = 'Resume last search' },
+      { '<leader>gs',   '<cmd>Telescope git_status<CR>',                desc = 'Git status' },
+      { '<leader>gb',   '<cmd>Telescope git_branches<CR>',              desc = 'Git branches' },
+      { '<leader>gc',   '<cmd>Telescope git_commits<CR>',               desc = 'Git commits' },
+      { '<leader>gC',   '<cmd>Telescope git_bcommits<CR>',              desc = 'Git buffer commits' },
     },
   },
 }
