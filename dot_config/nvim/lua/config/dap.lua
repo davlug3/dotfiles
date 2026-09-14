@@ -5,6 +5,10 @@ if not has_dap then
   return
 end
 
+-- Always capture the full adapter protocol so :DapShowLog is definitive
+-- when a session fails (e.g. "debug adapter disconnected").
+dap.set_log_level('TRACE')
+
 local mason_dir = vim.fn.stdpath('data') .. '/mason'
 
 -- Signs (gutter icons, ASCII-safe)
