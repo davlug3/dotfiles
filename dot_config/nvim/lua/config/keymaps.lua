@@ -86,3 +86,15 @@ vim.api.nvim_create_autocmd('BufWritePre', {
 vim.keymap.set('n', '<Leader>?', function()
   require('which-key').show()
 end, { desc = 'List all keymaps (which-key)' })
+
+-- Narrow screens (<55 cols): :vsplit gives two unusable ~25-col panes.
+-- <leader>s picks horizontal vs vertical automatically.
+vim.keymap.set('n', '<leader>s', function()
+  require('config.narrow').smart_split()
+end, { desc = 'Smart split (horizontal when narrow)' })
+vim.keymap.set('n', '<leader>zn', '<cmd>NarrowToggle<CR>', { desc = 'Toggle narrow-screen UI' })
+
+-- User manual: press ? in normal mode (overrides default backward search)
+vim.keymap.set('n', '?', function()
+  require('config.manual').show()
+end, { desc = 'User manual' })

@@ -50,7 +50,12 @@ return {
           keys = blank_keys, -- blank special-key icons (Esc, arrows, F-keys)
         }
       end
-      require('which-key').setup { icons = icons }
+      require('which-key').setup {
+        icons = icons,
+        window = { border = 'single', padding = { 1, 1 } },
+        -- Clamp popup so it fits in a 50-col screen instead of overflowing.
+        layout = { width = { min = 20, max = 50 }, spacing = 2, align = 'left' },
+      }
     end,
   },
 }

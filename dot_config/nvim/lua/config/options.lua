@@ -57,6 +57,19 @@ vim.opt.textwidth = 500
 vim.opt.autoindent = true
 vim.opt.smartindent = true
 vim.opt.wrap = true
+-- Wrap helpers (config/narrow.lua enables breakindent only when narrow,
+-- so wide screens keep clean block indent)
+vim.opt.breakindent = false
+vim.opt.showbreak = ''
+vim.opt.sidescroll = 1
+vim.opt.sidescrolloff = 8
+-- Window chrome (narrow.lua refines these on VimResized)
+vim.opt.laststatus = 3 -- one global statusline, not one per split
+vim.opt.showtabline = 1 -- only when >1 tab
+vim.opt.splitkeep = 'screen'
+vim.opt.splitbelow = true
+vim.opt.splitright = true
+vim.opt.winminwidth = 10
 
 -- Tags / completion
 vim.opt.tags = vim.fn.stdpath('data') .. '/tags,tags'

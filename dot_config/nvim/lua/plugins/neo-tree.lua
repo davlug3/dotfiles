@@ -96,9 +96,14 @@ return {
           end,
         },
       },
+      window = {
+        -- Default 40 cols is 80% of a 50-col screen; 22 works both ways.
+        width = 22,
+      },
       filesystem = {
         follow_current_file = { enabled = true },
         filtered_items = { hide_gitignored = false },
+        window = { width = 22 },
       },
       enable_git_status = true,
     },

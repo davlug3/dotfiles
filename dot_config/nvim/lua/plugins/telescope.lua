@@ -37,6 +37,15 @@ return {
           prompt_prefix = '❯ ',
           selection_caret = '❯ ',
           path_display = { 'truncate' },
+          -- Narrow (<55 cols): drop the preview pane, go full-width.
+          -- preview_cutoff makes it automatic on resize, no re-setup needed.
+          layout_strategy = 'horizontal',
+          layout_config = {
+            width = 0.99,
+            height = 0.9,
+            horizontal = { preview_cutoff = 55, prompt_position = 'top' },
+            vertical = { preview_cutoff = 55, prompt_position = 'top' },
+          },
           file_ignore_patterns = {
             '%.git/',
             'node_modules',

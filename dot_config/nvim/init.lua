@@ -12,5 +12,7 @@ require('lazy').setup({
 })
 
 require('config.options')
+require('config.narrow')
+require('config.manual')
 require('config.keymaps')
 require('config.lsp')
