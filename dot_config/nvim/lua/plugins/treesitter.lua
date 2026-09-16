@@ -6,10 +6,16 @@ return {
     config = function()
       -- Modern API: the old require('nvim-treesitter.config') module and the
       -- ensure_installed / highlight.enable options were removed from master.
-      -- install() compiles missing parsers with cc (no tree-sitter CLI needed)
-      -- and is a no-op for already-installed ones.
+      -- install() downloads each grammar and shells out to the `tree-sitter`
+      -- CLI (`generate` + `build`), so the CLI must be on $PATH (installed
+      -- via run_once_install-tree-sitter-cli; `:checkhealth nvim-treesitter`
+      -- reports it). Already-installed parsers are a no-op.
       require('nvim-treesitter').setup()
       require('nvim-treesitter').install {
+        'go',
+        'gomod',
+        'gosum',
+        'gowork',
         'gotmpl',
         'bash',
         'toml',

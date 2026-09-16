@@ -1,0 +1,55 @@
+{{- if eq .chezmoi.os "windows" -}}
+# Install the tree-sitter CLI for use with nvim-treesitter's :install()
+# (it shells out to `tree-sitter generate` + `tree-sitter build`).
+# `:checkhealth nvim-treesitter` reports whether the CLI is found.
+$ErrorActionPreference = 'Stop'
+
+if (Get-Command tree-sitter -ErrorAction SilentlyContinue) {
+    $version = (& tree-sitter --version | Select-Object -First 1)
+    Write-Host "tree-sitter already installed: $version"
+    exit 0
+}
+
+$binDir = Join-Path $HOME '.local\bin'
+New-Item -ItemType Directory -Force -Path $binDir | Out-Null
+
+try {
+    $release = Invoke-RestMethod -UseBasicParsing `
+        -Uri 'https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest'
+    $tag = $release.tag_name
+    $asset = "tree-sitter-windows-x64.gz"
+    $url = "https://github.com/tree-sitter/tree-sitter/releases/download/$tag/$asset"
+    Write-Host "Downloading tree-sitter $tag ($asset)..."
+    $tmp = Join-Path ([IO.Path]::GetTempPath()) 'tree-sitter.gz'
+    Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $tmp
+    $out = Join-Path $binDir 'tree-sitter.exe'
+    $inStream = [IO.File]::OpenRead($tmp)
+    try {
+        $gzip = New-Object IO.Compression.GzipStream($inStream, [IO.Compression.CompressionMode]::Decompress)
+        try {
+            $outStream = [IO.File]::Create($out)
+            try { $gzip.CopyTo($outStream) }
+            finally { $outStream.Close() }
+        }
+        finally { $gzip.Close() }
+    }
+    finally { $inStream.Close() }
+    Remove-Item $tmp -Force
+    Write-Host "tree-sitter installed at $out (ensure $binDir is on PATH)"
+    exit 0
+}
+catch {
+    Write-Warning "GitHub download failed: $($_.Exception.Message)"
+}
+
+# Fallback: npm package (needs node on PATH)
+if (Get-Command npm -ErrorAction SilentlyContinue) {
+    Write-Host "Falling back to npm..."
+    npm install -g tree-sitter-cli
+    Write-Host "tree-sitter installed via npm"
+    exit 0
+}
+
+Write-Warning "tree-sitter install: download failed and npm not available; skipping"
+exit 0
+{{- end -}}

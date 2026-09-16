@@ -1,0 +1,84 @@
+{{- if ne .chezmoi.os "windows" -}}
+{{- if env "TERMUX_VERSION" -}}
+#!/data/data/com.termux/files/usr/bin/env bash
+{{- else -}}
+#!/usr/bin/env bash
+{{ end }}
+# Install the tree-sitter CLI for use with nvim-treesitter's :install()
+# (it shells out to `tree-sitter generate` + `tree-sitter build`).
+# `:checkhealth nvim-treesitter` reports whether the CLI is found.
+set -euo pipefail
+
+if command -v tree-sitter &>/dev/null; then
+  echo "tree-sitter already installed: $(tree-sitter --version)"
+  exit 0
+fi
+
+# Termux: install via the system package manager
+if [ -n "${TERMUX_VERSION:-}" ]; then
+  if pkg install -y tree-sitter; then
+    echo "tree-sitter installed via pkg"
+    exit 0
+  fi
+  echo "tree-sitter install: pkg install failed; skipping" >&2
+  exit 0
+fi
+
+# Linux/macOS: official prebuilt binary from GitHub releases
+BIN_DIR="${HOME}/.local/bin"
+TEMP_DIR=$(mktemp -d)
+trap 'rm -rf "${TEMP_DIR}"' EXIT
+
+mkdir -p "${BIN_DIR}"
+
+case "$(uname -s)-$(uname -m)" in
+  Linux-x86_64|Linux-amd64)     ASSET_OS="linux"; ASSET_ARCH="x64" ;;
+  Linux-aarch64|Linux-arm64)    ASSET_OS="linux"; ASSET_ARCH="arm64" ;;
+  Darwin-arm64)                 ASSET_OS="macos"; ASSET_ARCH="arm64" ;;
+  Darwin-x86_64|Darwin-amd64)   ASSET_OS="macos"; ASSET_ARCH="x64" ;;
+  *)
+    echo "tree-sitter install: unsupported platform $(uname -s)-$(uname -m); skipping" >&2
+    exit 0
+    ;;
+esac
+
+# Resolve the latest release tag via the GitHub API (retry on transient failures)
+TAG=""
+for attempt in 1 2 3; do
+  TAG=$(curl -fsS --max-time 20 https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest 2>/dev/null \
+    | grep -m1 '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+  [ -n "${TAG}" ] && break
+  echo "tree-sitter install: API attempt ${attempt} failed; retrying..."
+  sleep 2
+done
+
+if [ -z "${TAG}" ]; then
+  echo "tree-sitter install: could not determine latest release tag; skipping" >&2
+  exit 0
+fi
+
+ASSET="tree-sitter-${ASSET_OS}-${ASSET_ARCH}.gz"
+URL="https://github.com/tree-sitter/tree-sitter/releases/download/${TAG}/${ASSET}"
+echo "Downloading tree-sitter ${TAG} (${ASSET})..."
+if curl -fsS --max-time 60 -L "${URL}" -o "${TEMP_DIR}/tree-sitter.gz"; then
+  if command -v gunzip &>/dev/null; then
+    gunzip -c "${TEMP_DIR}/tree-sitter.gz" > "${BIN_DIR}/tree-sitter"
+  else
+    python3 -c "import gzip,shutil; shutil.copyfileobj(gzip.open('${TEMP_DIR}/tree-sitter.gz','rb'), open('${BIN_DIR}/tree-sitter','wb'))"
+  fi
+  chmod +x "${BIN_DIR}/tree-sitter"
+  echo "tree-sitter installed at ${BIN_DIR}/tree-sitter"
+  exit 0
+fi
+
+# Fallback: npm package (needs node on PATH)
+if command -v npm &>/dev/null; then
+  echo "GitHub download failed; falling back to npm..."
+  npm install -g tree-sitter-cli
+  echo "tree-sitter installed via npm"
+  exit 0
+fi
+
+echo "tree-sitter install: download failed and npm not available; skipping" >&2
+exit 0
+{{- end -}}

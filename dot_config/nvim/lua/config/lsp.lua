@@ -6,6 +6,7 @@ local servers = {
   'html',
   'cssls',
   'jsonls',
+  'gopls',
 }
 
 -- Remove lua_ls from Mason installation if already installed system-wide
@@ -35,6 +36,23 @@ if vim.fn.executable('lua-language-server') == 1 then
     cmd = { 'lua-language-server' },
   }
 end
+
+-- gopls: formatting via gofumpt + staticcheck + unusedparams/shadow analyses.
+-- goimports-style import organizing is done on save via the
+-- source.organizeImports code action below (no extra plugin needed).
+vim.lsp.config['gopls'] = {
+  settings = {
+    gopls = {
+      gofumpt = true,
+      staticcheck = true,
+      usePlaceholders = true,
+      analyses = {
+        unusedparams = true,
+        shadow = true,
+      },
+    },
+  },
+}
 
 vim.lsp.config['*'] = {
   capabilities = require('cmp_nvim_lsp').default_capabilities(),
@@ -81,8 +99,38 @@ vim.api.nvim_create_autocmd('LspAttach', {
     map('n', 'K', vim.lsp.buf.hover, 'Hover documentation')
     map('n', '<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
     map('n', '<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+    map('n', '<leader>cf', function()
+      vim.lsp.buf.format({ async = false })
+    end, '[C]ode [F]ormat buffer')
     map('n', '[d', vim.diagnostic.goto_prev, 'Previous diagnostic')
     map('n', ']d', vim.diagnostic.goto_next, 'Next diagnostic')
+  end,
+})
+
+-- Go: goimports (organize imports) + gofumpt formatting on save via gopls.
+-- No extra plugin needed; guarded so it only runs when gopls is attached.
+-- Synchronous so edits land before the write completes.
+vim.api.nvim_create_autocmd('BufWritePre', {
+  pattern = '*.go',
+  callback = function(args)
+    local params = vim.lsp.util.make_range_params(nil, 'utf-8')
+    params.context = { only = { 'source.organizeImports' } }
+    local resp = vim.lsp.buf_request_sync(args.buf, 'textDocument/codeAction', params, 1000)
+    if resp then
+      for _, r in pairs(resp) do
+        for _, action in pairs(r.result or {}) do
+          if action.edit then
+            vim.lsp.util.apply_workspace_edit(action.edit, 'utf-8')
+          else
+            vim.lsp.buf.execute_command(action.command)
+          end
+        end
+      end
+    end
+    local clients = vim.lsp.get_clients({ bufnr = args.buf, name = 'gopls' })
+    if #clients > 0 then
+      vim.lsp.buf.format({ bufnr = args.buf, async = false })
+    end
   end,
 })
 
