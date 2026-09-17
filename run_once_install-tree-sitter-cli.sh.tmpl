@@ -7,7 +7,7 @@
 # Install the tree-sitter CLI for use with nvim-treesitter's :install()
 # (it shells out to `tree-sitter generate` + `tree-sitter build`).
 # `:checkhealth nvim-treesitter` reports whether the CLI is found.
-set -euo pipefail
+set -Eeuo pipefail
 
 if command -v tree-sitter &>/dev/null; then
   echo "tree-sitter already installed: $(tree-sitter --version)"
@@ -15,7 +15,7 @@ if command -v tree-sitter &>/dev/null; then
 fi
 
 # Termux: install via the system package manager
-if [ -n "${TERMUX_VERSION:-}" ]; then
+if [[ -n "${TERMUX_VERSION:-}" ]]; then
   if pkg install -y tree-sitter; then
     echo "tree-sitter installed via pkg"
     exit 0
@@ -50,7 +50,7 @@ RESP=""
 for attempt in 1 2 3; do
   if RESP=$(curl -fsS --max-time 60 https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest 2>/dev/null); then
     TAG=$(printf '%s\n' "${RESP}" | grep '"tag_name"' | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/')
-    [ -n "${TAG}" ] && break
+    [[ -n "${TAG}" ]] && break
   else
     TAG=""
   fi
@@ -59,7 +59,7 @@ for attempt in 1 2 3; do
 done
 RESP=""
 
-if [ -z "${TAG}" ]; then
+if [[ -z "${TAG}" ]]; then
   # GitHub API unreachable (rate-limited or offline); fall back to npm,
   # which uses a different host (registry.npmjs.org).
   if command -v npm &>/dev/null; then

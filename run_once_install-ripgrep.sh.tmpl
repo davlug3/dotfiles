@@ -6,7 +6,7 @@
 # Install ripgrep for use with Telescope live_grep.
 # If rg is already on $PATH Telescope will use it automatically;
 # otherwise a native grep fallback is configured in lua/plugins/telescope.lua.
-set -euo pipefail
+set -Eeuo pipefail
 
 if command -v rg &>/dev/null; then
   echo "ripgrep already installed: $(rg --version | head -1)"
@@ -41,7 +41,7 @@ RESP=""
 for attempt in 1 2 3; do
   if RESP=$(curl -fsSL --max-time 60 https://api.github.com/repos/BurntSushi/ripgrep/releases/latest 2>/dev/null); then
     TAG=$(printf '%s\n' "${RESP}" | grep '"tag_name"' | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/')
-    [ -n "${TAG}" ] && break
+    [[ -n "${TAG}" ]] && break
   else
     TAG=""
   fi
@@ -50,7 +50,7 @@ for attempt in 1 2 3; do
 done
 RESP=""
 
-if [ -z "${TAG}" ]; then
+if [[ -z "${TAG}" ]]; then
   echo "ripgrep install: could not determine latest release tag; skipping" >&2
   exit 0
 fi
@@ -70,7 +70,7 @@ curl -fSL "${URL}" -o "${TEMP_DIR}/rg.tar.gz"
 
 tar -xzf "${TEMP_DIR}/rg.tar.gz" -C "${TEMP_DIR}"
 RG_BIN="$(find "${TEMP_DIR}" -maxdepth 2 -type f -name 'rg' | head -1)"
-if [ -z "${RG_BIN}" ]; then
+if [[ -z "${RG_BIN}" ]]; then
   echo "ripgrep install: extracted binary not found; skipping" >&2
   exit 0
 fi

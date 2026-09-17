@@ -1,7 +1,7 @@
 {{- if eq .chezmoi.os "android" -}}
 #!/data/data/com.termux/files/usr/bin/env bash
 # Install Termux-specific dependencies for development
-set -euo pipefail
+set -Eeuo pipefail
 
 # Essential packages for development environment
 pkg install -y \

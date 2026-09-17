@@ -4,10 +4,16 @@
 {{- else -}}
 #!/usr/bin/env bash
 {{ end }}
-set -euo pipefail
+set -Eeuo pipefail
+
+# Idempotent: skip when neovim is already available
+if command -v nvim &>/dev/null; then
+  echo "neovim already installed: $(nvim --version | head -n 1)"
+  exit 0
+fi
 
 # Termux: install via the rootless repo binary
-if [ -n "${TERMUX_VERSION:-}" ]; then
+if [[ -n "${TERMUX_VERSION:-}" ]]; then
   pkg install -y neovim
   exit 0
 fi
@@ -36,7 +42,7 @@ curl -fSL "https://github.com/neovim/neovim/releases/latest/download/${ASSET}" \
 mkdir -p "${INSTALL_ROOT}" "${BIN_DIR}"
 tar -xzf "${TEMP_DIR}/nvim.tar.gz" -C "${INSTALL_ROOT}"
 NVIM_BIN="$(find "${INSTALL_ROOT}" -maxdepth 4 -type f -name nvim -path '*/bin/*' | head -1)"
-if [ -z "${NVIM_BIN}" ]; then
+if [[ -z "${NVIM_BIN}" ]]; then
   echo "neovim install: extracted binary not found" >&2
   exit 1
 fi

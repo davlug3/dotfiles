@@ -4,7 +4,7 @@
 {{- else -}}
 #!/usr/bin/env bash
 {{ end }}
-set -euo pipefail
+set -Eeuo pipefail
 
 # JetBrains Mono Nerd Font — gives the terminal + GUI apps the glyphs your
 # config (neo-tree, lualine, which-key...) relies on. On desktop Unix it's
@@ -28,7 +28,7 @@ if [[ ! -f "${INSTALLED_MARKER}" ]]; then
   echo "Extracting..."
   # chezmoi runs this script before the general termux-deps script, so make
   # sure we have an unzipper when on Termux.
-  if [ -n "${TERMUX_VERSION:-}" ]; then
+  if [[ -n "${TERMUX_VERSION:-}" ]]; then
     command -v unzip >/dev/null 2>&1 || pkg install -y unzip >/dev/null
   fi
   if command -v unzip >/dev/null 2>&1; then
@@ -54,7 +54,7 @@ else
 fi
 
 # Termux/Android: set the terminal font so Nerd glyphs render in the app
-if [ -n "${TERMUX_VERSION:-}" ]; then
+if [[ -n "${TERMUX_VERSION:-}" ]]; then
   mkdir -p "${HOME}/.termux"
   cp "${INSTALLED_MARKER}" "${HOME}/.termux/font.ttf"
   if command -v termux-font >/dev/null 2>&1; then
