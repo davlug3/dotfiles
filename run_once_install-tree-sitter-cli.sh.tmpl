@@ -43,16 +43,31 @@ case "$(uname -s)-$(uname -m)" in
 esac
 
 # Resolve the latest release tag via the GitHub API (retry on transient failures)
+# NOTE: two-step fetch+parse. Piping live curl output directly into `grep -m1`
+# under `set -o pipefail` makes curl exit 23 (SIGPIPE) when grep closes early.
 TAG=""
+RESP=""
 for attempt in 1 2 3; do
-  TAG=$(curl -fsS --max-time 20 https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest 2>/dev/null \
-    | grep -m1 '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
-  [ -n "${TAG}" ] && break
-  echo "tree-sitter install: API attempt ${attempt} failed; retrying..."
+  if RESP=$(curl -fsS --max-time 60 https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest 2>/dev/null); then
+    TAG=$(printf '%s\n' "${RESP}" | grep '"tag_name"' | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/')
+    [ -n "${TAG}" ] && break
+  else
+    TAG=""
+  fi
+  echo "tree-sitter install: API attempt ${attempt} failed; retrying..." >&2
   sleep 2
 done
+RESP=""
 
 if [ -z "${TAG}" ]; then
+  # GitHub API unreachable (rate-limited or offline); fall back to npm,
+  # which uses a different host (registry.npmjs.org).
+  if command -v npm &>/dev/null; then
+    echo "tree-sitter install: API unreachable; falling back to npm..."
+    npm install -g tree-sitter-cli
+    echo "tree-sitter installed via npm"
+    exit 0
+  fi
   echo "tree-sitter install: could not determine latest release tag; skipping" >&2
   exit 0
 fi

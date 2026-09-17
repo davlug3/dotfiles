@@ -33,9 +33,22 @@ case "${OS}-${ARCH}" in
     ;;
 esac
 
-# Resolve the latest release tag via the GitHub API
-TAG=$(curl -fsSL https://api.github.com/repos/BurntSushi/ripgrep/releases/latest \
-  | grep -m1 '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/')
+# Resolve the latest release tag via the GitHub API (retry on transient failures)
+# NOTE: two-step fetch+parse. Piping live curl output directly into `grep -m1`
+# under `set -o pipefail` makes curl exit 23 (SIGPIPE) when grep closes early.
+TAG=""
+RESP=""
+for attempt in 1 2 3; do
+  if RESP=$(curl -fsSL --max-time 60 https://api.github.com/repos/BurntSushi/ripgrep/releases/latest 2>/dev/null); then
+    TAG=$(printf '%s\n' "${RESP}" | grep '"tag_name"' | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/')
+    [ -n "${TAG}" ] && break
+  else
+    TAG=""
+  fi
+  echo "ripgrep install: API attempt ${attempt} failed; retrying..." >&2
+  sleep 2
+done
+RESP=""
 
 if [ -z "${TAG}" ]; then
   echo "ripgrep install: could not determine latest release tag; skipping" >&2
