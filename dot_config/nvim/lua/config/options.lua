@@ -1,3 +1,20 @@
+-- Disable Netrw; use Neo-tree instead
+vim.g.netrw_browse_split = 0
+vim.g.netrw_alternate = ''
+vim.g.netrw_liststyle = 0
+vim.g.netrw_winsize = 25
+
+-- When running `nvim .`, open Neo-tree instead of Netrw
+vim.api.nvim_create_autocmd("VimEnter", {
+  pattern = { "*" },
+  callback = function()
+    local arg = vim.api.nvim_get_arg(0)
+    if arg ~= "" and vim.fn.isdirectory(arg) == 1 then
+      vim.cmd("Neotree reveal")
+    end
+  end,
+})
+
 -- General
 vim.opt.history = 500
 vim.opt.autoread = true
