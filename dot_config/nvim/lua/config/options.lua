@@ -1,19 +1,38 @@
--- Disable Netrw; use Neo-tree instead
+-- Disable Netrw entirely; Neo-tree handles directory browsing
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
 vim.g.netrw_browse_split = 0
 vim.g.netrw_alternate = ''
 vim.g.netrw_liststyle = 0
 vim.g.netrw_winsize = 25
 
--- When running `nvim .`, open Neo-tree instead of Netrw
+-- When running `nvim .` (or `nvim <dir>`): skip netrw, show an empty
+-- buffer (splash) with Neo-tree open on the side instead.
 vim.api.nvim_create_autocmd("VimEnter", {
-  pattern = { "*" },
+  pattern = "*",
   callback = function()
-    local arg = vim.api.nvim_get_arg(0)
-    if arg ~= "" and vim.fn.isdirectory(arg) == 1 then
-      vim.cmd("Neotree reveal")
+    for _, arg in ipairs(vim.v.argv) do
+      if arg ~= "" and vim.fn.isdirectory(arg) == 1 then
+        -- Drop the directory buffer netrw would have shown
+        local dir_buf = vim.api.nvim_get_current_buf()
+        vim.cmd("enew")
+        pcall(vim.api.nvim_buf_delete, dir_buf, { force = true })
+        -- cd so pickers (Telescope) work relative to the target dir
+        pcall(vim.cmd, "cd " .. vim.fn.fnameescape(arg))
+        -- Defer so that lazy.nvim has fully initialized and the
+        -- Neotree command (via cmd proxy) is guaranteed to exist.
+        -- `show` (not `reveal`/`focus`) keeps the cursor on the splash.
+        vim.defer_fn(function()
+          if vim.fn.exists(":Neotree") == 2 then
+            vim.cmd("Neotree show")
+          end
+        end, 50)
+        break
+      end
     end
   end,
 })
+
 
 -- General
 vim.opt.history = 500

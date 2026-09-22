@@ -1,3 +1,23 @@
-[user]
-	email = {{ .email | default "112188845+davlug3@users.noreply.github.com" | quote }}
-	name = {{ .name | default "davlug3" | quote }}
+[alias]
+    # Core shortcuts
+    st   = status -s
+    co   = checkout
+    br   = branch
+    ci   = commit
+    cm   = commit -m
+    di   = diff
+    aa   = add -A
+
+    # Advanced workflow and logging
+    lg   = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+    cane = commit --amend --no-edit
+    undo = reset HEAD~1 --mixed
+    unstage = reset HEAD --
+    
+    # Utilities
+    aliases = config --get-regexp alias
+    prune-branches = !git branch -vv | grep ': gone]' | awk '{print $1}' | xargs -r git branch -d
+
+[include]
+    # Keeps your public GitHub repo clean by loading secrets locally
+    path = ~/.gitconfig.local
