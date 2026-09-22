@@ -54,18 +54,3 @@ mkcd() {
     cd -P -- "$1"
 }
 
-
-
-# Git Shell Shortcuts
-alias g="git"
-alias gs="git status -s"
-alias gco="git checkout"
-alias gb="git branch"
-alias gd="git diff"
-alias glg="git lg"
-
-# Quick workflow shortcuts
-alias gcaa="git add -A && git commit --amend --no-edit"
-alias gcm="git commit -m"
-alias gpo="git push origin \$(git branch --show-current)"
-

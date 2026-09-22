@@ -26,6 +26,10 @@ alias glg="git lg"
 
 # Complex workflows as functions (aliases with $(...) or $* would expand
 # at definition time or split multi-word messages — functions defer correctly).
+# unalias first: if these names already exist as aliases (e.g. from an older
+# ~/.bash_aliases), bash would alias-expand `gcaa() ...` into garbage and
+# fail with "syntax error near unexpected token `('".
+unalias gcaa gcm gpo 2>/dev/null || true
 gcaa() { git add -A && git commit --amend --no-edit; }
 gcm() { git commit -m "$*"; }
 gpo() { git push origin "$(git branch --show-current)"; }
