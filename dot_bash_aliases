@@ -1,9 +1,10 @@
 # ~/.bash_aliases: sourced by .bashrc
 
 # handy shortcuts
-alias ll='ls -lhAF --color=auto'
-alias la='ls -A --color=auto'
-alias l='ls -CF --color=auto'
+alias ll='ls -lhAF --color=auto --group-directories-first'
+alias ls='ls --color=auto --group-directories-first'
+alias la='ls -A --color=auto --group-directories-first'
+alias l='ls -CF --color=auto --group-directories-first'
 alias ..='cd ..'
 alias ...='cd ../..'
 
@@ -19,6 +20,9 @@ alias j='jobs -l'
 alias df='df -h'
 alias du='du -h'
 alias free='free -h'
+
+# editors
+alias nv='nvim'
 
 # tmux
 alias tmux='tmux -2'
@@ -49,3 +53,19 @@ mkcd() {
     fi
     cd -P -- "$1"
 }
+
+
+
+# Git Shell Shortcuts
+alias g="git"
+alias gs="git status -s"
+alias gco="git checkout"
+alias gb="git branch"
+alias gd="git diff"
+alias glg="git lg"
+
+# Quick workflow shortcuts
+alias gcaa="git add -A && git commit --amend --no-edit"
+alias gcm="git commit -m"
+alias gpo="git push origin \$(git branch --show-current)"
+

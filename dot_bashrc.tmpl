@@ -18,6 +18,11 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
+# Git shortcuts (chezmoi: dot_git_shortcuts.tmpl -> ~/.git_shortcuts).
+if [ -f ~/.git_shortcuts ]; then
+    . ~/.git_shortcuts
+fi
+
 export PATH="$HOME/.local/go/bin:$HOME/go/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
 

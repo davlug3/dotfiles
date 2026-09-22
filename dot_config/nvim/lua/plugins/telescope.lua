@@ -69,6 +69,10 @@ return {
       })
     end,
     keys = {
+      -- VSCode-style Ctrl+P quick-open + Ctrl+Shift+P command palette.
+      -- <leader>1/ff/fo remain as fallbacks (some terminals send <C-p> for <C-S-p>).
+      { '<C-p>',        '<cmd>Telescope find_files<CR>',                desc = 'Find files (Ctrl+P)' },
+      { '<C-S-p>',      '<cmd>Telescope commands<CR>',                 desc = 'Commands (Ctrl+Shift+P)' },
       { '<leader>1',      '<cmd>Telescope find_files<CR>',                desc = 'Find files' },
       { '<leader>ff',   '<cmd>Telescope find_files hidden=true<CR>',    desc = 'Find files (hidden)' },
       { '<leader>fg',   '<cmd>Telescope live_grep<CR>',                 desc = 'Live grep' },

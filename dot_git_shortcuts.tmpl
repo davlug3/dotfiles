@@ -1,0 +1,32 @@
+{{- if eq .chezmoi.os "windows" -}}
+# PowerShell Git Shortcuts
+# Managed by chezmoi: dot_git_shortcuts.tmpl -> ~/.git_shortcuts
+# Dot-sourced from Microsoft.PowerShell_profile.ps1
+Set-Alias -Name g -Value git -Force
+function Get-GitStatus { git status -s }; Set-Alias -Name gs -Value Get-GitStatus -Force
+function Get-GitCheckout { git checkout @args }; Set-Alias -Name gco -Value Get-GitCheckout -Force
+function Get-GitBranch { git branch @args }; Set-Alias -Name gb -Value Get-GitBranch -Force
+function Get-GitDiff { git diff @args }; Set-Alias -Name gd -Value Get-GitDiff -Force
+function Get-GitLg { git lg @args }; Set-Alias -Name glg -Value Get-GitLg -Force
+
+# Complex Workflows
+function Get-GitCaa { git add -A; git commit --amend --no-edit }; Set-Alias -Name gcaa -Value Get-GitCaa -Force
+function Get-GitCm { git commit -m ($args -join ' ') }; Set-Alias -Name gcm -Value Get-GitCm -Force
+function Get-GitPo { git push origin $(git branch --show-current) }; Set-Alias -Name gpo -Value Get-GitPo -Force
+{{- else -}}
+# Bash / Zsh Git Shortcuts
+# Managed by chezmoi: dot_git_shortcuts.tmpl -> ~/.git_shortcuts
+# Sourced from ~/.bashrc (after ~/.bash_aliases)
+alias g="git"
+alias gs="git status -s"
+alias gco="git checkout"
+alias gb="git branch"
+alias gd="git diff"
+alias glg="git lg"
+
+# Complex workflows as functions (aliases with $(...) or $* would expand
+# at definition time or split multi-word messages — functions defer correctly).
+gcaa() { git add -A && git commit --amend --no-edit; }
+gcm() { git commit -m "$*"; }
+gpo() { git push origin "$(git branch --show-current)"; }
+{{- end }}

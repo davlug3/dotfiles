@@ -6,6 +6,9 @@ if (Get-Command starship -ErrorAction SilentlyContinue) {
     Invoke-Expression (& starship init powershell --print-full-init)
 }
 
+# --- Git shortcuts (chezmoi: dot_git_shortcuts.tmpl -> ~/.git_shortcuts) --
+if (Test-Path "$HOME/.git_shortcuts") { . "$HOME/.git_shortcuts" }
+
 # --- Convenience aliases -------------------------------------------------
 
 # Jump to the chezmoi source directory
