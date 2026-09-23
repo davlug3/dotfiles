@@ -130,7 +130,7 @@ Inside the file, use `{{ promptStringOnce . "key" "Enter your token" }}` — che
 
 ### Guardrails
 
-`.gitignore` blocks common secret filenames, and `hooks/pre-commit` runs `gitleaks protect --staged` on every commit. After cloning, point git at the tracked hooks (one-time, per clone — git doesn't sync this setting):
+`.gitignore` blocks common secret filenames, and `hooks/pre-commit` runs `gitleaks protect --staged` on every commit. `run_after_set-git-hooks-path.sh.tmpl` points git at the tracked hooks automatically on each `chezmoi apply` (`core.hooksPath` can't be committed — git keeps it in untracked `.git/config` by design, so the script re-applies it instead). Manual equivalent, if ever needed:
 
 ```bash
 git config core.hooksPath hooks
