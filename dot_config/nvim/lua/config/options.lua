@@ -1,6 +1,6 @@
--- Disable Netrw entirely; Neo-tree handles directory browsing
-vim.g.loaded_netrw = 1
-vim.g.loaded_netrwPlugin = 1
+-- Netrw stays disabled (see init.lua top: g:loaded_netrw / g:loaded_netrwPlugin
+-- must be set before lazy.setup()); Neo-tree handles directory browsing.
+-- The defaults below are kept for documentation but have no effect.
 vim.g.netrw_browse_split = 0
 vim.g.netrw_alternate = ''
 vim.g.netrw_liststyle = 0
