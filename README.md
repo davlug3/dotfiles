@@ -128,6 +128,14 @@ chezmoi add --template ~/.config/some-token
 
 Inside the file, use `{{ promptStringOnce . "key" "Enter your token" }}` — chezmoi will ask once and store the answer in `~/.config/chezmoi/chezmoi.toml`.
 
+### Guardrails
+
+`.gitignore` blocks common secret filenames, and `hooks/pre-commit` runs `gitleaks protect --staged` on every commit. After cloning, point git at the tracked hooks (one-time, per clone — git doesn't sync this setting):
+
+```bash
+git config core.hooksPath hooks
+```
+
 ## What's included
 
 - **bash** — .bashrc (template with OS detection), .bash_profile, .bash_aliases, .bash_logout
