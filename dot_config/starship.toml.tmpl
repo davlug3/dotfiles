@@ -1,5 +1,17 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
+# Root-level format
+format = """
+$username$hostname\
+$directory\
+$git_branch$git_status\
+$python$nodejs$rust$golang$docker_context$kubernetes\
+$cmd_duration\
+$jobs\
+$line_break$character"""
+
+right_format = "$time"
+
 # ─────────────────────────────────────────────────────────────────────────────
 # Starship Config — modern Unicode/ASCII (no Nerd Font required)
 # ─────────────────────────────────────────────────────────────────────────────
@@ -161,38 +173,26 @@ time_format = "%H:%M:%S"
 style = "overlay0"
 
 # ─────────────────────────────────────────────────────────────────────────────
-# Battery (right side)
+# Battery (auto-detected by starship-auto-detect.sh)
 # ─────────────────────────────────────────────────────────────────────────────
-[battery]
-full_symbol = "100%"
-charging_symbol = "+"
-discharging_symbol = "-"
-display = [
-  { threshold = 10, style = "bold red" },
-  { threshold = 30, style = "bold yellow" },
-  { threshold = 100, style = "bold green" }
-]
-format = "[$symbol$percentage]($style) "
+# STARSHIP-BATTERY-AUTO-DETECT-START
+# [battery]
+# full_symbol = "100%"
+# charging_symbol = "+"
+# discharging_symbol = "-"
+# display = [
+#   { threshold = 10, style = "bold red" },
+#   { threshold = 30, style = "bold yellow" },
+#   { threshold = 100, style = "bold green" }
+# ]
+# format = "[$symbol$percentage]($style) "
+# STARSHIP-BATTERY-AUTO-DETECT-END
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Line break
 # ─────────────────────────────────────────────────────────────────────────────
 [line_break]
 disabled = false
-
-# ─────────────────────────────────────────────────────────────────────────────
-# Main prompt format
-# ─────────────────────────────────────────────────────────────────────────────
-format = """
-$username$hostname\
-$directory\
-$git_branch$git_status\
-$python$nodejs$rust$golang$docker_context$kubernetes\
-$cmd_duration\
-$jobs\
-$line_break$character"""
-
-right_format = "$time$battery"
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Disable noisy modules
