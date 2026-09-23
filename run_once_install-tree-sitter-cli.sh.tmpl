@@ -9,9 +9,14 @@
 # `:checkhealth nvim-treesitter` reports whether the CLI is found.
 set -Eeuo pipefail
 
+# Smoke-test any existing CLI: `command -v` alone can't detect a binary
+# that fails at runtime (e.g. built against a newer glibc than this host).
 if command -v tree-sitter &>/dev/null; then
-  echo "tree-sitter already installed: $(tree-sitter --version)"
-  exit 0
+  if tree-sitter --version &>/dev/null; then
+    echo "tree-sitter already installed: $(tree-sitter --version)"
+    exit 0
+  fi
+  echo "tree-sitter found but fails to run; reinstalling..." >&2
 fi
 
 # Termux: install via the system package manager
@@ -42,48 +47,72 @@ case "$(uname -s)-$(uname -m)" in
     ;;
 esac
 
-# Resolve the latest release tag via the GitHub API (retry on transient failures)
-# NOTE: two-step fetch+parse. Piping live curl output directly into `grep -m1`
-# under `set -o pipefail` makes curl exit 23 (SIGPIPE) when grep closes early.
-TAG=""
-RESP=""
-for attempt in 1 2 3; do
-  if RESP=$(curl -fsS --max-time 60 https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest 2>/dev/null); then
-    TAG=$(printf '%s\n' "${RESP}" | grep '"tag_name"' | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/')
-    [[ -n "${TAG}" ]] && break
-  else
-    TAG=""
-  fi
-  echo "tree-sitter install: API attempt ${attempt} failed; retrying..." >&2
-  sleep 2
-done
-RESP=""
+# Last release whose prebuilt Linux binaries run on glibc < 2.39
+# (e.g. Ubuntu 22.04 ships glibc 2.35; tree-sitter v0.26+ needs 2.39).
+PIN_TAG="v0.25.10"
 
-if [[ -z "${TAG}" ]]; then
-  # GitHub API unreachable (rate-limited or offline); fall back to npm,
-  # which uses a different host (registry.npmjs.org).
-  if command -v npm &>/dev/null; then
-    echo "tree-sitter install: API unreachable; falling back to npm..."
-    npm install -g tree-sitter-cli
-    echo "tree-sitter installed via npm"
-    exit 0
-  fi
-  echo "tree-sitter install: could not determine latest release tag; skipping" >&2
-  exit 0
-fi
+needs_pin() {
+  # True when the host glibc is older than 2.39.
+  [[ "$(uname -s)" == "Linux" ]] || return 1
+  local ver
+  ver=$(ldd --version 2>/dev/null | head -n 1 | grep -oE '[0-9]+\.[0-9]+' | head -n 1)
+  [[ -n "${ver}" ]] || return 1
+  [[ "$(printf '%s\n%s\n' "${ver}" "2.39" | sort -V | head -n 1)" != "2.39" ]]
+}
 
-ASSET="tree-sitter-${ASSET_OS}-${ASSET_ARCH}.gz"
-URL="https://github.com/tree-sitter/tree-sitter/releases/download/${TAG}/${ASSET}"
-echo "Downloading tree-sitter ${TAG} (${ASSET})..."
-if curl -fsS --max-time 60 -L "${URL}" -o "${TEMP_DIR}/tree-sitter.gz"; then
+install_tag() {
+  # Download release $1, install to $BIN_DIR, and smoke-test it.
+  local tag="$1"
+  local asset="tree-sitter-${ASSET_OS}-${ASSET_ARCH}.gz"
+  local url="https://github.com/tree-sitter/tree-sitter/releases/download/${tag}/${asset}"
+  echo "Downloading tree-sitter ${tag} (${asset})..."
+  if ! curl -fsS --max-time 60 -L "${url}" -o "${TEMP_DIR}/tree-sitter.gz"; then
+    return 1
+  fi
   if command -v gunzip &>/dev/null; then
     gunzip -c "${TEMP_DIR}/tree-sitter.gz" > "${BIN_DIR}/tree-sitter"
   else
     python3 -c "import gzip,shutil; shutil.copyfileobj(gzip.open('${TEMP_DIR}/tree-sitter.gz','rb'), open('${BIN_DIR}/tree-sitter','wb'))"
   fi
   chmod +x "${BIN_DIR}/tree-sitter"
+  "${BIN_DIR}/tree-sitter" --version &>/dev/null
+}
+
+# Resolve the release tag to install.
+# NOTE: two-step fetch+parse. Piping live curl output directly into `grep -m1`
+# under `set -o pipefail` makes curl exit 23 (SIGPIPE) when grep closes early.
+TAG=""
+if needs_pin; then
+  echo "tree-sitter install: glibc < 2.39 detected; pinning to ${PIN_TAG}" >&2
+  TAG="${PIN_TAG}"
+else
+  RESP=""
+  for attempt in 1 2 3; do
+    if RESP=$(curl -fsS --max-time 60 https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest 2>/dev/null); then
+      TAG=$(printf '%s\n' "${RESP}" | grep '"tag_name"' | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/')
+      [[ -n "${TAG}" ]] && break
+    else
+      TAG=""
+    fi
+    echo "tree-sitter install: API attempt ${attempt} failed; retrying..." >&2
+    sleep 2
+  done
+  RESP=""
+fi
+
+if [[ -n "${TAG}" ]] && install_tag "${TAG}"; then
   echo "tree-sitter installed at ${BIN_DIR}/tree-sitter"
   exit 0
+fi
+
+# The resolved release failed (or the API was unreachable): fall back to the
+# pinned build before giving up on GitHub entirely.
+if [[ "${TAG}" != "${PIN_TAG}" ]]; then
+  echo "tree-sitter install: trying pinned fallback ${PIN_TAG}..." >&2
+  if install_tag "${PIN_TAG}"; then
+    echo "tree-sitter installed at ${BIN_DIR}/tree-sitter"
+    exit 0
+  fi
 fi
 
 # Fallback: npm package (needs node on PATH)
