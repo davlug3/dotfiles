@@ -1,0 +1,11 @@
+#!/bin/sh
+# pre-commit: block commits that stage secrets.
+# Install with: cp hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+# Requires: gitleaks on PATH (~/.local/bin/gitleaks).
+
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "pre-commit: gitleaks not found on PATH, skipping secret scan" >&2
+  exit 0
+fi
+
+gitleaks protect --verbose --staged
