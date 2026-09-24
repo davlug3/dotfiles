@@ -14,4 +14,9 @@ if ! shopt -oq posix; then
   fi
 fi
 
-eval "$(starship init bash)"
+if command -v starship >/dev/null 2>&1; then
+    case "${PROMPT_COMMAND-}" in
+        *starship_precmd*) ;;
+        *) eval "$(starship init bash)" ;;
+    esac
+fi

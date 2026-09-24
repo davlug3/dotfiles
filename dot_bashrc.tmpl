@@ -9,8 +9,11 @@ if [ -d /data/data/com.termux/files/usr/bin ]; then
     . ~/.bashrc.termux
 elif [ -n "$WSL_DISTRO_NAME" ]; then
     . ~/.bashrc.wsl
-else
-    eval "$(starship init bash)"
+elif command -v starship >/dev/null 2>&1; then
+    case "${PROMPT_COMMAND-}" in
+        *starship_precmd*) ;;
+        *) eval "$(starship init bash)" ;;
+    esac
 fi
 
 # Alias definitions.
@@ -23,9 +26,37 @@ if [ -f ~/.git_shortcuts ]; then
     . ~/.git_shortcuts
 fi
 
-export PATH="$HOME/.local/go/bin:$HOME/go/bin:$PATH"
-export PATH="$HOME/.local/bin:$PATH"
+# Idempotent PATH prepend: safe to `source ~/.bashrc` repeatedly.
+__chezmoi_path_prepend_once() {
+    case ":$PATH:" in
+        *":$1:"*) ;;
+        *) PATH="$1:$PATH" ;;
+    esac
+}
+__chezmoi_path_prepend_once "$HOME/.local/go/bin"
+__chezmoi_path_prepend_once "$HOME/go/bin"
+__chezmoi_path_prepend_once "$HOME/.local/bin"
+__chezmoi_path_prepend_once "$HOME/.opencode/bin"
+export PATH
+unset -f __chezmoi_path_prepend_once
+# Clean pre-existing duplicates left by the old config (keep first occurrence).
+__chezmoi_deduped=""
+__chezmoi_old_ifs="$IFS"; IFS=:
+for __chezmoi_p in $PATH; do
+    [ -n "$__chezmoi_p" ] || continue
+    case ":$__chezmoi_deduped:" in
+        *":$__chezmoi_p:"*) ;;
+        *) __chezmoi_deduped="${__chezmoi_deduped:+$__chezmoi_deduped:}$__chezmoi_p" ;;
+    esac
+done
+IFS="$__chezmoi_old_ifs"
+PATH="$__chezmoi_deduped"
+export PATH
+unset __chezmoi_deduped __chezmoi_p __chezmoi_old_ifs
 
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+# Load nvm once: re-sourcing re-runs `nvm_auto use` (slow) and rewrites PATH.
+if ! command -v nvm >/dev/null 2>&1; then
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+fi
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion

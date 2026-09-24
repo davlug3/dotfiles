@@ -1,11 +1,30 @@
 # WSL specific settings
 
-export PATH="$HOME/.local/go/bin:$HOME/go/bin:$PATH"
-export PATH="$HOME/.local/bin:$PATH"
+# Idempotent PATH prepend (safe for re-sourcing ~/.bashrc).
+if ! declare -F __chezmoi_path_prepend_once >/dev/null 2>&1; then
+    __chezmoi_path_prepend_once() {
+        case ":$PATH:" in
+            *":$1:"*) ;;
+            *) PATH="$1:$PATH" ;;
+        esac
+    }
+fi
+__chezmoi_path_prepend_once "$HOME/.local/go/bin"
+__chezmoi_path_prepend_once "$HOME/go/bin"
+__chezmoi_path_prepend_once "$HOME/.local/bin"
 
 alias explorer='explorer.exe'
 alias wsl-open='cmd.exe /c start'
-alias winhome='cd /mnt/c/Users/$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d "\r")'
+# Function (not alias): defers the slow cmd.exe interop call until use,
+# times out instead of hanging the shell, and falls back sanely.
+winhome() {
+    local user
+    user="$(timeout 2 cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r\n ')";
+    if [ -z "$user" ]; then
+        user="${USER:-$(id -un 2>/dev/null)}"
+    fi
+    cd "/mnt/c/Users/$user" || return 1
+}
 
 shopt -s nocaseglob
 
@@ -13,4 +32,10 @@ if [ -z "$DISPLAY" ] && [ -n "$WAYLAND_DISPLAY" ]; then
     export DISPLAY=:0
 fi
 
-eval "$(starship init bash)"
+# Safe to re-source: skip if this shell already initialized starship.
+if command -v starship >/dev/null 2>&1; then
+    case "${PROMPT_COMMAND-}" in
+        *starship_precmd*) ;;
+        *) eval "$(starship init bash)" ;;
+    esac
+fi
