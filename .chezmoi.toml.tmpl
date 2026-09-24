@@ -1,18 +1,22 @@
 {{- $email := promptStringOnce . "email" "GitHub email" -}}
 {{- $name := promptStringOnce . "name" "GitHub username" -}}
+{{- $machine := promptChoiceOnce . "machine" "Machine type?" (list "personal" "work") -}}
 {{- $termux := env "TERMUX_VERSION" -}}
 
 [data]
     email = {{ $email | quote }}
     name = {{ $name | quote }}
+    machine = {{ $machine | quote }}
     termux = {{ if $termux }}true{{ else }}false{{ end }}
 
 [git]
     autoCommit = false
     autoPush = false
 
+[edit]
+    command = "vim"
+
 {{- if ne .chezmoi.os "windows" }}
 [merge]
     command = "vimdiff"
 {{- end }}
-
