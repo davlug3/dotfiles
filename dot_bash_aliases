@@ -1,7 +1,7 @@
 # ~/.bash_aliases: sourced by .bashrc
 
 # handy shortcuts
-alias ll='ls -lhAF --color=auto --group-directories-first'
+alias ll='ls -lhAF --color=always --group-directories-first'
 alias ls='ls --color=auto --group-directories-first'
 alias la='ls -A --color=auto --group-directories-first'
 alias l='ls -CF --color=auto --group-directories-first'

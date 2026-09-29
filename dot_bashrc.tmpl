@@ -102,6 +102,7 @@ __chezmoi_path_prepend_once() {
 __chezmoi_path_prepend_once "$HOME/.local/go/bin"
 __chezmoi_path_prepend_once "$HOME/go/bin"
 __chezmoi_path_prepend_once "$HOME/.local/bin"
+__chezmoi_path_prepend_once "$HOME/bin"
 __chezmoi_path_prepend_once "$HOME/.opencode/bin"
 export PATH
 unset -f __chezmoi_path_prepend_once

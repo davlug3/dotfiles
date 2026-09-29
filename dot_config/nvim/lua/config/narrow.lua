@@ -1,4 +1,4 @@
--- Responsive UI for narrow screens (columns < 55, e.g. phone portrait,
+-- Responsive UI for narrow screens (columns < threshold, e.g. phone portrait,
 -- Termux split, tmux side-pane).
 --
 -- What it does when narrow:
@@ -10,13 +10,126 @@
 --   * gitsigns eol blame off (wraps badly on 50 cols)
 --   * refreshes lualine so its hide_in_width components update
 --
+-- When the screen is wide again, everything it changed is restored to the
+-- values you had before going narrow (snapshot/restore), instead of being
+-- overwritten with hardcoded "wide" values.
+--
 -- Manual override:
 --   :NarrowOn / :NarrowOff / :NarrowToggle  (sets vim.g.narrow_force)
 --   unset with :NarrowAuto (follow vim.o.columns again)
+--
+-- Usage:
+--   require('narrow')                        -- defaults (threshold 55)
+--   require('narrow').setup({ threshold = 60 })
+--   vim.keymap.set('n', '<leader>s', require('narrow').smart_split)
 
 local M = {}
 
 M.threshold = 55
+
+-- Window-local options: applied to every normal window and (via vim.go) to
+-- windows created later.
+local WIN_NARROW = {
+  number = true,
+  relativenumber = false,
+  numberwidth = 2,
+  foldcolumn = '0',
+  signcolumn = 'yes:1',
+  wrap = true,
+  linebreak = true,
+  breakindent = true,
+  showbreak = '\u{21AA} ', -- "↪ "
+}
+
+-- Global options.
+local GLOBAL_NARROW = {
+  sidescroll = 1,
+  sidescrolloff = 0,
+  scrolloff = 1,
+  laststatus = 3, -- one global statusline
+  showtabline = 1, -- tabline only with >1 tab
+  cmdheight = 1,
+  winminwidth = 10,
+  winwidth = 10,
+  splitkeep = 'screen',
+}
+
+-- Buffer types whose windows we leave alone.
+local SKIP_BUFTYPE = { prompt = true, nofile = true, terminal = true }
+
+-- State: nil = not applied yet, true/false = last applied narrow state.
+M._state = nil
+M._saved = nil -- snapshot of the user's values taken when entering narrow
+
+------------------------------------------------------------------------
+-- Helpers
+------------------------------------------------------------------------
+
+local function try_set(scope, key, value)
+  -- Individual options can be missing on older Neovim (e.g. splitkeep);
+  -- never let one bad option abort the rest.
+  pcall(function()
+    scope[key] = value
+  end)
+end
+
+local function snapshot()
+  local s = { win = {}, global = {}, diag = nil, blame_was_on = false }
+  for k in pairs(WIN_NARROW) do
+    s.win[k] = vim.go[k]
+  end
+  for k in pairs(GLOBAL_NARROW) do
+    s.global[k] = vim.go[k]
+  end
+  s.diag = vim.diagnostic.config()
+  return s
+end
+
+local function each_normal_window(fn)
+  for _, win in ipairs(vim.api.nvim_list_wins()) do
+    if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_config(win).relative == '' then
+      local ok, buf = pcall(vim.api.nvim_win_get_buf, win)
+      if ok and vim.api.nvim_buf_is_valid(buf) and not SKIP_BUFTYPE[vim.bo[buf].buftype] then
+        fn(win)
+      end
+    end
+  end
+end
+
+local function apply_win_opts(values)
+  each_normal_window(function(win)
+    for k, v in pairs(values) do
+      try_set(vim.wo[win], k, v)
+    end
+  end)
+end
+
+-- Gitsigns: read the real state so we never invert it by accident, and only
+-- re-enable blame later if *we* were the one who turned it off.
+local function blame_enabled()
+  local ok, cfg = pcall(require, 'gitsigns.config')
+  if ok and cfg.config then
+    return cfg.config.current_line_blame == true
+  end
+  return nil
+end
+
+local function set_blame(want)
+  local gs = package.loaded.gitsigns
+  if not (gs and gs.toggle_current_line_blame) then
+    return false
+  end
+  local current = blame_enabled()
+  if current == nil or current == want then
+    return false
+  end
+  gs.toggle_current_line_blame()
+  return true
+end
+
+------------------------------------------------------------------------
+-- Public API
+------------------------------------------------------------------------
 
 function M.is_narrow()
   if vim.g.narrow_force == true then
@@ -28,95 +141,87 @@ function M.is_narrow()
   return vim.o.columns < M.threshold
 end
 
-local diag_wide = {
-  virtual_text = { prefix = '●', spacing = 2 },
-  signs = true,
-  underline = true,
-  float = { border = 'single' },
-}
-local diag_narrow = {
-  virtual_text = false,
-  signs = true,
-  underline = true,
-  float = { border = 'single', max_width = 50,max_height = 10, wrap = true },
-}
+local function enter_narrow()
+  M._saved = snapshot()
+
+  -- Globals (also become the defaults for new windows).
+  for k, v in pairs(WIN_NARROW) do
+    try_set(vim.go, k, v)
+  end
+  for k, v in pairs(GLOBAL_NARROW) do
+    try_set(vim.go, k, v)
+  end
+
+  -- Diagnostics: signs + float only, no virtual text.
+  local float = M._saved.diag.float
+  float = type(float) == 'table' and float or {}
+  vim.diagnostic.config({
+    virtual_text = false,
+    float = vim.tbl_extend('force', float, {
+      border = float.border or 'single',
+      max_width = 50,
+      max_height = 10,
+      wrap = true,
+    }),
+  })
+
+  -- Gitsigns eol blame wraps into mush on ~50 cols.
+  M._saved.blame_was_on = blame_enabled() == true
+  if M._saved.blame_was_on then
+    set_blame(false)
+  end
+end
+
+local function leave_narrow()
+  local s = M._saved
+  M._saved = nil
+  if not s then
+    return
+  end
+
+  for k, v in pairs(s.win) do
+    try_set(vim.go, k, v)
+  end
+  for k, v in pairs(s.global) do
+    try_set(vim.go, k, v)
+  end
+  -- Existing windows were narrowed individually; put them back too.
+  apply_win_opts(s.win)
+
+  vim.diagnostic.config(s.diag)
+
+  if s.blame_was_on then
+    set_blame(true)
+  end
+end
 
 function M.apply()
   local narrow = M.is_narrow()
 
+  if narrow ~= M._state then
+    local first = M._state == nil
+    M._state = narrow
+    if narrow then
+      enter_narrow()
+    elseif not first then
+      leave_narrow()
+    end
+
+    -- Lualine caches `cond` results; force re-evaluation on change.
+    pcall(function()
+      require('lualine').refresh()
+    end)
+  end
+
+  -- Windows opened while narrow (or before the module ran) may not have
+  -- picked up the window-local values; cheap to re-assert on every event.
   if narrow then
-    -- Gutter: number (2-wide) + 1 sign col, no fold col, no rnu.
-    vim.opt.numberwidth = 2
-    vim.opt.foldcolumn = '0'
-    vim.opt.signcolumn = 'yes:1'
-    vim.opt.number = true
-    vim.opt.relativenumber = false
-    -- Wrapping / sideways motion: every col counts.
-    vim.opt.wrap = true
-    vim.opt.linebreak = true
-    vim.opt.breakindent = true
-    vim.opt.showbreak = '↪ '
-    vim.opt.sidescroll = 1
-    vim.opt.sidescrolloff = 0
-    vim.opt.scrolloff = 1
-    -- Chrome: one global statusline, tabline only when needed.
-    vim.opt.laststatus = 3
-    vim.opt.showtabline = 1
-    vim.opt.cmdheight = 1
-    vim.opt.winminwidth = 10
-    vim.opt.winwidth = 10
-    vim.opt.splitkeep = 'screen'
-    vim.diagnostic.config(diag_narrow)
-  else
-    vim.opt.numberwidth = 4
-    vim.opt.foldcolumn = '1'
-    vim.opt.signcolumn = 'yes'
-    vim.opt.number = true
-    vim.opt.relativenumber = true
-    vim.opt.breakindent = false
-    vim.opt.showbreak = ''
-    vim.opt.sidescrolloff = 8
-    vim.opt.scrolloff = 3
-    vim.opt.laststatus = 3
-    vim.opt.showtabline = 1
-    vim.opt.splitkeep = 'screen'
-    vim.diagnostic.config(diag_wide)
+    apply_win_opts(WIN_NARROW)
   end
-
-  -- Per-window options (future splits inherit vim.opt, fix open ones).
-  for _, win in ipairs(vim.api.nvim_list_wins()) do
-    local ok, buf = pcall(vim.api.nvim_win_get_buf, win)
-    if ok and vim.api.nvim_buf_is_valid(buf) then
-      local bt = vim.bo[buf].buftype
-      if bt ~= 'prompt' and bt ~= 'nofile' then
-        vim.wo[win].number = true
-        vim.wo[win].relativenumber = not narrow
-        vim.wo[win].foldcolumn = narrow and '0' or '1'
-        vim.wo[win].signcolumn = narrow and 'yes:1' or 'yes'
-        vim.wo[win].wrap = true
-        vim.wo[win].linebreak = true
-        vim.wo[win].breakindent = narrow
-      end
-    end
-  end
-
-  -- Gitsigns eol blame wraps into mush on ~50 cols; toggle it with width.
-  pcall(function()
-    local gs = package.loaded.gitsigns
-    if gs and gs.toggle_current_line_blame then
-      -- toggle_current_line_blame(bool) forces state when arg given.
-      gs.toggle_current_line_blame(not narrow)
-    end
-  end)
-
-  -- Lualine caches `cond` results; force re-evaluation on resize.
-  pcall(function()
-    require('lualine').refresh()
-  end)
 end
 
--- Smart horizontal-first split: :vsplit on a 50-col screen gives two
--- unusable 25-col panes. <leader>s picks orientation by width.
+-- Smart split: :vsplit on a 50-col screen gives two unusable 25-col panes,
+-- so pick the orientation by width.
 function M.smart_split()
   if M.is_narrow() then
     vim.cmd('split')
@@ -125,30 +230,46 @@ function M.smart_split()
   end
 end
 
-vim.api.nvim_create_user_command('NarrowOn', function()
-  vim.g.narrow_force = true
-  M.apply()
-end, { desc = 'Force narrow-screen UI' })
-vim.api.nvim_create_user_command('NarrowOff', function()
-  vim.g.narrow_force = false
-  M.apply()
-end, { desc = 'Force wide-screen UI' })
-vim.api.nvim_create_user_command('NarrowAuto', function()
-  vim.g.narrow_force = nil
-  M.apply()
-end, { desc = 'Follow window width for narrow UI' })
-vim.api.nvim_create_user_command('NarrowToggle', function()
-  vim.g.narrow_force = not M.is_narrow()
-  M.apply()
-end, { desc = 'Toggle narrow-screen UI' })
+function M.setup(opts)
+  opts = opts or {}
+  if opts.threshold then
+    M.threshold = opts.threshold
+  end
 
-local grp = vim.api.nvim_create_augroup('NarrowScreen', { clear = true })
-vim.api.nvim_create_autocmd({ 'VimEnter', 'VimResized', 'WinEnter', 'BufWinEnter' }, {
-  group = grp,
-  callback = function()
-    -- Defer on resize so vim.o.columns has settled (tmux/phone rotate).
+  local function cmd(name, fn, desc)
+    vim.api.nvim_create_user_command(name, function()
+      fn()
+      M.apply()
+    end, { desc = desc })
+  end
+  cmd('NarrowOn', function()
+    vim.g.narrow_force = true
+  end, 'Force narrow-screen UI')
+  cmd('NarrowOff', function()
+    vim.g.narrow_force = false
+  end, 'Force wide-screen UI')
+  cmd('NarrowAuto', function()
+    vim.g.narrow_force = nil
+  end, 'Follow window width for narrow UI')
+  cmd('NarrowToggle', function()
+    vim.g.narrow_force = not M.is_narrow()
+  end, 'Toggle narrow-screen UI')
+
+  local grp = vim.api.nvim_create_augroup('NarrowScreen', { clear = true })
+  vim.api.nvim_create_autocmd({ 'VimEnter', 'VimResized', 'VimResume', 'WinNew', 'BufWinEnter' }, {
+    group = grp,
+    callback = function()
+      -- Defer so vim.o.columns has settled (tmux / phone rotate).
+      vim.schedule(M.apply)
+    end,
+  })
+
+  -- If this module was loaded lazily after VimEnter, that event won't fire.
+  if vim.v.vim_did_enter == 1 then
     vim.schedule(M.apply)
-  end,
-})
+  end
+end
+
+M.setup()
 
 return M
