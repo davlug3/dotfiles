@@ -1,25 +1,86 @@
 return {
   {
     'nvim-treesitter/nvim-treesitter',
-    -- Deferred so parser builds don't block first paint; runs right after startup.
-    event = 'VeryLazy',
+    lazy = false,
+    build = ':TSUpdate',
+
     config = function()
-      -- Modern API: the old require('nvim-treesitter.config') module and the
-      -- ensure_installed / highlight.enable options were removed from master.
-      -- install() downloads each grammar and shells out to the `tree-sitter`
-      -- CLI (`generate` + `build`), so the CLI must be on $PATH (installed
-      -- via run_once_install-tree-sitter-cli; `:checkhealth nvim-treesitter`
-      -- reports it). Already-installed parsers are a no-op.
       require('nvim-treesitter').setup()
+
       require('nvim-treesitter').install {
+        -- Systems
+        'c',
+        'cpp',
+        'rust',
         'go',
-        'gomod',
-        'gosum',
-        'gowork',
-        'gotmpl',
+        'java',
+        'kotlin',
+        'c_sharp',
+        'swift',
+
+        -- Web
+        'javascript',
+        'typescript',
+        'tsx',
+        'html',
+        'css',
+        'scss',
+        'vue',
+        'svelte',
+        'astro',
+
+        -- Backend / scripting
+        'python',
+        'ruby',
+        'php',
+        'lua',
         'bash',
+        'fish',
+        'perl',
+        'r',
+        'sql',
+
+        -- Data / config
+        'json',
+        'jsonc',
+        'yaml',
         'toml',
+        'xml',
+        'graphql',
+        'hcl',
+
+        -- Templates
+        'gotmpl',
+        'jinja',
+
+        -- DevOps
+        'dockerfile',
+
+        -- Documentation
+        'markdown',
+        'markdown_inline',
+        'rst',
+
+        -- Git
+        'gitcommit',
+        'git_rebase',
+
+        -- Misc
+        'vim',
+        'regex',
       }
+
+      vim.api.nvim_create_autocmd('FileType', {
+        callback = function(args)
+          pcall(vim.treesitter.start, args.buf)
+        end,
+      })
     end,
+  },
+
+  {
+    'martineausimon/nvim-lilypond-suite',
+    ft = { 'lilypond', 'tex', 'texinfo' },
+    opts = {},
   },
 }

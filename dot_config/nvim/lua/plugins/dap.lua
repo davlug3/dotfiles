@@ -1,5 +1,5 @@
--- VSCode-like debugging: nvim-dap + launch.json support.
--- Minimal by default (signs + virtual-text + F-keys); full sidebar via <leader>du.
+-- VSCode-like debugging: nvim-dap and launch.json support.
+-- Minimal by default (signs, virtual-text, F-keys); full sidebar via <leader>du.
 return {
   'mfussenegger/nvim-dap',
   {

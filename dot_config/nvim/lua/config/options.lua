@@ -6,33 +6,66 @@ vim.g.netrw_alternate = ''
 vim.g.netrw_liststyle = 0
 vim.g.netrw_winsize = 25
 
--- When running `nvim .` (or `nvim <dir>`): skip netrw, show an empty
--- buffer (splash) with Neo-tree open on the side instead.
+-- When running `nvim .` or `nvim <dir>`:
+--   • don't show netrw
+--   • start with an empty scratch buffer
+--   • open Neo-tree without moving focus
+--   • set cwd to the requested directory
+
 vim.api.nvim_create_autocmd("VimEnter", {
-  pattern = "*",
   callback = function()
+    local target_dir
+
+    -- Find the first directory passed to Neovim.
     for _, arg in ipairs(vim.v.argv) do
-      if arg ~= "" and vim.fn.isdirectory(arg) == 1 then
-        -- Drop the directory buffer netrw would have shown
-        local dir_buf = vim.api.nvim_get_current_buf()
-        vim.cmd("enew")
-        pcall(vim.api.nvim_buf_delete, dir_buf, { force = true })
-        -- cd so pickers (Telescope) work relative to the target dir
-        pcall(vim.cmd, "cd " .. vim.fn.fnameescape(arg))
-        -- Defer so that lazy.nvim has fully initialized and the
-        -- Neotree command (via cmd proxy) is guaranteed to exist.
-        -- `show` (not `reveal`/`focus`) keeps the cursor on the splash.
-        vim.defer_fn(function()
-          if vim.fn.exists(":Neotree") == 2 then
-            vim.cmd("Neotree show")
-          end
-        end, 50)
-        break
+      if arg ~= "" and not vim.startswith(arg, "-") then
+        local expanded = vim.fn.fnamemodify(arg, ":p")
+
+        if vim.fn.isdirectory(expanded) == 1 then
+          target_dir = expanded
+          break
+        end
       end
     end
+
+    if not target_dir then
+      return
+    end
+
+    -- Make the requested directory the working directory so that
+    -- Telescope and other tools start from the correct location.
+    vim.cmd.cd(vim.fn.fnameescape(target_dir))
+
+    -- Replace netrw's directory buffer with a scratch buffer.
+    local netrw_buf = vim.api.nvim_get_current_buf()
+
+    vim.cmd.enew()
+
+    local splash_buf = vim.api.nvim_get_current_buf()
+
+    vim.bo[splash_buf].buftype = "nofile"
+    vim.bo[splash_buf].bufhidden = "wipe"
+    vim.bo[splash_buf].swapfile = false
+    vim.bo[splash_buf].buflisted = false
+    vim.bo[splash_buf].modifiable = false
+
+    -- Remove the original netrw buffer.
+    if vim.api.nvim_buf_is_valid(netrw_buf)
+        and netrw_buf ~= splash_buf then
+      pcall(vim.api.nvim_buf_delete, netrw_buf, { force = true })
+    end
+
+    -- Open Neo-tree after lazy.nvim has registered its command.
+    -- `show` opens it without stealing focus from the splash buffer.
+    vim.schedule(function()
+      vim.defer_fn(function()
+        if vim.fn.exists(":Neotree") == 2 then
+          vim.cmd("Neotree show")
+        end
+      end, 50)
+    end)
   end,
 })
-
 
 -- General
 vim.opt.history = 500

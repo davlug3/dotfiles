@@ -1,7 +1,3 @@
---- Detect ripgrep for Telescope's grep pickers.
---- live_grep prefers rg when it is on $PATH; when rg is absent Telescope
---- falls back to vimgrep/grep using the arguments below, so the fallback
---- is deterministic on every machine without requiring the user to act.
 local has_ripgrep = vim.fn.executable('rg') == 1
 
 local vimgrep_arguments
@@ -16,7 +12,6 @@ if has_ripgrep then
     '--smart-case',
   }
 else
-  --- grep fallback: works on both GNU and BSD/macOS grep without --column.
   vimgrep_arguments = {
     'grep',
     '--color=never',
@@ -34,28 +29,74 @@ return {
       require('telescope').setup({
         defaults = {
           vimgrep_arguments = vimgrep_arguments,
-          prompt_prefix = '❯ ',
-          selection_caret = '❯ ',
+          prompt_prefix = '>',
+          selection_caret = '>',
           path_display = { 'truncate' },
-          -- Narrow (<55 cols): drop the preview pane, go full-width.
-          -- preview_cutoff makes it automatic on resize, no re-setup needed.
-          layout_strategy = 'horizontal',
+          layout_strategy = 'flex',
           layout_config = {
             width = 0.99,
             height = 0.9,
             horizontal = { preview_cutoff = 55, prompt_position = 'top' },
             vertical = { preview_cutoff = 55, prompt_position = 'top' },
           },
-          file_ignore_patterns = {
-            '%.git/',
-            'node_modules',
-            '%.venv/',
-            '__pycache__',
-            '%.mypy_cache/',
-            '%.pytest_cache/',
-            '%.cache/',
-          },
-          mappings = {
+file_ignore_patterns = {
+  '%.git/',
+  'node_modules',
+  '%.venv/',
+  '__pycache__',
+  '%.mypy_cache/',
+  '%.pytest_cache/',
+  '%.cache/',
+  '%.docker/',
+  '%.terraform/',
+  '%.aws/',
+  'kube/',
+  '%.sqlite',
+  '%.db',
+  '%.duckdb',
+  'data/db/',
+  'supabase/',
+  '%.astro/',
+  '%.remix/',
+  '%.turbo/',
+  '%.vercel/',
+  '%.netlify/',
+  'bin/',
+  'obj/',
+  '%.gopls/',
+  'dist-newstyle/',
+  '%.stack-work/',
+  '%.docusaurus/',
+  'site/',
+  '_site/',
+  '%.vitepress/dist/',
+  '%.wrangler/',
+  '%.dev/',
+  '%.cloudflare/',
+  '%.next/',
+  '%.nuxt/',
+  '%.output/',
+  'dist/',
+  'build/',
+  'out/',
+  '%.nitro/',
+  '%.content-cache/',
+  '%.mp4',
+  '%.mov',
+  '%.avi',
+  '%.png',
+  '%.jpg',
+  '%.jpeg',
+  '%.webp',
+  '%.gif',
+  '%.mp3',
+  '%.wav',
+  '%.flac',
+  '%.zip',
+  '%.tar%.gz',
+  '%.rar',
+  '%.7z',
+},          mappings = {
             i = {
               ['<C-j>'] = 'move_selection_next',
               ['<C-k>'] = 'move_selection_previous',
@@ -69,10 +110,12 @@ return {
       })
     end,
     keys = {
-      -- VSCode-style Ctrl+P quick-open + Ctrl+Shift+P command palette.
+      -- VSCode-style Ctrl+P quick-open + Ctrl+Shift+P command  palette.
       -- <leader>1/ff/fo remain as fallbacks (some terminals send <C-p> for <C-S-p>).
       { '<C-p>',        '<cmd>Telescope find_files<CR>',                desc = 'Find files (Ctrl+P)' },
+      { '<leader>p',        '<cmd>Telescope find_files<CR>',                desc = 'Find files (Leader+p)' },
       { '<C-S-p>',      '<cmd>Telescope commands<CR>',                 desc = 'Commands (Ctrl+Shift+P)' },
+      { '<leader>P',      '<cmd>Telescope commands<CR>',                 desc = 'Commands (Leader+P)' },
       { '<leader>1',      '<cmd>Telescope find_files<CR>',                desc = 'Find files' },
       { '<leader>ff',   '<cmd>Telescope find_files hidden=true<CR>',    desc = 'Find files (hidden)' },
       { '<leader>fg',   '<cmd>Telescope live_grep<CR>',                 desc = 'Live grep' },

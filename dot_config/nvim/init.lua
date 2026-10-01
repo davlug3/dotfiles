@@ -1,15 +1,11 @@
--- Disable netrw BEFORE anything (esp. lazy.nvim) can load it.
--- Neo-tree handles directory browsing instead.
--- NOTE: these must stay here at the top. Setting them later (e.g. in
--- config/options.lua, after lazy.setup()) is too late: lazy triggers
--- `packadd netrw` during setup, the plugin then defines its FileExplorer
--- VimEnter autocmds, but the autoload file bails out early on
--- g:loaded_netrw — leaving `netrw#LocalBrowseCheck` undefined (E117).
+
+-- Diable netrw in favor of neo-tree
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
 -- Set leader key BEFORE loading plugins (required by lazy.nvim)
-vim.g.mapleader = " "
+vim.g.mapleader = "\\"
+vim.g.maplocalleader = "\\"
 
 vim.opt.rtp:prepend(vim.fn.stdpath('data') .. '/lazy/lazy.nvim')
 

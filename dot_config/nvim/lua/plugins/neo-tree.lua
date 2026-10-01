@@ -1,112 +1,40 @@
 return {
   {
-    'nvim-neo-tree/neo-tree.nvim',
-    branch = 'v3.x',
-    cmd = { 'Neotree' },
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
     dependencies = {
-      'nvim-lua/plenary.nvim',
-      'nvim-tree/nvim-web-devicons',
-      'MunifTanjim/nui.nvim',
+      "nvim-lua/plenary.nvim",
+      "MunifTanjim/nui.nvim",
+      "nvim-tree/nvim-web-devicons",
     },
-    keys = {
-      { '<leader>e', '<cmd>Neotree toggle<CR>', desc = 'Toggle Neo-tree' },
+  },
+  {
+    "Crysthamus/nvim-file-operations",
+    -- branch = "compat" -- if you are on Neovim <= 0.10
+    dependencies = {
+      "nvim-neo-tree/neo-tree.nvim", -- makes sure that this loads after Neo-tree.
     },
-    opts = {
-      default_component_configs = {
-        git_status = {
-          symbols = {
-            added = 'A',
-            modified = 'M',
-            deleted = 'D',
-            renamed = 'R',
-            untracked = '?',
-            ignored = '!',
-            unstaged = 'M',
-            staged = 'S',
-            conflict = '!',
+    config = function()
+      require("nvim-file-operations").setup()
+    end,
+  },
+  {
+    "s1n7ax/nvim-window-picker",
+    version = "2.*",
+    config = function()
+      require("window-picker").setup({
+        filter_rules = {
+          include_current_win = false,
+          autoselect_one = true,
+          -- filter using buffer options
+          bo = {
+            -- if the file type is one of following, the window will be ignored
+            filetype = { "neo-tree", "neo-tree-popup", "notify" },
+            -- if the buffer type is one of following, the window will be ignored
+            buftype = { "terminal", "quickfix" },
           },
         },
-        icon = {
-          folder_closed = '▸',
-          folder_open = '▾',
-          folder_empty = '□',
-          folder_empty_open = '◇',
-          default = '*',
-          provider = function(icon, node, state)
-            if node.type ~= 'file' then return end
-            local default = '·'
-            local ext_icons = {
-              md = '§',
-              sh = '>',
-              json = '{ }',
-              lua = '◇',
-              go = '◎',
-              py = '▶',
-              js = '◈',
-              ts = '◈',
-              rs = '◇',
-              rb = '◆',
-              ex = '◆',
-              yaml = '≡',
-              toml = '≡',
-              txt = '·',
-              cfg = '·',
-              conf = '·',
-              ini = '·',
-              gz = '⎔',
-              zip = '⎔',
-              tar = '⎔',
-              rar = '⎔',
-              bz2 = '⎔',
-              xz = '⎔',
-              ['7z'] = '⎔',
-              iso = '⎔',
-              gitignore = '○',
-              dockerignore = '○',
-              lock = '◎',
-              log = '¶',
-              err = '×',
-              out = '×',
-              pdf = '□',
-              png = '▣',
-              jpg = '▣',
-              jpeg = '▣',
-              gif = '▣',
-              svg = '▣',
-              ico = '▣',
-              css = '#',
-              scss = '#',
-              less = '#',
-              html = '<>',
-              htm = '<>',
-              xml = '<>',
-              sql = '⎈',
-              db = '⎈',
-              c = '◎',
-              cpp = '◎',
-              h = '◎',
-              hpp = '◎',
-              java = '◎',
-              kt = '◎',
-              swift = '◎',
-              dart = '◎',
-            }
-            local ext = vim.fn.fnamemodify(node.name, ':e'):lower()
-            icon.text = ext_icons[ext] or default
-            icon.highlight = 'NeoTreeFileIcon'
-          end,
-        },
-      },
-      window = {
-        -- Default 40 cols is 80% of a 50-col screen; 22 works both ways.
-        width = 22,
-      },
-      filesystem = {
-        follow_current_file = { enabled = true },
-        filtered_items = { hide_gitignored = false },
-        window = { width = 22 },
-      },
-      enable_git_status = true,
-    },
+      })
+    end,
   },
 }
