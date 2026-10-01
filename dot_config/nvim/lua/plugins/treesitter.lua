@@ -1,3 +1,9 @@
+vim.filetype.add({
+  extension = {
+    jsonc = "json",
+  },
+})
+
 return {
   {
     'nvim-treesitter/nvim-treesitter',
@@ -42,7 +48,6 @@ return {
 
         -- Data / config
         'json',
-        'jsonc',
         'yaml',
         'toml',
         'xml',

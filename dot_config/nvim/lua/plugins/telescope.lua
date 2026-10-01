@@ -36,8 +36,8 @@ return {
           layout_config = {
             width = 0.99,
             height = 0.9,
-            horizontal = { preview_cutoff = 55, prompt_position = 'top' },
-            vertical = { preview_cutoff = 55, prompt_position = 'top' },
+            horizontal = { preview_cutoff = 55, prompt_position = 'bottom' },
+            vertical = { preview_cutoff = 55, prompt_position = 'bottom' },
           },
 file_ignore_patterns = {
   '%.git/',
