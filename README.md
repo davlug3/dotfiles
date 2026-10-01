@@ -83,13 +83,39 @@ alias brewup="brew update && brew upgrade && brew cleanup"
 {{ end -}}
 ```
 
+### Package installers (single source of truth)
+
+Each package's install procedure is defined exactly once in `installers/` (`install-<name>.sh` for Unix, `install-<name>.ps1` for Windows). Everything else delegates to these files — never duplicate the logic:
+
+- `install.sh` / `install.ps1` (fresh-machine bootstrap) call `installers/` — from the local clone, or fetched from GitHub when piped via curl.
+- `run_once_install-*.sh.tmpl` / `*-windows.ps1.tmpl` (first-`apply` auto-install) exec the deployed copy at `~/installers/`.
+
+All installers are idempotent (exit 0 when already installed). Invoke any one any time:
+
+```bash
+~/installers/install-nvim.sh
+~/installers/install-lilypond.sh
+~/installers/install-starship.sh
+```
+
+```powershell
+& "$HOME/installers/install-nvim.ps1"
+```
+
+| Package | First-apply prompt | Default |
+|---------|-------------------|---------|
+| neovim | `Install neovim?` | Yes |
+| lilypond | `Install lilypond?` | No |
+| starship | none (always installed — shell rc depends on it) | — |
+
 ### Run-once scripts
 
 Scripts prefixed with `run_once_` execute automatically on first `chezmoi apply`. Currently runs:
 
 - **vim-plug** — installs plugin manager and runs `PlugInstall`
 - **JetBrains Mono Nerd Font** — installs the font for Unix systems (desktop font cache on Linux/macOS, terminal font via `~/.termux/font.ttf` on Termux)
-- **neovim** — installs the latest neovim binary (official tarball to `~/.local/bin` on Linux/macOS, `pkg` on Termux, winget on Windows)
+- **neovim** — gated on the `Install neovim?` prompt; delegates to `~/installers/install-nvim.sh`
+- **lilypond** — gated on the `Install lilypond?` prompt; delegates to `~/installers/install-lilypond.sh`
 - **ripgrep** — installs `rg` for fast Telescope live_grep (prebuilt binary on Linux/macOS, `pkg` on Termux, winget on Windows); Telescope falls back to native `grep` if rg is missing
 
 ### Starship prompt
@@ -97,8 +123,8 @@ Scripts prefixed with `run_once_` execute automatically on first `chezmoi apply`
 A minimal [starship](https://starship.rs) config is included at `~/.config/starship.toml`. Enable it:
 
 ```bash
-# Install starship
-curl -sS https://starship.rs/install.sh | sh
+# Install starship (same script the bootstrap uses)
+~/installers/install-starship.sh
 
 # Add to ~/.bashrc
 eval "$(starship init bash)"

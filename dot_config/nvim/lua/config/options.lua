@@ -113,3 +113,11 @@ vim.opt.completeopt = { 'menuone', 'noinsert', 'noselect', 'preview' }
 
 -- Clipboard
 vim.opt.clipboard = 'unnamedplus'
+
+
+vim.api.nvim_create_autocmd('FileType', {
+    pattern = 'lilypond',
+    callback = function ()
+        vim.bo.commentstring = '% %s'
+    end
+})

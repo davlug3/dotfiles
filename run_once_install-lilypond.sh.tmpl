@@ -1,0 +1,19 @@
+{{- $installLilypond := false -}}
+{{- if hasKey . "install_lilypond" -}}{{- $installLilypond = .install_lilypond -}}{{- end -}}
+{{- if and (ne .chezmoi.os "windows") $installLilypond -}}
+{{- if env "TERMUX_VERSION" -}}
+#!/data/data/com.termux/files/usr/bin/env bash
+{{- else -}}
+#!/usr/bin/env bash
+{{ end }}
+set -Eeuo pipefail
+# Thin wrapper: auto-install on first apply when prompted Yes.
+# Manual re-run any time with: ~/installers/install-lilypond.sh
+if [[ -x "${HOME}/installers/install-lilypond.sh" ]]; then
+  exec bash "${HOME}/installers/install-lilypond.sh"
+else
+  # Fresh init: dotfiles may not be written yet, resolve from source dir.
+  SRC="$(chezmoi source-path 2>/dev/null || echo "${HOME}/.local/share/chezmoi")"
+  exec bash "${SRC}/installers/install-lilypond.sh"
+fi
+{{- end -}}

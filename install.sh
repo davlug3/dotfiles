@@ -4,7 +4,26 @@ set -e
 
 have() { command -v "$1" >/dev/null 2>&1; }
 
+# Single source of truth for package installs lives in installers/.
+# Runs installers/<name>.sh from the local clone when present,
+# otherwise fetches it from GitHub (curl-pipe bootstrap mode).
+REPO_RAW="https://raw.githubusercontent.com/davlug3/dotfiles/main/installers"
+run_installer() {
+    local name="$1"
+    if [ -f "$PWD/installers/${name}.sh" ]; then
+        bash "$PWD/installers/${name}.sh"
+    elif have curl; then
+        curl -fsSL "${REPO_RAW}/${name}.sh" | bash
+    elif have wget; then
+        wget -qO- "${REPO_RAW}/${name}.sh" | bash
+    else
+        echo "error: need curl or wget to fetch ${name} installer" >&2
+        exit 1
+    fi
+}
+
 # Install a system package using the first available package manager.
+# Bootstrap-only helper (used for git); package installs live in installers/.
 _pkg_install() {
     if have pkg; then          pkg install -y "$1"
     elif have apt-get; then    sudo apt-get update && sudo apt-get install -y "$1"
@@ -19,55 +38,14 @@ _pkg_install() {
 }
 
 install_neovim() {
-    if have nvim; then
-        echo ">>> neovim already installed"
-        return
-    fi
-
-    echo ">>> neovim not found; installing..."
-
-    mkdir -p "$HOME/.local/bin"
-
-    curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
-    sudo rm -rf "$HOME/.local/bin/nvim-linux-x86_64"
-    sudo tar -C "$HOME/.local/bin -xzf nvim-linux-x86_64.tar.gz"
-    export PATH="$PATH:$HOME/.local/bin/nvim-linux-x86_64/bin"
+    echo ">>> ensuring neovim..."
+    run_installer install-nvim
 }
 
 
 install_starship() {
-    if have starship; then
-        echo ">>> starship already installed"
-        return
-    fi
-
-    echo ">>> starship not found; installing..."
-
-    # Strategy 1: native package manager
-    if have apt-get || have dnf || have pacman || have brew || have pkg; then
-        echo ">>> trying package manager..."
-        if _pkg_install starship 2>/dev/null; then
-            echo ">>> starship installed via package manager"
-            return
-        fi
-        echo ">>> package manager install failed; falling back to official installer..."
-    fi
-
-    # Strategy 2: official starship.rs installer
-    # mkdir -p ensures the target directory exists (fixes "does not appear to
-    # be a directory" error on fresh systems where ~/.local/bin doesn't exist)
-    mkdir -p "$HOME/.local/bin"
-    if have curl; then
-        curl -sS https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin"
-    elif have wget; then
-        wget -qO- https://starship.rs/install.sh | sh -s -- -y -b "$HOME/.local/bin"
-    else
-        echo "error: need curl or wget to install starship" >&2
-        exit 1
-    fi
-    [ -x "$HOME/.local/bin/starship" ] || {
-        echo "error: starship was not installed" >&2; exit 1;
-    }
+    echo ">>> ensuring starship..."
+    run_installer install-starship
 }
 
 # Ensure prerequisites for a brand-new machine are present:

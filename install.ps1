@@ -11,40 +11,30 @@ Write-Host @"
   installing dotfiles...
 "@
 
+$REPO_RAW = "https://raw.githubusercontent.com/davlug3/dotfiles/main/installers"
+
+# Single source of truth for package installs lives in installers/.
+# Runs installers/<name>.ps1 from the local clone when present,
+# otherwise fetches it from GitHub (remote bootstrap mode).
+function Invoke-PackageInstaller {
+    param([string]$Name)
+    $local = Join-Path (Join-Path $PSScriptRoot "installers") "$Name.ps1"
+    if (($PSScriptRoot) -and (Test-Path $local)) {
+        & $local
+    } else {
+        Write-Host "fetching $Name installer from GitHub..."
+        $script = Invoke-RestMethod "$REPO_RAW/$Name.ps1"
+        # Run fetched script via temp file so $ErrorActionPreference=Stop applies
+        $tmp = Join-Path $env:TEMP "chezmoi-$Name.ps1"
+        Set-Content -Path $tmp -Value $script
+        & $tmp
+        Remove-Item $tmp -Force
+    }
+}
+
 function Install-Starship {
-    if (Get-Command starship -ErrorAction SilentlyContinue) {
-        Write-Host ">>> starship already installed"
-        return
-    }
-
-    Write-Host ">>> starship not found; installing..."
-
-    # Strategy 1: winget (preferred on Windows)
-    try {
-        Write-Host ">>> trying winget..."
-        winget install --id Starship.Starship --exact --accept-source-agreements --accept-package-agreements 2>$null
-        if (Get-Command starship -ErrorAction SilentlyContinue) { return }
-    } catch { }
-
-    # Strategy 2: scoop
-    try {
-        Write-Host ">>> trying scoop..."
-        scoop install starship 2>$null
-        if (Get-Command starship -ErrorAction SilentlyContinue) { return }
-    } catch { }
-
-    # Strategy 3: official installer
-    Write-Host ">>> trying official installer..."
-    $binDir = "$env:USERPROFILE\.local\bin"
-    if (-not (Test-Path $binDir)) { New-Item -ItemType Directory -Path $binDir -Force | Out-Null }
-    $installer = "$env:TEMP\starship-install.ps1"
-    Invoke-WebRequest -Uri "https://starship.rs/install.ps1" -OutFile $installer
-    & $installer -BinDir $binDir -Yes
-    Remove-Item $installer -Force
-
-    if (-not (Get-Command starship -ErrorAction SilentlyContinue)) {
-        throw "starship installation failed"
-    }
+    Write-Host ">>> ensuring starship..."
+    Invoke-PackageInstaller "install-starship"
 }
 
 function Install-Chezmoi {

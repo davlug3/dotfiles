@@ -3,11 +3,16 @@
 {{- $machine := promptChoiceOnce . "machine" "Machine type?" (list "personal" "work") -}}
 {{- $termux := env "TERMUX_VERSION" -}}
 
+{{- $installNvim := promptBoolOnce . "install_nvim" "Install neovim?" true -}}
+{{- $installLilypond := promptBoolOnce . "install_lilypond" "Install lilypond?" false -}}
+
 [data]
     email = {{ $email | quote }}
     name = {{ $name | quote }}
     machine = {{ $machine | quote }}
     termux = {{ if $termux }}true{{ else }}false{{ end }}
+    install_nvim = {{ $installNvim }}
+    install_lilypond = {{ $installLilypond }}
 
 [git]
     autoCommit = false
