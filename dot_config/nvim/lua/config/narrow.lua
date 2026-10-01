@@ -98,6 +98,14 @@ local function is_normal_window(win)
     return false
   end
 
+  -- Let Neo-tree own its wrap setting (W toggle in neo-tree.lua).
+  local ok_ft, ft = pcall(function()
+    return vim.bo[buf].filetype
+  end)
+  if ok_ft and (ft == "neo-tree" or ft == "neo-tree-popup") then
+    return false
+  end
+
   return not SKIP_BUFTYPE[vim.bo[buf].buftype]
 end
 
