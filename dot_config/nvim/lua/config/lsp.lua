@@ -1,5 +1,6 @@
 local servers = {
   'ts_ls',
+  'vue_ls',
   'pyright',
   'terraformls',
   'lua_ls',
@@ -28,6 +29,7 @@ require('mason').setup()
 require('mason-lspconfig').setup({
   ensure_installed = servers,
   automatic_installation = false, -- Only install servers that are explicitly requested
+  automatic_enable = false, -- We enable explicitly via vim.lsp.enable(servers) below
 })
 
 -- Configure lua_ls to use system installation if available
@@ -53,6 +55,81 @@ vim.lsp.config['gopls'] = {
     },
   },
 }
+
+-- Vue + TypeScript: vue_ls requires a companion ts_ls/vtsls client in the
+-- same project, otherwise it errors with "Could not find ts_ls, vtsls, or
+-- typescript-tools lsp client required by vue_ls". ts_ls must also load
+-- @vue/typescript-plugin and claim the `vue` filetype.
+local function vue_typescript_plugin_location()
+  local candidates = {
+    vim.fn.stdpath('data') .. '/mason/packages/vue-language-server/node_modules/@vue/typescript-plugin',
+  }
+  for _, p in ipairs(candidates) do
+    if vim.fn.isdirectory(p) == 1 then
+      return p
+    end
+  end
+  -- Fallback: global npm install (npm i -g @vue/typescript-plugin).
+  local npm_root = vim.fn.system({ 'npm', 'root', '-g' }):gsub('%s+$', '')
+  if npm_root ~= '' then
+    local p = npm_root .. '/@vue/typescript-plugin'
+    if vim.fn.isdirectory(p) == 1 then
+      return p
+    end
+  end
+  return nil
+end
+
+local function vue_typescript_tsdk()
+  local candidates = {
+    vim.fn.stdpath('data') .. '/mason/packages/typescript-language-server/node_modules/typescript/lib',
+    vim.fn.stdpath('data') .. '/mason/packages/vue-language-server/node_modules/typescript/lib',
+  }
+  for _, p in ipairs(candidates) do
+    if vim.fn.isdirectory(p) == 1 then
+      return p
+    end
+  end
+  return nil
+end
+
+do
+  local plugin_location = vue_typescript_plugin_location()
+  local plugins = {}
+  if plugin_location then
+    plugins = {
+      {
+        name = '@vue/typescript-plugin',
+        location = plugin_location,
+        languages = { 'vue' },
+      },
+    }
+  end
+  vim.lsp.config['ts_ls'] = {
+    filetypes = { 'typescript', 'javascript', 'javascriptreact', 'typescriptreact', 'vue' },
+    init_options = {
+      plugins = plugins,
+    },
+  }
+end
+
+do
+  local tsdk = vue_typescript_tsdk()
+  local init_options = {
+    vue = {
+      -- Takeover mode: vue_ls handles all Vue intelligence, ts_ls assists
+      -- via @vue/typescript-plugin. hybridMode = true would split duties.
+      hybridMode = false,
+    },
+  }
+  if tsdk then
+    init_options.typescript = { tsdk = tsdk }
+  end
+  vim.lsp.config['vue_ls'] = {
+    filetypes = { 'vue' },
+    init_options = init_options,
+  }
+end
 
 vim.lsp.config['*'] = {
   capabilities = require('cmp_nvim_lsp').default_capabilities(),
