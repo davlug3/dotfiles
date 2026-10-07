@@ -20,7 +20,9 @@ if (Get-Command starship -ErrorAction SilentlyContinue) {
 }
 
 # --- Git shortcuts (chezmoi: dot_git_shortcuts.tmpl -> ~/.git_shortcuts) --
-if (Test-Path "$HOME/.git_shortcuts") { . "$HOME/.git_shortcuts" }
+# NOTE: extensionless file, so execute contents instead of dot-sourcing;
+# dot-sourcing a non-.ps1 path falls back to the shell association (Notepad).
+if (Test-Path "$HOME/.git_shortcuts") { Invoke-Expression (Get-Content "$HOME/.git_shortcuts" -Raw) }
 
 # --- Convenience aliases -------------------------------------------------
 
