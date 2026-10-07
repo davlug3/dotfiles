@@ -61,7 +61,7 @@ function Install-Chezmoi {
     if (Get-Command winget -ErrorAction SilentlyContinue) {
         try {
             Write-Host "installing chezmoi via winget..."
-            winget install --id twpayne.chezmoi --exact --accept-source-agreements --accept-package-agreements
+            winget install --id twpayne.chezmoi --exact --source winget --accept-source-agreements --accept-package-agreements
             Update-SessionPath
             if (Get-Command chezmoi -ErrorAction SilentlyContinue) { return }
             Write-Warning "winget did not leave chezmoi on PATH (exit=$LASTEXITCODE), trying official installer..."

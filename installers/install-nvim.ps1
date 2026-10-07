@@ -12,7 +12,7 @@ if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
     throw "winget not found; install App Installer from the Microsoft Store, then re-run."
 }
 
-winget install --id Neovim.Neovim --exact --accept-source-agreements --accept-package-agreements
+winget install --id Neovim.Neovim --exact --source winget --accept-source-agreements --accept-package-agreements
 $machine = [System.Environment]::GetEnvironmentVariable('Path', 'Machine')
 $user = [System.Environment]::GetEnvironmentVariable('Path', 'User')
 if ($machine -and $user) { $env:Path = "$machine;$user" }

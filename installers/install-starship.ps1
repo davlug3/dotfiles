@@ -20,10 +20,11 @@ if (Get-Command starship -ErrorAction SilentlyContinue) {
 Write-Host "starship not found; installing..."
 
 # Strategy 1: winget (preferred on Windows)
+# NOTE: --source winget avoids slow/failed msstore lookups (WinHttp 12002).
 if (Get-Command winget -ErrorAction SilentlyContinue) {
     try {
         Write-Host "trying winget..."
-        winget install --id Starship.Starship --exact --accept-source-agreements --accept-package-agreements
+        winget install --id Starship.Starship --exact --source winget --accept-source-agreements --accept-package-agreements
         Update-SessionPath
         if (Get-Command starship -ErrorAction SilentlyContinue) { return }
         Write-Warning "winget did not leave starship on PATH (exit=$LASTEXITCODE)"
@@ -45,19 +46,29 @@ if (Get-Command scoop -ErrorAction SilentlyContinue) {
     }
 }
 
-# Strategy 3: official installer
-Write-Host "trying official installer..."
+# Strategy 3: portable zip from GitHub releases (no admin).
+# Per https://starship.rs/guide / README: Windows builds ship as
+# starship-<arch>-pc-windows-msvc.zip/.msi under starship/starship releases.
+# https://starship.rs/install.ps1 no longer exists (404), so do not use it.
+Write-Host "trying GitHub releases..."
 $binDir = Join-Path $HOME '.local\bin'
 if (-not (Test-Path $binDir)) { New-Item -ItemType Directory -Path $binDir -Force | Out-Null }
 $tempDir = $env:TEMP
 if (-not $tempDir) { $tempDir = $env:TMP }
 if (-not $tempDir) { $tempDir = [System.IO.Path]::GetTempPath() }
-$installer = Join-Path $tempDir 'starship-install.ps1'
-Invoke-WebRequest -UseBasicParsing -Uri "https://starship.rs/install.ps1" -OutFile $installer
+$arch = 'x86_64'
+if ($env:PROCESSOR_ARCHITECTURE -eq 'ARM64') { $arch = 'aarch64' }
+$release = Invoke-RestMethod -UseBasicParsing -Uri 'https://api.github.com/repos/starship/starship/releases/latest'
+$tag = $release.tag_name
+$asset = "starship-$arch-pc-windows-msvc.zip"
+$url = "https://github.com/starship/starship/releases/download/$tag/$asset"
+Write-Host "Downloading starship $tag ($asset)..."
+$zip = Join-Path $tempDir 'starship.zip'
+Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $zip
 try {
-    & $installer -BinDir $binDir -Yes
+    Expand-Archive -Path $zip -DestinationPath $binDir -Force
 } finally {
-    Remove-Item $installer -Force -ErrorAction SilentlyContinue
+    Remove-Item $zip -Force -ErrorAction SilentlyContinue
 }
 if ($env:Path -notlike "*$binDir*") { $env:Path = "$env:Path;$binDir" }
 Update-SessionPath

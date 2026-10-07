@@ -13,7 +13,7 @@ if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
 }
 
 # LilyPond is published on winget as LilyPond.LilyPond
-winget install --id LilyPond.LilyPond --exact --accept-source-agreements --accept-package-agreements
+winget install --id LilyPond.LilyPond --exact --source winget --accept-source-agreements --accept-package-agreements
 $machine = [System.Environment]::GetEnvironmentVariable('Path', 'Machine')
 $user = [System.Environment]::GetEnvironmentVariable('Path', 'User')
 if ($machine -and $user) { $env:Path = "$machine;$user" }
