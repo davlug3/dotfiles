@@ -13,22 +13,38 @@ Write-Host @"
 
 $REPO_RAW = "https://raw.githubusercontent.com/davlug3/dotfiles/main/installers"
 
+function Update-SessionPath {
+    $machine = [System.Environment]::GetEnvironmentVariable('Path', 'Machine')
+    $user = [System.Environment]::GetEnvironmentVariable('Path', 'User')
+    if ($machine -and $user) { $env:Path = "$machine;$user" }
+    elseif ($machine) { $env:Path = $machine }
+    elseif ($user) { $env:Path = "$env:Path;$user" }
+}
+
 # Single source of truth for package installs lives in installers/.
 # Runs installers/<name>.ps1 from the local clone when present,
 # otherwise fetches it from GitHub (remote bootstrap mode).
 function Invoke-PackageInstaller {
     param([string]$Name)
-    $local = Join-Path (Join-Path $PSScriptRoot "installers") "$Name.ps1"
-    if (($PSScriptRoot) -and (Test-Path $local)) {
-        & $local
-    } else {
-        Write-Host "fetching $Name installer from GitHub..."
-        $script = Invoke-RestMethod "$REPO_RAW/$Name.ps1"
-        # Run fetched script via temp file so $ErrorActionPreference=Stop applies
-        $tmp = Join-Path $env:TEMP "chezmoi-$Name.ps1"
-        Set-Content -Path $tmp -Value $script
+    if ($PSScriptRoot) {
+        $local = Join-Path (Join-Path $PSScriptRoot "installers") "$Name.ps1"
+        if (Test-Path $local) {
+            & $local
+            return
+        }
+    }
+    Write-Host "fetching $Name installer from GitHub..."
+    $script = Invoke-RestMethod -UseBasicParsing "$REPO_RAW/$Name.ps1"
+    # Run fetched script via temp file so $ErrorActionPreference=Stop applies
+    $tempDir = $env:TEMP
+    if (-not $tempDir) { $tempDir = $env:TMP }
+    if (-not $tempDir) { $tempDir = [System.IO.Path]::GetTempPath() }
+    $tmp = Join-Path $tempDir "chezmoi-$Name.ps1"
+    Set-Content -Path $tmp -Value $script
+    try {
         & $tmp
-        Remove-Item $tmp -Force
+    } finally {
+        Remove-Item $tmp -Force -ErrorAction SilentlyContinue
     }
 }
 
@@ -42,13 +58,20 @@ function Install-Chezmoi {
         Write-Host "chezmoi already installed"
         return
     }
-    try {
-        Write-Host "installing chezmoi via winget..."
-        winget install --id twpayne.chezmoi --exact --accept-source-agreements --accept-package-agreements
-    } catch {
-        Write-Host "winget failed, using official installer..."
-        Invoke-Expression (Invoke-RestMethod https://get.chezmoi.io/ps1)
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+        try {
+            Write-Host "installing chezmoi via winget..."
+            winget install --id twpayne.chezmoi --exact --accept-source-agreements --accept-package-agreements
+            Update-SessionPath
+            if (Get-Command chezmoi -ErrorAction SilentlyContinue) { return }
+            Write-Warning "winget did not leave chezmoi on PATH (exit=$LASTEXITCODE), trying official installer..."
+        } catch {
+            Write-Warning "winget failed: $($_.Exception.Message), trying official installer..."
+        }
     }
+    Write-Host "installing chezmoi via official installer..."
+    Invoke-Expression (Invoke-RestMethod -UseBasicParsing https://get.chezmoi.io/ps1)
+    Update-SessionPath
     if (-not (Get-Command chezmoi -ErrorAction SilentlyContinue)) {
         throw "chezmoi installation failed"
     }

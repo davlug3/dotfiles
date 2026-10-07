@@ -5,13 +5,15 @@ $ErrorActionPreference = 'Stop'
 
 if (Get-Command nvim -ErrorAction SilentlyContinue) {
     Write-Host "neovim already installed: $(nvim --version | Select-Object -First 1)"
-    exit 0
+    return
 }
 
 if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
-    Write-Error "winget not found; install App Installer from the Microsoft Store, then re-run."
-    exit 1
+    throw "winget not found; install App Installer from the Microsoft Store, then re-run."
 }
 
 winget install --id Neovim.Neovim --exact --accept-source-agreements --accept-package-agreements
+$machine = [System.Environment]::GetEnvironmentVariable('Path', 'Machine')
+$user = [System.Environment]::GetEnvironmentVariable('Path', 'User')
+if ($machine -and $user) { $env:Path = "$machine;$user" }
 Write-Host "neovim installed via winget"
