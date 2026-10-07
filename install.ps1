@@ -11,7 +11,8 @@ Write-Host @"
   installing dotfiles...
 "@
 
-$REPO_RAW = "https://raw.githubusercontent.com/davlug3/dotfiles/main/installers"
+$DOTFILES_REF = if ($env:DOTFILES_REF) { $env:DOTFILES_REF } else { "main" }
+$REPO_RAW = "https://raw.githubusercontent.com/davlug3/dotfiles/$DOTFILES_REF/installers"
 
 function Update-SessionPath {
     $machine = [System.Environment]::GetEnvironmentVariable('Path', 'Machine')
@@ -33,7 +34,7 @@ function Invoke-PackageInstaller {
             return
         }
     }
-    Write-Host "fetching $Name installer from GitHub..."
+    Write-Host "fetching $Name installer from GitHub (ref $DOTFILES_REF)..."
     $script = Invoke-RestMethod -UseBasicParsing "$REPO_RAW/$Name.ps1"
     # Run fetched script via temp file so $ErrorActionPreference=Stop applies
     $tempDir = $env:TEMP

@@ -7,7 +7,10 @@ have() { command -v "$1" >/dev/null 2>&1; }
 # Single source of truth for package installs lives in installers/.
 # Runs installers/<name>.sh from the local clone when present,
 # otherwise fetches it from GitHub (curl-pipe bootstrap mode).
-REPO_RAW="https://raw.githubusercontent.com/davlug3/dotfiles/main/installers"
+# Set DOTFILES_REF to a branch, tag, or commit SHA to pin installers
+# to the same ref as the outer script (bypasses main CDN cache).
+: "${DOTFILES_REF:=main}"
+REPO_RAW="https://raw.githubusercontent.com/davlug3/dotfiles/${DOTFILES_REF}/installers"
 run_installer() {
     local name="$1"
     if [ -f "$PWD/installers/${name}.sh" ]; then
