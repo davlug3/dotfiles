@@ -2,8 +2,21 @@
 # https://github.com/davlug3/dotfiles
 
 # --- Starship prompt -----------------------------------------------------
+# NOTE: Out-String collapses init output to a single string; without it
+# Invoke-Expression fails with "Cannot convert Object[] to String" when
+# starship prints more than one line (e.g. first run after fresh install).
+# try/catch keeps the profile (and chezmoi hooks) usable when starship
+# is mid-install or PATH is stale.
+$starshipBinDir = Join-Path $HOME '.local\bin'
+if (($env:Path -notlike "*$starshipBinDir*") -and (Test-Path $starshipBinDir)) {
+    $env:Path = "$env:Path;$starshipBinDir"
+}
 if (Get-Command starship -ErrorAction SilentlyContinue) {
-    Invoke-Expression (& starship init powershell --print-full-init)
+    try {
+        Invoke-Expression (&starship init powershell --print-full-init | Out-String)
+    } catch {
+        Write-Warning "starship init failed: $($_.Exception.Message)"
+    }
 }
 
 # --- Git shortcuts (chezmoi: dot_git_shortcuts.tmpl -> ~/.git_shortcuts) --
