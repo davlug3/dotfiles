@@ -14,6 +14,9 @@ return {
         mappings = {
           -- Neo-tree-only wrap toggle (applies to the Neo-tree window).
           ["W"] = { "toggle_wrap", desc = "toggle wrap" },
+          -- `/` back to native Vim search; Neo-tree fuzzy finder moves to `g/`.
+          ["/"] = "none",
+          ["g/"] = "fuzzy_finder",
         },
       },
       default_component_configs = {
