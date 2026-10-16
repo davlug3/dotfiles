@@ -82,10 +82,4 @@ return {
       })
     end,
   },
-
-  {
-    'martineausimon/nvim-lilypond-suite',
-    ft = { 'lilypond', 'tex', 'texinfo' },
-    opts = {},
-  },
 }
