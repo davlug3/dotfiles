@@ -8,9 +8,14 @@ return {
       "nvim-tree/nvim-web-devicons",
     },
     opts = {
+      filesystem = {
+        follow_current_file = {
+            enabled = true,
+            leave_dirs_open = false
+        }
+      },
       window = {
-        width = 40,
-        auto_expand_width = true,
+        width = 30,
         mappings = {
           -- Neo-tree-only wrap toggle (applies to the Neo-tree window).
           ["W"] = { "toggle_wrap", desc = "toggle wrap" },
