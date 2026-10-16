@@ -28,7 +28,6 @@ Plug 'tpope/vim-commentary'
 Plug 'majutsushi/tagbar'
 Plug 'junegunn/fzf'
 Plug 'junegunn/fzf.vim'
-Plug 'christoomey/vim-tmux-navigator'
 Plug 'hashivim/vim-terraform'
 Plug 'vim-airline/vim-airline'
 Plug 'neoclide/coc.nvim' , {'branch':'release'}
@@ -306,8 +305,8 @@ map <silent> <Leader>cr :call <SID>GitRootCwd()<CR>
 
 
 if !has('nvim')
-"Enable vim-tmux-navigator shortcuts 
-"when on NERDtree
+"Free the NERDTree sibling-jump keys so they do not shadow navigation
+"mappings. (vim-tmux-navigator is no longer installed.)
 let g:NERDTreeMapJumpPrevSibling=""
 let g:NERDTreeMapJumpNextSibling=""
 let g:NERDTreeChDirMode=2

@@ -1,6 +1,5 @@
 return {
   'tpope/vim-commentary',
-  'christoomey/vim-tmux-navigator',
   {
     -- Lazy: Neovim's core already detects terraform/hcl filetypes on its own,
     -- so this trigger fires without the plugin's ftdetect being loaded.

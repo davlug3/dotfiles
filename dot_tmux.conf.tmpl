@@ -1,17 +1,68 @@
+# Reload the config with prefix + R (capital).
+# prefix + r is given to tmux-resurrect, the common convention, so the two
+# do not fight over the same key.
 unbind r
-bind r source-file ~/.tmux.conf
+unbind R
+bind R source-file ~/.tmux.conf
+# The executables live in each plugin's scripts/ dir, not tpm's bin/.
+bind r run-shell '~/.tmux/plugins/tmux-resurrect/scripts/restore.sh'
+
 set -g default-terminal "tmux-256color"
 
 setw -g mode-keys vi
+setw -g status-keys vi
+
+# --- Sensible defaults -----------------------------------------------------
+# mouse: scroll + pane selection without reaching for the mouse.
+set -g mouse on
+
+# history-limit: the default 2000 lines is very little scrollback.
+set -g history-limit 50000
+
+# focus-events: shells redraw their prompt when a pane gains/loses focus.
+set -g focus-events on
+
+# set-clipboard: OSC 52 clipboard integration.
+set -g set-clipboard on
+
+# renumber-windows: keep window numbers contiguous after closing one.
+set -g renumber-windows on
+
+# detach-on-destroy: closing the final window detaches instead of ending the
+# session (and, with continuum, instead of killing it).
+set -g detach-on-destroy off
+
+# allow-passthrough: let programs pass through escape sequences so they can
+# draw natively (lazygit, fzf, and similar).
+set -g allow-passthrough on
+
+# escape-time: the 500ms default makes <Esc> feel laggy inside vim.
+# 10ms still accommodates slow terminals sending meta key sequences.
+set -g escape-time 10
+
+# repeat-time: a little more forgiving when holding the prefix.
+set -g repeat-time 600
+
+# 1-based numbering, to match the prefix+h/j/k/l pane focus keys below.
+set -g base-index 1
+setw -g pane-base-index 1
 
 set -g @tpm_plugins 'tpm'
 if "test ! -d ~/.tmux/plugins/tpm" \
    "run 'git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm && ~/.tmux/plugins/tpm/bin/install_plugins'"
 
+# NOTE: `set -ga` is deliberately NOT used here. tmux concatenates appended
+# user-option values without a separator, which would produce one bogus plugin
+# name and stop tpm from sourcing anything.
 set -g @plugin 'tmux-plugins/tpm'
-# vim-tmux-navigator removed: use prefix+h/j/k/l for tmux pane focus,
-# and Ctrl+W+h/j/k/l in vim for vim split focus (both native, no plugin)
+# vim-tmux-navigator is fully removed (nvim spec, vim Plug, and the tpm copy).
+# Use prefix+h/j/k/l for tmux pane focus, and Ctrl+W+h/j/k/l in vim for vim
+# split focus (both native, no plugin).
 set -g @plugin 'dracula/tmux'
+# Session persistence: resurrect saves/restores panes, layout and working dirs;
+# continuum auto-saves on exit and restores on tmux start.
+set -g @plugin 'tmux-plugins/tmux-resurrect'
+set -g @plugin 'tmux-plugins/tmux-continuum'
 
 
 set -g @dracula-show-powerline true
@@ -38,8 +89,7 @@ if-shell 'echo "#{client_termtype}" | grep -qi alacritty' \
 
 run '~/.tmux/plugins/tpm/tpm'
 
-# No vim-tmux-navigator: use prefix+h/j/k/l for tmux pane focus,
-# and Ctrl+W+h/j/k/l in vim for vim split focus (both native, no plugin).
+# vim-tmux-navigator is not installed; see the note above.
 
 unbind-key -n C-h
 unbind-key -n C-j
@@ -58,11 +108,25 @@ bind-key -r -T prefix l select-pane -R
 
 
 # panes
-set -g pane-border-style 'fg=red'
-set -g pane-active-border-style 'fg=yellow'
+# Dracula palette, so the borders sit with the dracula status theme above
+# instead of fighting it with raw red/yellow.
+set -g pane-border-style 'fg=#6272a4'
+set -g pane-active-border-style 'fg=#50fa7b'
+
+# status bar (dracula-tmux paints most of this; this covers the rest)
+set -g status-style 'fg=#6272a4 bg=#282a36'
 
 # messages
-set -g message-style 'fg=yellow bg=red bold'
+set -g message-style 'fg=#f1fa8c bg=#282a36 bold'
+
+# --- Copy mode -------------------------------------------------------------
+# mode-keys vi above only switches the key table; these add the bindings that
+# are missing by default.
+bind -T copy-mode-vi /  search-forward
+bind -T copy-mode-vi '?' search-backward
+bind -T copy-mode-vi n  search-again
+bind -T copy-mode-vi N  search-backward-again
+bind -T copy-mode-vi q  send-keys -X cancel
 
 
 
