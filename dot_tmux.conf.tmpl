@@ -120,13 +120,11 @@ set -g status-style 'fg=#6272a4 bg=#282a36'
 set -g message-style 'fg=#f1fa8c bg=#282a36 bold'
 
 # --- Copy mode -------------------------------------------------------------
-# mode-keys vi above only switches the key table; these add the bindings that
-# are missing by default.
-bind -T copy-mode-vi /  search-forward
-bind -T copy-mode-vi '?' search-backward
-bind -T copy-mode-vi n  search-again
-bind -T copy-mode-vi N  search-backward-again
-bind -T copy-mode-vi q  send-keys -X cancel
+# No bindings needed here. `mode-keys vi` above switches to the copy-mode-vi
+# key table, whose defaults already provide /, ?, n, N and q.
+# Do NOT re-add `search-forward` and friends as plain bindings: they are
+# copy-mode commands and must be dispatched via `send-keys -X`, otherwise tmux
+# reports "unknown command".
 
 
 
