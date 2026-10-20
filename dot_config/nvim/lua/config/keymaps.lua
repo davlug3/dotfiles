@@ -37,6 +37,11 @@ vim.keymap.set('n', '<leader>ba', ':bufdo bd<CR>', { desc = 'Close all buffers' 
 vim.keymap.set('n', '<leader>l', ':bnext<CR>', { desc = 'Next buffer' })
 vim.keymap.set('n', '<leader>h', ':bprevious<CR>', { desc = 'Previous buffer' })
 
+-- Neo-tree: toggle the file explorer
+vim.keymap.set('n', '<leader>e', '<cmd>Neotree toggle<CR>', { desc = 'Toggle Neo-tree' })
+-- Neo-tree: flip the explorer between a vertical sidebar and a horizontal split
+vim.keymap.set('n', '<leader>eP', '<cmd>NeotreePos toggle<CR>', { desc = 'Neo-tree position' })
+
 -- lcd to the git root of the current file
 local function git_root()
   local root = vim.fs.root(0, { '.git' })

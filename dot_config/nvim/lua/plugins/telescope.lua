@@ -32,6 +32,10 @@ return {
           prompt_prefix = '>',
           selection_caret = '>',
           path_display = { 'truncate' },
+          history = {
+            path = vim.fn.stdpath('data') .. '/telescope_history',
+            limit = 100,
+          },
           layout_strategy = 'flex',
           layout_config = {
             width = 0.99,
