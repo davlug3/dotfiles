@@ -223,7 +223,7 @@ end
 -- render time, so wrap cannot re-flow a truncated filename. It still exists
 -- for the long lines printed by `i`.
 local function winbar_text()
-  return " e:expand  ?:help  i:details "
+  return " e:expand  ?:help  i:details  P:position "
 end
 
 local function apply_winbar()
@@ -293,6 +293,8 @@ return {
           -- `/` back to native Vim search; Neo-tree fuzzy finder moves to `g/`.
           ["/"] = "none",
           ["g/"] = "fuzzy_finder",
+          -- Toggle between sidebar (left/right) and horizontal (top/bottom).
+          ["P"] = { "neotree_pos_toggle", desc = "Toggle position" },
         },
       },
       default_component_configs = {
@@ -317,6 +319,9 @@ return {
           apply_winbar()
 
           print("Neo-tree wrap " .. (vim.g.neotree_wrap_on and "ON" or "OFF"))
+        end,
+        neotree_pos_toggle = function()
+          vim.cmd("NeotreePos toggle")
         end,
       },
       -- Neo-tree forces `nowrap` on buffer_enter / window_after_open, so the
