@@ -123,6 +123,17 @@ file_ignore_patterns = {
       { '<leader>1',      '<cmd>Telescope find_files<CR>',                desc = 'Find files' },
       { '<leader>ff',   '<cmd>Telescope find_files hidden=true<CR>',    desc = 'Find files (hidden)' },
       { '<leader>fg',   '<cmd>Telescope live_grep<CR>',                 desc = 'Live grep' },
+      -- Hidden files, including gitignored ones (.env, local configs).
+      -- --no-ignore is deliberate here; the normal <leader>fg stays fast.
+      {
+        '<leader>fH',
+        function()
+          require('telescope.builtin').live_grep({
+            additional_args = { '--hidden', '--no-ignore', '--glob=!.git/*' },
+          })
+        end,
+        desc = 'Live grep (hidden + no ignore)',
+      },
       { '<leader>fG',   '<cmd>Telescope grep_cword<CR>',                desc = 'Grep word under cursor' },
       { '<leader>f;',   '<cmd>Telescope grep_last_word<CR>',            desc = 'Grep last searched word' },
       { '<leader>fz',   '<cmd>Telescope current_buffer_fuzzy_find<CR>', desc = 'Fuzzy find in buffer' },
