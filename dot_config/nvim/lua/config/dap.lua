@@ -744,40 +744,14 @@ end
 
 -- ============================================================================
 -- Load .vscode/launch.json
--- ============================================================================
-
-local function dap_load_launch_json()
-  local launch_json = dap_find_launch_json()
-
-  if not launch_json then
-    return nil, {}
-  end
-
-  local ok, err = pcall(function()
-    vscode.load_launchjs(
-      launch_json,
-      vscode_type_to_filetypes
-    )
-  end)
-
-  if not ok then
-    vim.notify(
-      "Failed to load " .. launch_json .. "\n" .. tostring(err),
-      vim.log.levels.ERROR
-    )
-
-    return launch_json, {}
-  end
-
-  local ft = vim.bo.filetype
-  local configs = dap.configurations[ft] or {}
-
-  return launch_json, configs
-end
-
-
--- ============================================================================
--- Find launch.json configurations
+--
+-- nvim-dap reads launch.json on demand via its config-provider system
+-- (:help dap-providers); load_launchjs is deprecated and no longer needed.
+-- This is a pure read for the picker: it does NOT merge anything into
+-- dap.configurations anymore. Configs are matched to the buffer filetype
+-- through the adapter-type map (vscode_type_to_filetypes) and combined with
+-- the native configs, launch.json entries winning on name clashes -- the
+-- same result the old load_launchjs-then-merge produced.
 -- ============================================================================
 
 local function dap_launch_configs()
@@ -787,25 +761,47 @@ local function dap_launch_configs()
     return nil, nil
   end
 
-  local ok, err = pcall(function()
-    vscode.load_launchjs(
-      launch_json,
-      vscode_type_to_filetypes
-    )
-  end)
+  local ok, configs = pcall(vscode.getconfigs, launch_json)
 
   if not ok then
     vim.notify(
-      "Could not load launch.json:\n" .. tostring(err),
+      "Could not load launch.json:\n" .. tostring(configs),
       vim.log.levels.ERROR
     )
 
     return launch_json, {}
   end
 
-  local configs = dap.configurations[vim.bo.filetype] or {}
+  local ft = vim.bo.filetype
+  local launch_matched = {}
 
-  return launch_json, configs
+  for _, config in ipairs(configs) do
+    local filetypes = vscode_type_to_filetypes[config.type] or { config.type }
+
+    if vim.list_contains(filetypes, ft) then
+      launch_matched[#launch_matched + 1] = config
+    end
+  end
+
+  -- Native configs for the filetype, minus any entry a launch.json config
+  -- replaces by name, then the launch.json entries appended -- mirroring
+  -- what load_launchjs's merge used to leave behind.
+  local replaced = {}
+  for _, config in ipairs(launch_matched) do
+    replaced[config.name] = true
+  end
+
+  local merged = {}
+
+  for _, config in ipairs(dap.configurations[ft] or {}) do
+    if not replaced[config.name] then
+      merged[#merged + 1] = config
+    end
+  end
+
+  vim.list_extend(merged, launch_matched)
+
+  return launch_json, merged
 end
 
 
@@ -830,7 +826,7 @@ local function collect_all_configs()
   local seen = {}
   local all = {}
 
-  for _, configs in pairs(dap.configurations) do
+  local function add(configs)
     for _, config in ipairs(configs) do
       local key = collection_key(config)
 
@@ -838,6 +834,25 @@ local function collect_all_configs()
         seen[key] = true
         all[#all + 1] = config
       end
+    end
+  end
+
+  -- Native configs across all filetypes.
+  for _, configs in pairs(dap.configurations) do
+    add(configs)
+  end
+
+  -- launch.json entries are no longer merged into dap.configurations
+  -- (load_launchjs is deprecated); read them directly so the "all" picker
+  -- still offers them. No filetype filter here: this is the every-config
+  -- list for Neo-tree / unnamed buffers.
+  local launch_json = dap_find_launch_json()
+
+  if launch_json then
+    local ok, configs = pcall(vscode.getconfigs, launch_json)
+
+    if ok then
+      add(configs)
     end
   end
 
@@ -919,17 +934,7 @@ local function dap_smart_launch()
       return
     end
 
-    local launch_json = dap_find_launch_json()
-
-    if launch_json then
-      pcall(function()
-        vscode.load_launchjs(
-          launch_json,
-          vscode_type_to_filetypes
-        )
-      end)
-    end
-
+    -- collect_all_configs() reads launch.json itself now; no preload needed.
     local all = collect_all_configs()
 
     if #all == 0 then
