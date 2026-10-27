@@ -20,6 +20,46 @@ else
   }
 end
 
+-- Open a grep result, highlight every occurrence of the prompt in the file and
+-- centre it. Telescope's own edit action only moves to (row, col): it never
+-- touches the search register, so `hlsearch` has nothing to draw and the match
+-- can land at the bottom of the window.
+local function open_grep_result(prompt_bufnr)
+  local actions = require('telescope.actions')
+  local action_state = require('telescope.actions.state')
+
+  -- Capture before select_default closes the prompt buffer.
+  local prompt = action_state.get_current_line()
+
+  actions.select_default(prompt_bufnr)
+
+  if not prompt or prompt == '' then
+    return
+  end
+
+  -- Let Telescope finish opening the buffer and placing the cursor first.
+  vim.schedule(function()
+    vim.fn.setreg('/', prompt)
+    vim.opt.hlsearch = true
+
+    local ok, found = pcall(vim.fn.search, prompt, 'cW')
+    if not ok or found == 0 then
+      -- Ripgrep regex and Vim regex are not the same dialect (+ ? ( ) are
+      -- literal here). Fall back to a literal search so a fancy prompt still
+      -- highlights something instead of throwing E486.
+      local literal = prompt:gsub('\\', '\\\\')
+      pcall(vim.fn.search, '\\V' .. literal, 'cW')
+    end
+
+    vim.cmd('normal! zz')
+  end)
+end
+
+local function grep_attach_mappings(_, map)
+  map({ 'i', 'n' }, '<CR>', open_grep_result)
+  return true
+end
+
 return {
   {
     'nvim-telescope/telescope.nvim',
@@ -122,7 +162,15 @@ file_ignore_patterns = {
       { '<leader>P',      '<cmd>Telescope commands<CR>',                 desc = 'Commands (Leader+P)' },
       { '<leader>1',      '<cmd>Telescope find_files<CR>',                desc = 'Find files' },
       { '<leader>ff',   '<cmd>Telescope find_files hidden=true<CR>',    desc = 'Find files (hidden)' },
-      { '<leader>fg',   '<cmd>Telescope live_grep<CR>',                 desc = 'Live grep' },
+      {
+        '<leader>fg',
+        function()
+          require('telescope.builtin').live_grep({
+            attach_mappings = grep_attach_mappings,
+          })
+        end,
+        desc = 'Live grep',
+      },
       -- Hidden files, including gitignored ones (.env, local configs).
       -- --no-ignore is deliberate here; the normal <leader>fg stays fast.
       {
@@ -130,6 +178,7 @@ file_ignore_patterns = {
         function()
           require('telescope.builtin').live_grep({
             additional_args = { '--hidden', '--no-ignore', '--glob=!.git/*' },
+            attach_mappings = grep_attach_mappings,
           })
         end,
         desc = 'Live grep (hidden + no ignore)',
