@@ -1,5 +1,9 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
+# Raise the directory-scan timeout so slow mounts (e.g. WSL /mnt/c via 9p)
+# finish scanning instead of emitting a timeout warning. Default is 30 ms.
+scan_timeout = 1000
+
 # Root-level format
 format = """
 $username$hostname\
