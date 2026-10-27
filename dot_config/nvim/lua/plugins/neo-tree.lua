@@ -5,7 +5,8 @@
 -- utils.truncate_by_cell). The characters are gone by the time Vim sees them,
 -- so Vim's `wrap` can never re-flow a long filename. There is no option to
 -- disable that truncation on the v3.x branch, so the caps below are the only
--- lever. Names longer than the cap are still cut; press `e` to expand.
+-- lever. Names longer than the cap are still cut; press `e` to expand (capped
+-- at half the screen), or `W` to wrap lines that were not pre-truncated.
 --
 -- Neo-tree measures a sidebar in columns and a top/bottom tree in rows: the
 -- window options read `window.width` for left/right and `window.height` for
@@ -15,6 +16,16 @@ local CAPS = {
   width = { narrow = 30, wide = 50 },
   height = { narrow = 10, wide = 18 },
 }
+
+-- Absolute rule: the tree may never take more than half the screen width,
+-- no matter what the caps, a manual drag, or `e`-expansion ask for.
+-- clamp_size() enforces this on every read, so persisted manual sizes that
+-- were set on a wider screen are capped automatically.
+local MAX_WIDTH_RATIO = 0.5
+
+local function half_screen_width()
+  return math.floor(vim.o.columns * MAX_WIDTH_RATIO)
+end
 
 -- Positions Neo-tree can be driven to by :NeotreePos. float/current are left
 -- out on purpose: they are not splits, and auto-close ignores them.
@@ -184,7 +195,7 @@ local function clamp_size(size, axis)
     return math.max(5, math.min(math.floor(size), max_height))
   end
 
-  local max_width = math.max(20, vim.o.columns - 20)
+  local max_width = math.max(20, half_screen_width())
   return math.max(10, math.min(math.floor(size), max_width))
 end
 
@@ -214,16 +225,14 @@ end
 
 -- Shortcut hint above the tree.
 --
--- Only keys that are actually worth advertising:
---   e: expands the window so long filenames are not truncated
+-- Keys worth advertising:
+--   e: expands the window to the longest name (never past half the screen)
+--   W: wrap (on by default; re-flows lines that were not pre-truncated)
 --   ?: Neo-tree's own keymap help
 --   i: file details
---
--- `W` (wrap) is deliberately not advertised: Neo-tree drops characters at
--- render time, so wrap cannot re-flow a truncated filename. It still exists
--- for the long lines printed by `i`.
+--   P: position toggle
 local function winbar_text()
-  return " e:expand  ?:help  i:details  P:position "
+  return " e:expand  W:wrap  ?:help  i:details  P:position "
 end
 
 local function apply_winbar()
@@ -272,7 +281,8 @@ return {
         -- (utils.resolve_config_option), so the unexpanded tree follows the
         -- screen and the position follows :NeotreePos. See CAPS above for why
         -- these are caps rather than wrap settings.
-        -- A size you set by hand wins over the caps and persists.
+        -- A size you set by hand wins over the caps and persists; every read
+        -- is clamped to half the screen width (MAX_WIDTH_RATIO).
         --
         -- Neo-tree reads `height` only for top/bottom positions and `width`
         -- only for left/right, so each function is simply ignored when it does
@@ -290,6 +300,12 @@ return {
         mappings = {
           -- Neo-tree-only wrap toggle (applies to the Neo-tree window).
           ["W"] = { "toggle_wrap", desc = "toggle wrap" },
+          -- Expand to the longest visible name, capped at half the screen.
+          -- Owns the expansion instead of the default `e`
+          -- (toggle_auto_expand_width): Neo-tree re-expands on every render
+          -- and would fight any clamp applied after the fact. Like a manual
+          -- drag, the expanded size persists as a manual size.
+          ["e"] = { "neotree_expand", desc = "expand to longest name (half-screen cap)" },
           -- `/` back to native Vim search; Neo-tree fuzzy finder moves to `g/`.
           ["/"] = "none",
           ["g/"] = "fuzzy_finder",
@@ -303,6 +319,25 @@ return {
         },
       },
       commands = {
+        -- `e`: grow the sidebar to fit the longest visible name, but never
+        -- past half the screen (MAX_WIDTH_RATIO). `state.longest_node` is
+        -- Neo-tree's own per-draw widest line; fall back to the cap when it
+        -- is not known yet. Top/bottom trees are sized in rows, so the width
+        -- rule does not apply and expanding is a no-op there.
+        neotree_expand = function(state)
+          if not state.winid or not vim.api.nvim_win_is_valid(state.winid) then
+            return
+          end
+
+          local pos = vim.b[state.bufnr].neo_tree_position
+          if pos == "top" or pos == "bottom" then
+            return
+          end
+
+          local content = (state.longest_node or 0) + 2
+          local target = math.max(20, math.min(content, half_screen_width()))
+          vim.api.nvim_win_set_width(state.winid, target)
+        end,
         toggle_wrap = function()
           vim.g.neotree_wrap_on = not vim.g.neotree_wrap_on
 
@@ -395,7 +430,13 @@ return {
       },
     },
     config = function(_, opts)
-      vim.g.neotree_wrap_on = vim.g.neotree_wrap_on or false
+      -- Wrap defaults ON: long names that fit the window flow onto the next
+      -- line. Tree rows are truncated to the window width by Neo-tree's
+      -- container before Vim sees them, so wrap cannot re-flow a name that
+      -- was already cut — `e` (half-screen capped) is the lever for those.
+      if vim.g.neotree_wrap_on == nil then
+        vim.g.neotree_wrap_on = true
+      end
       require("neo-tree").setup(opts)
 
       -- True while we are the ones changing a window's size, so our own

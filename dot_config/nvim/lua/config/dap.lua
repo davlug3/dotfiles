@@ -891,6 +891,16 @@ end
 --   5. Nothing -> notify
 -- ============================================================================
 
+-- nvim-dap keeps its "last run" config in a module-local (used internally by
+-- run_last) and exposes no accessor for it, so dap.last_run() does not exist.
+-- Track the launched config ourselves instead: every run / continue /
+-- run_last fires event_initialized carrying the config that started it.
+local last_launched_config = nil
+
+dap.listeners.after.event_initialized["smart_launch_tracker"] = function(session, _)
+  last_launched_config = session and session.config or nil
+end
+
 local function dap_smart_launch()
   -- Existing session.
   if dap.session() then
@@ -904,8 +914,8 @@ local function dap_smart_launch()
   -- ---------------------------------------------------------------------
 
   if vim.bo.filetype == "" or vim.bo.filetype == "neo-tree" then
-    if dap.last_run() then
-      dap.run_last()
+    if last_launched_config then
+      dap.run(last_launched_config)
       return
     end
 
