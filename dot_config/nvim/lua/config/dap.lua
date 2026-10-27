@@ -753,28 +753,6 @@ local function dap_load_launch_json()
     return nil, {}
   end
 
-  -- Remove configurations previously loaded from launch.json.
-  --
-  -- This prevents stale configurations if you move between projects.
-  for _, filetype in ipairs({
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact",
-    "vue",
-    "python",
-    "go",
-    "c",
-    "cpp",
-    "rust",
-    "php",
-    "lua",
-  }) do
-    -- Keep the original fallback configurations.
-    --
-    -- load_launchjs() will append/replace configurations as appropriate.
-  end
-
   local ok, err = pcall(function()
     vscode.load_launchjs(
       launch_json,
@@ -832,35 +810,133 @@ end
 
 
 -- ============================================================================
+-- All-configurations helpers
+--
+-- Used by F5 when the current buffer has no useful filetype (Neo-tree,
+-- unnamed buffers). Instead of asking you to open a source file first, F5
+-- offers every known configuration.
+-- ============================================================================
+
+local function collection_key(config)
+  return table.concat({
+    config.name or "Unnamed",
+    config.type or "",
+    config.request or "",
+  }, "|")
+end
+
+
+local function collect_all_configs()
+  local seen = {}
+  local all = {}
+
+  for _, configs in pairs(dap.configurations) do
+    for _, config in ipairs(configs) do
+      local key = collection_key(config)
+
+      if not seen[key] then
+        seen[key] = true
+        all[#all + 1] = config
+      end
+    end
+  end
+
+  table.sort(all, function(a, b)
+    local a_key
+      = (a.name or "Unnamed") .. " " .. (a.type or "")
+    local b_key
+      = (b.name or "Unnamed") .. " " .. (b.type or "")
+
+    return a_key < b_key
+  end)
+
+  return all
+end
+
+
+local function pick_and_run(configs, prompt)
+  if #configs == 1 then
+    dap.run(configs[1])
+    return
+  end
+
+  vim.ui.select(configs, {
+    prompt = prompt,
+
+    format_item = function(config)
+      return string.format(
+        "%s  [%s/%s]",
+        config.name or "Unnamed",
+        config.type or "",
+        config.request or ""
+      )
+    end,
+  }, function(config)
+    if config then
+      dap.run(config)
+    end
+  end)
+end
+
+
+-- ============================================================================
 -- Smart F5
 --
 -- Priority:
 --
 --   1. Existing session -> continue
---   2. .vscode/launch.json -> use it
---   3. Native dap.configurations -> use them
---   4. Nothing -> notify
+--   2. No filetype (Neo-tree, unnamed) -> last run, else pick from all
+--   3. .vscode/launch.json -> use it
+--   4. Native dap.configurations -> use them
+--   5. Nothing -> notify
 -- ============================================================================
 
 local function dap_smart_launch()
-  -- Never try to debug Neo-tree itself.
-  if vim.bo.filetype == "neo-tree" then
-    vim.notify(
-      "Open a source file before pressing F5",
-      vim.log.levels.WARN
-    )
-    return
-  end
-
   -- Existing session.
   if dap.session() then
     dap.continue()
     return
   end
 
-  -- -------------------------------------------------------------------------
+  -- ---------------------------------------------------------------------
+  -- Neo-tree / unnamed buffers have no filetype to match, so offer every
+  -- known configuration instead of asking you to open a source file.
+  -- ---------------------------------------------------------------------
+
+  if vim.bo.filetype == "" or vim.bo.filetype == "neo-tree" then
+    if dap.last_run() then
+      dap.run_last()
+      return
+    end
+
+    local launch_json = dap_find_launch_json()
+
+    if launch_json then
+      pcall(function()
+        vscode.load_launchjs(
+          launch_json,
+          vscode_type_to_filetypes
+        )
+      end)
+    end
+
+    local all = collect_all_configs()
+
+    if #all == 0 then
+      vim.notify(
+        "No DAP configurations found",
+        vim.log.levels.WARN
+      )
+      return
+    end
+
+    pick_and_run(all, "DAP configuration (all filetypes):")
+    return
+  end
+
+  -- ------------------------------------------------------------------------
   -- .vscode/launch.json
-  -- -------------------------------------------------------------------------
+  -- ------------------------------------------------------------------------
 
   local launch_json, launch_configs = dap_launch_configs()
 
@@ -895,25 +971,10 @@ local function dap_smart_launch()
     end
 
     -- Multiple launch.json configurations.
-    vim.ui.select(launch_configs, {
-      prompt = "DAP configuration from .vscode/launch.json:",
-      format_item = function(config)
-        local name = config.name or "Unnamed"
-        local request = config.request or ""
-        local type = config.type or ""
-
-        return string.format(
-          "%s  [%s/%s]",
-          name,
-          type,
-          request
-        )
-      end,
-    }, function(config)
-      if config then
-        dap.run(config)
-      end
-    end)
+    pick_and_run(
+      launch_configs,
+      "DAP configuration from .vscode/launch.json:"
+    )
 
     return
   end
@@ -939,21 +1000,7 @@ local function dap_smart_launch()
     return
   end
 
-  vim.ui.select(configs, {
-    prompt = "DAP configuration:",
-    format_item = function(config)
-      return string.format(
-        "%s  [%s/%s]",
-        config.name or "Unnamed",
-        config.type or "",
-        config.request or ""
-      )
-    end,
-  }, function(config)
-    if config then
-      dap.run(config)
-    end
-  end)
+  pick_and_run(configs, "DAP configuration:")
 end
 
 
