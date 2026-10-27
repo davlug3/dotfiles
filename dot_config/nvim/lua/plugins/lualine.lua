@@ -7,9 +7,14 @@ local function wide()
   return vim.o.columns >= 55
 end
 
+-- Mobile mode: bottombar owns the statusline, so lualine must not load
+-- (it re-asserts its own statusline on VimEnter/UIEnter and would win).
+local is_mobile = os.getenv('TERMUX_VERSION') or os.getenv('NVIM_MOBILE') == '1'
+
 return {
   {
     'nvim-lualine/lualine.nvim',
+    cond = not is_mobile,
     opts = {
       options = {
         theme = 'auto',

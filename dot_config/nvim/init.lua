@@ -45,3 +45,9 @@ require('config.manual')
 require('config.keymaps')
 require('config.lsp')
 require('config.dap')
+
+-- Termux mobile suite (button bar, Android clipboard, gesture keymaps).
+-- Inert on desktop unless explicitly enabled for testing: NVIM_MOBILE=1 nvim
+if os.getenv('TERMUX_VERSION') or os.getenv('NVIM_MOBILE') == '1' then
+  require('mobile').setup()
+end
