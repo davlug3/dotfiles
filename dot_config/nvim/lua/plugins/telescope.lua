@@ -20,6 +20,35 @@ else
   }
 end
 
+-- Last non-empty live-grep prompt, stored outside any nvim session so `\fg`
+-- and `\fH` pre-fill the prompt across restarts.
+local last_grep_path = vim.fn.stdpath('state') .. '/last_live_grep'
+
+local function read_last_grep()
+  local file = io.open(last_grep_path, 'r')
+  if not file then
+    return nil
+  end
+  local line = file:read('*l')
+  file:close()
+  if line ~= '' then
+    return line
+  end
+  return nil
+end
+
+local function save_last_grep(prompt)
+  if not prompt or prompt == '' then
+    return
+  end
+  vim.fn.mkdir(vim.fn.stdpath('state'), 'p')
+  local file = io.open(last_grep_path, 'w')
+  if file then
+    file:write(prompt)
+    file:close()
+  end
+end
+
 -- Open a grep result, highlight every occurrence of the prompt in the file and
 -- centre it. Telescope's own edit action only moves to (row, col): it never
 -- touches the search register, so `hlsearch` has nothing to draw and the match
@@ -30,6 +59,7 @@ local function open_grep_result(prompt_bufnr)
 
   -- Capture before select_default closes the prompt buffer.
   local prompt = action_state.get_current_line()
+  save_last_grep(prompt)
 
   actions.select_default(prompt_bufnr)
 
@@ -56,7 +86,20 @@ local function open_grep_result(prompt_bufnr)
 end
 
 local function grep_attach_mappings(_, map)
+  local function close_and_save(prompt_bufnr)
+    local action_state = require('telescope.actions.state')
+    local actions = require('telescope.actions')
+
+    -- Capture before close() tears down the prompt buffer.
+    save_last_grep(action_state.get_current_line(prompt_bufnr))
+    actions.close(prompt_bufnr)
+  end
+
   map({ 'i', 'n' }, '<CR>', open_grep_result)
+  -- Abandoning the picker (Esc / q / <C-c>) still remembers what was typed.
+  map({ 'i', 'n' }, '<Esc>', close_and_save)
+  map('n', 'q', close_and_save)
+  map({ 'i', 'n' }, '<C-c>', close_and_save)
   return true
 end
 
@@ -144,10 +187,14 @@ file_ignore_patterns = {
             i = {
               ['<C-j>'] = 'move_selection_next',
               ['<C-k>'] = 'move_selection_previous',
+              ['<C-Down>'] = require('telescope.actions').cycle_history_next,
+              ['<C-Up>'] = require('telescope.actions').cycle_history_prev,
             },
             n = {
               ['<C-j>'] = 'move_selection_next',
               ['<C-k>'] = 'move_selection_previous',
+              ['<C-Down>'] = require('telescope.actions').cycle_history_next,
+              ['<C-Up>'] = require('telescope.actions').cycle_history_prev,
             },
           },
         },
@@ -166,6 +213,7 @@ file_ignore_patterns = {
         '<leader>fg',
         function()
           require('telescope.builtin').live_grep({
+            default_text = read_last_grep(),
             attach_mappings = grep_attach_mappings,
           })
         end,
@@ -178,6 +226,7 @@ file_ignore_patterns = {
         function()
           require('telescope.builtin').live_grep({
             additional_args = { '--hidden', '--no-ignore', '--glob=!.git/*' },
+            default_text = read_last_grep(),
             attach_mappings = grep_attach_mappings,
           })
         end,
