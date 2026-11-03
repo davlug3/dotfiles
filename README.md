@@ -83,6 +83,16 @@ alias brewup="brew update && brew upgrade && brew cleanup"
 {{ end -}}
 ```
 
+### Editing templates in Neovim
+
+Neovim uses [`dpezto/chezmoi-template.nvim`](https://github.com/dpezto/chezmoi-template.nvim) on the real source files (no `chezmoi edit` temp buffers):
+
+- `.tmpl` files are `gotmpl` buffers with the deployed filetype's syntax injected (e.g. shell inside `dot_bashrc.tmpl`). When no treesitter parser exists for the deployed type (`tmux`, `gitconfig`, …), the usual Vim syntax file for that type is used instead.
+- Saving a managed source file runs `chezmoi apply` for that target.
+- `:Chezmoi preview` renders the template in a split and marks the diff against the deployed file.
+- In a source buffer, `\C` opens a which-key group: `p` preview, `a` apply, `t` open target, `s` open source, `e` edit target, `f` pick. `\fC` opens the source picker (Telescope).
+- `conform.nvim` formats templates as their target language on save, using `stylua`, `shfmt`, and `taplo` (installed by Mason).
+
 ### Package installers (single source of truth)
 
 Each package's install procedure is defined exactly once in `installers/` (`install-<name>.sh` for Unix, `install-<name>.ps1` for Windows). Everything else delegates to these files — never duplicate the logic:

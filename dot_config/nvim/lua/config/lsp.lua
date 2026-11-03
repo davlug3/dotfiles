@@ -213,9 +213,30 @@ vim.api.nvim_create_autocmd('BufWritePre', {
 
 -- Treesitter highlighting for gotmpl: chezmoi-template.nvim only sets the
 -- filetype + registers the injection directive, so start parsing explicitly.
+-- When the deployed filetype has no treesitter parser (e.g. tmux, gitconfig)
+-- the plugin injects nothing and the buffer would stay unhighlighted, so fall
+-- back to that filetype's classic syntax in the gotmpl buffer.
 vim.api.nvim_create_autocmd('FileType', {
   pattern = 'gotmpl',
-  callback = function()
-    vim.treesitter.start()
+  callback = function(args)
+    local ft = vim.b[args.buf].chezmoi_target_ft
+    local lang = vim.b[args.buf].chezmoi_target_lang
+
+    if ft and ft ~= 'gotmpl' and not lang then
+      local has_syntax = vim.api.nvim_get_runtime_file('syntax/' .. ft .. '.vim', false)[1]
+      if has_syntax then
+        vim.treesitter.stop(args.buf)
+        -- Neovim's syntaxset FileType autocmd runs after this one and sets
+        -- `syntax` to the buffer filetype (gotmpl), so wait for it to finish.
+        vim.schedule(function()
+          if vim.api.nvim_buf_is_valid(args.buf) and vim.bo[args.buf].filetype == 'gotmpl' then
+            vim.bo[args.buf].syntax = ft
+          end
+        end)
+        return
+      end
+    end
+
+    vim.treesitter.start(args.buf)
   end,
 })

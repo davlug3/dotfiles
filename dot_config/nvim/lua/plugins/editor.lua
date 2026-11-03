@@ -27,12 +27,4 @@ return {
     },
     cmd = { 'Emmet', 'EmmetInstall' },
   },
-  {
-    -- Must stay eager: this plugin registers its own filetype detection for
-    -- chezmoi's *.tmpl files, so an ft trigger would be circular. It already
-    -- defers its heavy work internally.
-    'dpezto/chezmoi-template.nvim',
-    lazy = false,
-    opts = {},
-  },
 }
