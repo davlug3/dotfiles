@@ -1,45 +1,38 @@
-# install-lilypond.ps1 — pre-scripted lilypond installer, invocable any time.
+# install-lilypond.ps1 — lilypond installer via manifest package manager.
 # Managed by chezmoi: installers/install-lilypond.ps1 -> ~/installers/install-lilypond.ps1
-# Invoke any time with: & "$HOME/installers/install-lilypond.ps1"
-# NOTE: uses `return` (not `exit`) so it is safe to invoke via `&`.
-# LilyPond often needs admin (MSI); on no-admin machines this warns and skips
-# instead of failing the whole bootstrap.
+# Refactored to rely entirely on handlers/package_handler.ps1 for execution.
+
 $ErrorActionPreference = 'Stop'
 
-function Update-SessionPath {
-    $machine = [System.Environment]::GetEnvironmentVariable('Path', 'Machine')
-    $user = [System.Environment]::GetEnvironmentVariable('Path', 'User')
-    if ($machine -and $user) { $env:Path = "$machine;$user" }
-    elseif ($machine) { $env:Path = $machine }
-    elseif ($user) { $env:Path = "$env:Path;$user" }
+$scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$repoRoot = Split-Path -Parent $scriptDir
+$handlerPath = Join-Path $repoRoot 'handlers\package_handler.ps1'
+
+if (-not (Test-Path $handlerPath)) {
+    $handlerPath = Join-Path $HOME '.local\share\chezmoi\handlers\package_handler.ps1'
 }
 
-if (Get-Command lilypond -ErrorAction SilentlyContinue) {
-    Write-Host "lilypond already installed: $(lilypond --version 2>$null | Select-Object -First 1)"
+if (-not (Test-Path $handlerPath)) {
+    Write-Error "package_handler.ps1 not found at $handlerPath"
     return
 }
 
-# LilyPond is published on winget as LilyPond.LilyPond
-if (Get-Command winget -ErrorAction SilentlyContinue) {
-    try {
-        Write-Host "trying winget..."
-        winget install --id LilyPond.LilyPond --exact --source winget --scope user --accept-source-agreements --accept-package-agreements
-        Update-SessionPath
-        if (Get-Command lilypond -ErrorAction SilentlyContinue) {
-            Write-Host "lilypond installed via winget"
-            return
-        }
-        Write-Warning "winget did not leave lilypond on PATH (exit=$LASTEXITCODE)"
-    } catch {
-        Write-Warning "winget failed: $($_.Exception.Message)"
-    }
+. $handlerPath
+
+$manifestPath = Join-Path $repoRoot 'manifest\dependencies.yaml'
+if (-not (Test-Path $manifestPath)) {
+    $manifestPath = Join-Path $HOME '.local\share\chezmoi\manifest\dependencies.yaml'
+}
+
+if (-not (Test-Path $manifestPath)) {
+    Write-Error "dependencies.yaml not found at $manifestPath"
+    return
+}
+
+Write-Host "--- Running LilyPond installation via centralized package handler ---"
+
+if (Process-Manifest -ManifestPath $manifestPath) {
+    Write-Host "`n[SUCCESS] Dependency management run complete for LilyPond." -ForegroundColor Green
 } else {
-    Write-Warning "winget not found; skipping lilypond (needs admin MSI otherwise)"
-    return
+    Write-Host "`n[FAILURE] Failed to run dependency handler. Check logs above." -ForegroundColor Red
 }
-
-if (-not (Get-Command lilypond -ErrorAction SilentlyContinue)) {
-    Write-Warning "lilypond not installed (likely needs admin for MSI 1602); skipping. Re-run as admin or install manually, then re-apply."
-    return
-}
-Write-Host "lilypond installed via winget"

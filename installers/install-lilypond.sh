@@ -1,38 +1,40 @@
 #!/usr/bin/env bash
+# install-lilypond — lilypond installer via manifest package manager.
+# Managed by chezmoi: installers/install-lilypond.sh -> ~/installers/install-lilypond.sh
+# Refactored to rely entirely on handlers/package_handler.sh for execution.
 
 set -Eeuo pipefail
 
-if command -v lilypond &>/dev/null; then
-  echo "lilypond already installed: $(lilypond --version 2>/dev/null | head -n 1)"
-  exit 0
+# Resolve the handler path: prefer repo source dir, fall back to deployed path
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+HANDLER_PATH="$REPO_ROOT/handlers/package_handler.sh"
+
+if [[ ! -f "$HANDLER_PATH" ]]; then
+    HANDLER_PATH="$HOME/.local/share/chezmoi/handlers/package_handler.sh"
 fi
 
-VERSION="2.26.0"
-NAME="lilypond-$VERSION-linux-x86_64.tar.gz"
-URL="https://gitlab.com/lilypond/lilypond/-/releases/v$VERSION/downloads/$NAME"
-INSTALL_DIR="$HOME/bin"
-LILYPOND_DIR="$INSTALL_DIR/lilypond-$VERSION"
+if [[ ! -f "$HANDLER_PATH" ]]; then
+    echo "ERROR: package_handler.sh not found at $HANDLER_PATH" >&2
+    exit 1
+fi
 
-mkdir -p "$INSTALL_DIR"
+source "$HANDLER_PATH"
 
-TMP_DIR="$(mktemp -d)"
-trap 'rm -rf "$TMP_DIR"' EXIT
+MANIFEST_PATH="$REPO_ROOT/manifest/dependencies.yaml"
+if [[ ! -f "$MANIFEST_PATH" ]]; then
+    MANIFEST_PATH="$HOME/.local/share/chezmoi/manifest/dependencies.yaml"
+fi
 
-cd "$TMP_DIR"
+if [[ ! -f "$MANIFEST_PATH" ]]; then
+    echo "ERROR: dependencies.yaml not found at $MANIFEST_PATH" >&2
+    exit 1
+fi
 
-echo "Downloading LilyPond $VERSION..."
-curl -fL -o "$NAME" "$URL"
+echo "--- Running LilyPond installation via centralized package handler ---"
 
-echo "Extracting..."
-tar -xzf "$NAME"
-
-echo "Installing to $LILYPOND_DIR..."
-rm -rf "$LILYPOND_DIR"
-mv "lilypond-$VERSION" "$LILYPOND_DIR"
-
-# ~/bin/lilypond -> ~/bin/lilypond-2.26.0/bin/lilypond
-ln -sfn "$LILYPOND_DIR/bin/lilypond" "$INSTALL_DIR/lilypond"
-
-export PATH="$INSTALL_DIR:$PATH"
-
-echo "LilyPond installed: $(lilypond --version 2>/dev/null | head -n 1)"
+if process_manifest "$MANIFEST_PATH"; then
+    echo -e "\n\e[32m[SUCCESS]\e[0m Dependency management run complete for LilyPond."
+else
+    echo -e "\n\e[31m[FAILURE]\e[0m Failed to run dependency handler. Check logs above." >&2
+fi

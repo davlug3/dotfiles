@@ -5,16 +5,39 @@
 
 set -Eeuo pipefail
 
-# Source the new generic handler logic which contains process_manifest()
-source "$HOME/.local/share/chezmoi/handlers/package_handler.sh"
+# Resolve the handler path: prefer repo source dir, fall back to deployed path
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+HANDLER_PATH="$REPO_ROOT/handlers/package_handler.sh"
 
-# Define the manifest path (assuming it's relative to the source directory)
-MANIFEST_PATH="$HOME/.local/share/chezmoi/manifest/dependencies.yaml"
+if [[ ! -f "$HANDLER_PATH" ]]; then
+    # Fall back to chezmoi deployed path
+    HANDLER_PATH="$HOME/.local/share/chezmoi/handlers/package_handler.sh"
+fi
+
+if [[ ! -f "$HANDLER_PATH" ]]; then
+    echo "ERROR: package_handler.sh not found at $HANDLER_PATH" >&2
+    exit 1
+fi
+
+# Source the generic handler
+source "$HANDLER_PATH"
+
+# Resolve manifest path
+MANIFEST_PATH="$REPO_ROOT/manifest/dependencies.yaml"
+if [[ ! -f "$MANIFEST_PATH" ]]; then
+    MANIFEST_PATH="$HOME/.local/share/chezmoi/manifest/dependencies.yaml"
+fi
+
+if [[ ! -f "$MANIFEST_PATH" ]]; then
+    echo "ERROR: dependencies.yaml not found at $MANIFEST_PATH" >&2
+    exit 1
+fi
 
 echo "--- Running Starship installation via centralized package handler ---"
 
 if process_manifest "$MANIFEST_PATH"; then
     echo -e "\n\e[32m[SUCCESS]\e[0m Dependency management run complete for Starship."
 else
-    echo -e "\n\e[31m[FAILURE]\e[0m Failed to run dependency handler. Check logs above and ensure the manifest path is correct." >&2
+    echo -e "\n\e[31m[FAILURE]\e[0m Failed to run dependency handler. Check logs above." >&2
 fi

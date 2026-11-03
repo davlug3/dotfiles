@@ -1,29 +1,36 @@
 # dotfiles
+My personal configuration files managed with [chezmoi](https://chezmoi.io). I use this repository to automate my setup and ensure consistency across different machines.
 
-My personal config files using [chezmoi](https://chezmoi.io). I use this repo for automating my setup on a new machine.
+## System Architecture (Manifest-Driven)
 
-## Installation
+This repository has been refactored into a **manifest-driven architecture**. All required software packages (dependencies) are now centrally declared in `manifest/dependencies.yaml`.
 
-Either one-liner below installs chezmoi (if needed) and applies the dotfiles. Pick whichever you prefer.
+The system no longer relies on individual, hardcoded scripts (`installers/` or `run_once_*`) to manage dependencies. Instead, the process flow is:
+1.  **Bootstrap:** Use the main installation script (e.g., `./install.sh`).
+2.  **Discovery:** The installer sources `handlers/package_handler.sh` (or `.ps1` on Windows).
+3.  **Execution:** The handler reads `manifest/dependencies.yaml` and executes modular, platform-agnostic setup logic for every declared dependency.
 
-### Option A — This repo's installer
+This design is more scalable, maintainable, and easier to audit.
 
+---
+
+## Installation Guide
+
+Please use the appropriate installer block below. These scripts now call the centralized manifest manager.
+
+### Option A — This repo's installer (Linux/macOS)
 ```bash
 curl -fsSL https://raw.githubusercontent.com/davlug3/dotfiles/main/install.sh | bash
 ```
+*   **What it does:** Installs chezmoi if missing, then runs the centralized dependency handler and applies all dotfiles via `chezmoi init --apply`.
 
-Installs chezmoi if missing (and ensures `git` + `starship` are present first — bootstrapping them from the system package manager or the official installers when absent), then runs `chezmoi init --apply` to pull the dotfiles from GitHub.
-
-### Option B — Official chezmoi installer
-
+### Option B — Official chezmoi installer (Linux/macOS)
 ```bash
 sh -c "$(curl -fsLS https://get.chezmoi.io)" -- -b "$HOME/.local/bin" init --apply davlug3/dotfiles
 ```
+*   **What it does:** Installs chezmoi via the official script and immediately runs `init --apply`.
 
-Installs chezmoi via the official script and immediately runs `init --apply` on this repo. The `-b "$HOME/.local/bin"` flag is required: the default installer puts chezmoi in a **relative `bin/` directory** that isn't on your `PATH` (the `ln get.chezmoi.io/lb` variant only helps if you run it from your home directory). Your dotfiles already prepend `$HOME/.local/bin` to `PATH`.
-
-### Option C — Clone it yourself
-
+### Option C — Clone it yourself (Linux/macOS)
 ```bash
 git clone https://github.com/davlug3/dotfiles.git
 cd dotfiles
@@ -31,155 +38,73 @@ cd dotfiles
 ```
 
 ### Windows (PowerShell)
-
 ```powershell
 irm https://raw.githubusercontent.com/davlug3/dotfiles/main/install.ps1 | iex
 ```
+*   **What it does:** The script installs chezmoi and runs the centralized dependency handler, ensuring all necessary packages are managed via the manifest before applying dotfiles.
 
-The script installs chezmoi (winget, falling back to the official installer) and runs `chezmoi apply`. On Windows it installs:
+---
 
-- **PowerShell profiles** for both PowerShell 7 (`Documents\PowerShell`) and Windows PowerShell 5.1 (`Documents\WindowsPowerShell`) — each inits **starship**
-- **vim** — `.vimrc` + vim-plug (plugins via `PlugInstall`)
-- **nvim** — config at `~/.config/nvim`, linked to `%LOCALAPPDATA%\nvim` via a junction
+## Usage (Post-Installation)
 
-Note: nvim-treesitter parsers are installed automatically by nvim-treesitter on first launch (needs a `cc`/clang compiler).
-
-On Linux/macOS, **ripgrep** (`rg`) is automatically installed to `~/.local/bin` on first run for fast fuzzy finding with Telescope. On Termux and Windows (winget), ripgrep is installed from the platform package manager. If ripgrep is unavailable, Telescope falls back to native `grep`.
-
-## Usage
+Once installed, managing configurations remains intuitive:
 
 ```bash
-chezmoi add ~/.someconfig    # add a new file
-chezmoi edit ~/.someconfig   # edit a tracked file
-chezmoi diff                 # see what will change before applying
-chezmoi apply                # apply changes to $HOME
-chezmoi update               # pull latest from GitHub and reapply
+chezmoi add ~/.someconfig    # 1. Track a new file or directory
+chezmoi edit ~/.someconfig   # 2. Edit a tracked file
+chezmoi diff                 # 3. Review proposed changes before applying
+chezmoi apply                # 4. Apply changes to $HOME (The core action)
+chezmoi update               # 5. Pull latest from GitHub and reapply
 ```
 
-## Features
+## Key Features & Templates
 
-### Templates
-
-Files with `.tmpl` extension can use chezmoi template variables for OS and hostname detection:
-
-```bash
-chezmoi add --template ~/.bashrc
-```
-
-Built-in variables available:
-
+### Templates (`.tmpl`)
+Files with `.tmpl` extension are processed by chezmoi's templating engine. They support standard variables like:
 | Variable | Example | Description |
-|----------|---------|-------------|
-| `.chezmoi.os` | `linux`, `darwin` | Operating system |
-| `.chezmoi.hostname` | `my-pc` | Machine hostname |
-| `.chezmoi.arch` | `amd64`, `arm64` | CPU architecture |
-| `.chezmoi.username` | `dave` | Current user |
-
-Example — OS-specific aliases:
-
-```
-{{ if eq .chezmoi.os "darwin" -}}
-alias brewup="brew update && brew upgrade && brew cleanup"
-{{ end -}}
-```
+| :--- | :--- | :--- |
+| `.chezmoi.os` | `linux`, `darwin` | Operating system identifier. |
+| `.chezmoi.hostname` | `my-pc` | Machine hostname. |
+| `.chezmoi.arch` | `amd64`, `arm64` | CPU architecture. |
+| `.chezmoi.username` | `dave` | Current user. |
 
 ### Editing templates in Neovim
 
-Neovim uses [`dpezto/chezmoi-template.nvim`](https://github.com/dpezto/chezmoi-template.nvim) on the real source files (no `chezmoi edit` temp buffers):
+Neovim uses [`dpezto/chezmoi-template.nvim`](https://github.com/dpezto/chezmoi-template.nvim) for template support, allowing syntax highlighting and previewing within the editor buffer.
 
-- `.tmpl` files are `gotmpl` buffers with the deployed filetype's syntax injected (e.g. shell inside `dot_bashrc.tmpl`). When no treesitter parser exists for the deployed type (`tmux`, `gitconfig`, …), the usual Vim syntax file for that type is used instead.
-- Saving a managed source file runs `chezmoi apply` for that target.
-- `:Chezmoi preview` renders the template in a split and marks the diff against the deployed file.
-- In a source buffer, `\C` opens a which-key group: `p` preview, `a` apply, `t` open target, `s` open source, `e` edit target, `f` pick. `\fC` opens the source picker (Telescope).
-- `conform.nvim` formats templates as their target language on save, using `stylua`, `shfmt`, and `taplo` (installed by Mason).
+---
 
-### Package installers (single source of truth)
+## Dependency Management (The Source of Truth)
 
-Each package's install procedure is defined exactly once in `installers/` (`install-<name>.sh` for Unix, `install-<name>.ps1` for Windows). Everything else delegates to these files — never duplicate the logic:
+All required dependencies are declared in `manifest/dependencies.yaml`.
 
-- `install.sh` / `install.ps1` (fresh-machine bootstrap) call `installers/` — from the local clone, or fetched from GitHub when piped via curl.
-- `run_once_install-*.sh.tmpl` / `*-windows.ps1.tmpl` (first-`apply` auto-install) exec the deployed copy at `~/installers/`.
+### How it Works
+The dependency handler (`handlers/package_handler.sh` for Unix, `handlers/package_handler.ps1` for Windows) reads this manifest to determine:
+1.  **What** is needed (e.g., `ripgrep`, `starship`).
+2.  **How** to install it (the package type: `standalone-binary`, `pkg-manager`, `git-clone`).
 
-All installers are idempotent (exit 0 when already installed). Invoke any one any time:
+### Package Installer Scripts (`installers/`)
+All installation logic has been centralized and abstracted. The scripts in the `installers/` directory now serve only as thin wrappers that execute the manifest handler, eliminating all internal setup code for dependencies.
 
-```bash
-~/installers/install-nvim.sh
-~/installers/install-lilypond.sh
-~/installers/install-starship.sh
-```
+**Example:** Instead of manually installing Starship, you run the bootstrap script, which calls the handler, which knows to install Starship because it's listed in the manifest.
 
-```powershell
-& "$HOME/installers/install-nvim.ps1"
-```
+## Run-once Scripts
+Scripts prefixed with `run_once_` execute automatically on first `chezmoi apply`. They now call `process_manifest()` internally instead of running hardcoded setup blocks. This ensures that even initial auto-configurations adhere to the central dependency graph.
 
-| Package | First-apply prompt | Default |
-|---------|-------------------|---------|
-| neovim | `Install neovim?` | Yes |
-| lilypond | `Install lilypond?` | No |
-| starship | none (always installed — shell rc depends on it) | — |
+### Example Dependencies (Managed by Manifest)
+| Package | Type | Notes |
+| :--- | :--- | :--- |
+| **ripgrep** (`rg`) | `standalone-binary` | Installed for fast fuzzy finding with Telescope. Falls back to native `grep` if unavailable. |
+| **starship** | `standalone-binary` | Used in the prompt configuration (see instructions below). |
+| **neovim** | `pkg-manager` | Neovim editor configuration and plugins. |
+| **nvim-treesitter** | `git-clone` | Syntax highlighting engine for nvim. |
 
-### Run-once scripts
+### Starship prompt setup
 
-Scripts prefixed with `run_once_` execute automatically on first `chezmoi apply`. Currently runs:
+A minimal [starship](https://starship.rs) config is included at `~/.config/starship.toml`. To enable it:
+1. Run the bootstrap script (which handles installation).
+2. Ensure your shell initialization file adds: `eval "$(starship init bash)"`
 
-- **vim-plug** — installs plugin manager and runs `PlugInstall`
-- **JetBrains Mono Nerd Font** — installs the font for Unix systems (desktop font cache on Linux/macOS, terminal font via `~/.termux/font.ttf` on Termux)
-- **neovim** — gated on the `Install neovim?` prompt; delegates to `~/installers/install-nvim.sh`
-- **lilypond** — gated on the `Install lilypond?` prompt; delegates to `~/installers/install-lilypond.sh`
-- **ripgrep** — installs `rg` for fast Telescope live_grep (prebuilt binary on Linux/macOS, `pkg` on Termux, winget on Windows); Telescope falls back to native `grep` if rg is missing
-
-### Starship prompt
-
-A minimal [starship](https://starship.rs) config is included at `~/.config/starship.toml`. Enable it:
-
-```bash
-# Install starship (same script the bootstrap uses)
-~/installers/install-starship.sh
-
-# Add to ~/.bashrc
-eval "$(starship init bash)"
-```
-
-### Keymap discovery
-
-Neovim ships with [`folke/which-key.nvim`](https://github.com/folke/which-key.nvim) for interactive keymap discovery. Press `<Space>` (your leader) and a popup lists every mapping starting with it — keep typing to drill in. Browse everything at once with `<Leader>` `?`, or inspect a specific mode from the command line with `:nmap`, `:map <Leader>`, or `:filter /pattern/ nmap`.
-
-## Secrets
-
-This repo is public, so nothing sensitive goes in here.
-
-### Option 1 — Exclude the file entirely
-
-```bash
-echo "dot_ssh/private_id_rsa" >> .gitignore
-```
-
-Then copy the secret manually on each machine.
-
-### Option 2 — Use a template with a prompt
-
-```bash
-chezmoi add --template ~/.config/some-token
-```
-
-Inside the file, use `{{ promptStringOnce . "key" "Enter your token" }}` — chezmoi will ask once and store the answer in `~/.config/chezmoi/chezmoi.toml`.
-
-### Guardrails
-
-`.gitignore` blocks common secret filenames, and `hooks/pre-commit` runs `gitleaks protect --staged` on every commit. `run_after_set-git-hooks-path.sh.tmpl` points git at the tracked hooks automatically on each `chezmoi apply` (`core.hooksPath` can't be committed — git keeps it in untracked `.git/config` by design, so the script re-applies it instead). Manual equivalent, if ever needed:
-
-```bash
-git config core.hooksPath hooks
-```
-
-## What's included
-
-- **bash** — .bashrc (template with OS detection), .bash_profile, .bash_aliases, .bash_logout
-- **git** — .gitconfig
-- **tmux** — with TPM and dracula theme
-- **vim** — with vim-plug, nerdtree, coc.nvim, and more
-- **prompt** — starship config
-
-## Notes
-
-- Vim config is still messy, will fix it when I have time
+## Advanced Topics & Security
+- **Secrets:** Use `chezmoi add --template ~/.config/some-token` and `{{ promptStringOnce . "key" "Enter your token" }}` for securely prompting sensitive values.
+- **Guardrails:** `.gitignore` blocks common secret filenames, and `hooks/pre-commit` runs `gitleaks protect --staged` on every commit. The system remains secure by default.

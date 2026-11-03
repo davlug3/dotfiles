@@ -1,0 +1,47 @@
+# Dependencies Manifest
+# This file lists all external tools and packages required by this dotfiles repository.
+# The core installer logic reads this file to determine which dependencies need installing,
+# eliminating hardcoded installation steps in run_once scripts.
+#
+# Format: YAML mapping of package name to its metadata.
+# Fields:
+#   type:        Installation method (standalone-binary, pkg-manager, git-clone)
+#   version:     Version to install (latest, or specific semver)
+#   description: Human-readable description
+#   url:         (optional) Download URL for standalone binaries
+#
+# NOTE: Config files managed by chezmoi (bash-aliases, gitconfig, tmux-conf) are NOT
+# listed here — they are handled by chezmoi's own apply mechanism.
+
+---
+
+# ====================
+# CORE UTILITIES
+# ====================
+
+ripgrep:
+  type: standalone-binary
+  version: latest
+  description: High-speed recursive file finder for Telescope.
+  url: "https://github.com/BurntSushi/ripgrep/releases/latest/download/ripgrep-VERSION-x86_64-unknown-linux-musl.tar.gz"
+
+starship:
+  type: standalone-binary
+  version: latest
+  description: Cross-shell prompt theme.
+  url: "https://starship.rs/install.sh"
+
+# ====================
+# DEVELOPMENT TOOLS
+# ====================
+
+neovim:
+  type: pkg-manager
+  version: latest
+  description: Neovim editor configuration and plugins.
+
+nvim-treesitter:
+  type: git-clone
+  version: latest
+  description: Syntax highlighting engine for nvim.
+  url: "https://github.com/nvim-treesitter/nvim-treesitter"

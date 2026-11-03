@@ -1,47 +1,40 @@
 #!/usr/bin/env bash
-# install-nvim — pre-scripted neovim installer, invocable any time.
+# install-nvim — neovim installer via manifest package manager.
 # Managed by chezmoi: installers/install-nvim.sh -> ~/installers/install-nvim.sh
-# Idempotent: exits 0 when nvim is already on PATH.
+# Refactored to rely entirely on handlers/package_handler.sh for execution.
+
 set -Eeuo pipefail
 
-if command -v nvim &>/dev/null; then
-  echo "neovim already installed: $(nvim --version | head -n 1)"
-  exit 0
+# Resolve the handler path: prefer repo source dir, fall back to deployed path
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+HANDLER_PATH="$REPO_ROOT/handlers/package_handler.sh"
+
+if [[ ! -f "$HANDLER_PATH" ]]; then
+    HANDLER_PATH="$HOME/.local/share/chezmoi/handlers/package_handler.sh"
 fi
 
-# Termux: install via the rootless repo binary
-if [[ -n "${TERMUX_VERSION:-}" ]]; then
-  pkg install -y neovim
-  exit 0
+if [[ ! -f "$HANDLER_PATH" ]]; then
+    echo "ERROR: package_handler.sh not found at $HANDLER_PATH" >&2
+    exit 1
 fi
 
-# Linux/macOS: official latest prebuilt tarball
-BIN_DIR="${HOME}/.local/bin"
-INSTALL_ROOT="${HOME}/.local/share/neovim"
-TEMP_DIR=$(mktemp -d)
-trap 'rm -rf "${TEMP_DIR}"' EXIT
+source "$HANDLER_PATH"
 
-case "$(uname -s)-$(uname -m)" in
-  Linux-x86_64|Linux-amd64)   ASSET="nvim-linux-x86_64.tar.gz" ;;
-  Linux-aarch64|Linux-arm64)  ASSET="nvim-linux-aarch64.tar.gz" ;;
-  Darwin-arm64)               ASSET="nvim-macos-arm64.tar.gz" ;;
-  Darwin-x86_64|Darwin-amd64) ASSET="nvim-macos-x86_64.tar.gz" ;;
-  *)
-    echo "neovim install: unsupported platform $(uname -s)-$(uname -m); skipping" >&2
-    exit 0
-    ;;
-esac
-
-echo "Downloading neovim (${ASSET})..."
-curl -fSL "https://github.com/neovim/neovim/releases/latest/download/${ASSET}" \
-  -o "${TEMP_DIR}/nvim.tar.gz"
-
-mkdir -p "${INSTALL_ROOT}" "${BIN_DIR}"
-tar -xzf "${TEMP_DIR}/nvim.tar.gz" -C "${INSTALL_ROOT}"
-NVIM_BIN="$(find "${INSTALL_ROOT}" -maxdepth 4 -type f -name nvim -path '*/bin/*' | head -1)"
-if [[ -z "${NVIM_BIN}" ]]; then
-  echo "neovim install: extracted binary not found" >&2
-  exit 1
+MANIFEST_PATH="$REPO_ROOT/manifest/dependencies.yaml"
+if [[ ! -f "$MANIFEST_PATH" ]]; then
+    MANIFEST_PATH="$HOME/.local/share/chezmoi/manifest/dependencies.yaml"
 fi
-ln -sf "${NVIM_BIN}" "${BIN_DIR}/nvim"
-echo "neovim installed at ${BIN_DIR}/nvim"
+
+if [[ ! -f "$MANIFEST_PATH" ]]; then
+    echo "ERROR: dependencies.yaml not found at $MANIFEST_PATH" >&2
+    exit 1
+fi
+
+echo "--- Running Neovim installation via centralized package handler ---"
+
+if process_manifest "$MANIFEST_PATH"; then
+    echo -e "\n\e[32m[SUCCESS]\e[0m Dependency management run complete for Neovim."
+else
+    echo -e "\n\e[31m[FAILURE]\e[0m Failed to run dependency handler. Check logs above." >&2
+fi
