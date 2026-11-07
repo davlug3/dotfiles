@@ -1,18 +1,50 @@
 -- VSCode-like debugging: nvim-dap and launch.json support.
--- Minimal by default (signs, virtual-text, F-keys); full sidebar via <leader>du.
+-- Loaded on demand when debugging.
 return {
-  'mfussenegger/nvim-dap',
   {
-    'rcarriga/nvim-dap-ui',
-    dependencies = { 'nvim-neotest/nvim-nio' },
+    'mfussenegger/nvim-dap',
+    lazy = true,
+    cmd = { 'DapCheck' },
+    keys = {
+      { '<F5>', desc = 'DAP: Smart Launch' },
+      { '<F6>', desc = 'DAP: Pause' },
+      { '<F7>', desc = 'DAP: Terminate' },
+      { '<F8>', desc = 'DAP: Step Over' },
+      { '<F9>', desc = 'DAP: Step Into' },
+      { '<F10>', desc = 'DAP: Step Out' },
+      { '<leader>db', desc = 'DAP: Toggle Breakpoint' },
+      { '<leader>dB', desc = 'DAP: Conditional Breakpoint' },
+      { '<leader>dc', desc = 'DAP: Continue' },
+      { '<leader>dl', desc = 'DAP: Log Point' },
+      { '<leader>dr', desc = 'DAP: REPL' },
+      { '<leader>di', desc = 'DAP: Step Into' },
+      { '<leader>do', desc = 'DAP: Step Over' },
+      { '<leader>dO', desc = 'DAP: Step Out' },
+      { '<leader>dt', desc = 'DAP: Terminate' },
+      { '<leader>dh', desc = 'DAP: Hover' },
+      { '<leader>de', desc = 'DAP: Evaluate', mode = { 'n', 'v' } },
+      { '<leader>du', desc = 'DAP: Toggle UI' },
+      { '<leader>dC', desc = 'DAP: Configurations' },
+      { '<leader>dlb', desc = 'DAP: List Breakpoints' },
+      { '<leader>dv', desc = 'DAP: Variables' },
+      { '<leader>dn', desc = 'DAP: Attach Next.js :9230' },
+    },
+    dependencies = {
+      'williamboman/mason.nvim',
+      'jay-babu/mason-nvim-dap.nvim',
+      'rcarriga/nvim-dap-ui',
+      'nvim-neotest/nvim-nio',
+      'theHamsta/nvim-dap-virtual-text',
+      'nvim-telescope/telescope-dap.nvim',
+      'nvim-telescope/telescope.nvim',
+    },
+    config = function()
+      require('config.dap')
+    end,
   },
-  'theHamsta/nvim-dap-virtual-text',
-  {
-    'jay-babu/mason-nvim-dap.nvim',
-    dependencies = { 'williamboman/mason.nvim', 'mfussenegger/nvim-dap' },
-  },
-  {
-    'nvim-telescope/telescope-dap.nvim',
-    dependencies = { 'nvim-telescope/telescope.nvim', 'mfussenegger/nvim-dap' },
-  },
+  { 'jay-babu/mason-nvim-dap.nvim', lazy = true },
+  { 'rcarriga/nvim-dap-ui', lazy = true },
+  { 'nvim-neotest/nvim-nio', lazy = true },
+  { 'theHamsta/nvim-dap-virtual-text', lazy = true },
+  { 'nvim-telescope/telescope-dap.nvim', lazy = true },
 }

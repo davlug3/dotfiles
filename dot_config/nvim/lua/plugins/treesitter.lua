@@ -7,73 +7,28 @@ vim.filetype.add({
 return {
   {
     'nvim-treesitter/nvim-treesitter',
-    lazy = false,
+    lazy = true,
+    event = { 'BufReadPost', 'BufNewFile' },
     build = ':TSUpdate',
 
     config = function()
       require('nvim-treesitter').setup()
 
-      require('nvim-treesitter').install {
-        -- Systems
-        'c',
-        'cpp',
-        'rust',
-        'go',
-        'java',
-        'kotlin',
-        'c_sharp',
-        'swift',
-
-        -- Web
-        'javascript',
-        'typescript',
-        'tsx',
-        'html',
-        'css',
-        'scss',
-        'vue',
-        'svelte',
-        'astro',
-
-        -- Backend / scripting
-        'python',
-        'ruby',
-        'php',
+      -- Install parsers on demand as needed
+      -- Add parsers here only if you use them frequently
+      local parsers = {
         'lua',
-        'bash',
-        'fish',
-        'perl',
-        'r',
-        'sql',
-
-        -- Data / config
-        'json',
-        'yaml',
-        'toml',
-        'xml',
-        'graphql',
-        'hcl',
-
-        -- Templates
-        'gotmpl',
-        'jinja',
-
-        -- DevOps
-        'dockerfile',
-
-        -- Documentation
+        'vim',
+        'vimdoc',
+        'query',
         'markdown',
         'markdown_inline',
-        'rst',
-
-        -- Git
-        'gitcommit',
-        'git_rebase',
-
-        -- Misc
-        'vim',
-        'regex',
       }
+
+      -- Try to install common parsers if missing (non-blocking)
+      pcall(function()
+        require('nvim-treesitter').install(parsers)
+      end)
 
       vim.api.nvim_create_autocmd('FileType', {
         callback = function(args)

@@ -94,15 +94,9 @@ end)
 
 pcall(function()
   require("mason-nvim-dap").setup({
-    automatic_installation = false,
+    automatic_installation = true,
 
-    ensure_installed = {
-      "js-debug-adapter",
-      "codelldb",
-      "delve",
-      "php-debug-adapter",
-      "local-lua-debugger-vscode",
-    },
+    ensure_installed = {}, -- Install on demand
 
     handlers = {
       function(config)

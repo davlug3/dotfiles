@@ -1,60 +1,49 @@
-local servers = {
-  'ts_ls',
-  'vue_ls',
-  'pyright',
-  'terraformls',
-  'lua_ls',
-  'html',
-  'cssls',
-  'jsonls',
-  'gopls',
-}
-
--- Remove lua_ls from Mason installation if already installed system-wide
-if vim.fn.executable('lua-language-server') == 1 then
-  for i, srv in ipairs(servers) do
-    if srv == 'lua_ls' then
-      table.remove(servers, i)
-      break
-    end
+-- Setup is handled by the plugin config.
+local _setup_done = false
+local function setup()
+  if _setup_done then
+    return
   end
+  _setup_done = true
+  require('mason').setup()
+  require('mason-lspconfig').setup({
+    ensure_installed = {}, -- Install on demand, not upfront
+    automatic_installation = true, -- Install when a server is requested
+    automatic_enable = true, -- Auto-enable servers when installed
+  })
 end
 
--- Try to add rust_analyzer if rustup or rustc is available
-if vim.fn.executable('rustc') == 1 or vim.fn.executable('rustup') == 1 then
-  table.insert(servers, 'rust_analyzer')
-end
+local _configs_done = false
+local function setup_lsp_configs()
+  if _configs_done then
+    return
+  end
+  _configs_done = true
+  -- Configure lua_ls to use system installation if available
+  if vim.fn.executable('lua-language-server') == 1 then
+    vim.lsp.config['lua_ls'] = {
+      cmd = { 'lua-language-server' },
+    }
+    pcall(vim.lsp.enable, 'lua_ls')
+  end
 
-require('mason').setup()
-require('mason-lspconfig').setup({
-  ensure_installed = servers,
-  automatic_installation = false, -- Only install servers that are explicitly requested
-  automatic_enable = false, -- We enable explicitly via vim.lsp.enable(servers) below
-})
-
--- Configure lua_ls to use system installation if available
-if vim.fn.executable('lua-language-server') == 1 then
-  vim.lsp.config['lua_ls'] = {
-    cmd = { 'lua-language-server' },
-  }
-end
-
--- gopls: formatting via gofumpt + staticcheck + unusedparams/shadow analyses.
--- goimports-style import organizing is done on save via the
--- source.organizeImports code action below (no extra plugin needed).
-vim.lsp.config['gopls'] = {
-  settings = {
-    gopls = {
-      gofumpt = true,
-      staticcheck = true,
-      usePlaceholders = true,
-      analyses = {
-        unusedparams = true,
-        shadow = true,
+  -- gopls: formatting via gofumpt + staticcheck + unusedparams/shadow analyses.
+  -- goimports-style import organizing is done on save via the
+  -- source.organizeImports code action below (no extra plugin needed).
+  vim.lsp.config['gopls'] = {
+    settings = {
+      gopls = {
+        gofumpt = true,
+        staticcheck = true,
+        usePlaceholders = true,
+        analyses = {
+          unusedparams = true,
+          shadow = true,
+        },
       },
     },
-  },
-}
+  }
+end
 
 -- Vue + TypeScript: vue_ls requires a companion ts_ls/vtsls client in the
 -- same project, otherwise it errors with "Could not find ts_ls, vtsls, or
@@ -131,35 +120,21 @@ do
   }
 end
 
+local function capabilities()
+  local caps = vim.lsp.protocol.make_client_capabilities()
+  local ok, cmp_nvim_lsp = pcall(require, 'cmp_nvim_lsp')
+  if ok then
+    caps = cmp_nvim_lsp.default_capabilities(caps)
+  end
+  return caps
+end
+
 vim.lsp.config['*'] = {
-  capabilities = require('cmp_nvim_lsp').default_capabilities(),
+  capabilities = capabilities(),
 }
 
-vim.lsp.enable(servers)
-
--- Completion
-local cmp = require('cmp')
-cmp.setup({
-  snippet = {
-    expand = function(args)
-      require('luasnip').lsp_expand(args.body)
-    end,
-  },
-  mapping = cmp.mapping.preset.insert({
-    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete(),
-    ['<C-e>'] = cmp.mapping.abort(),
-    ['<CR>'] = cmp.mapping.confirm({ select = true }),
-  }),
-  sources = cmp.config.sources({
-    { name = 'nvim_lsp' },
-    { name = 'luasnip' },
-  }, {
-    { name = 'buffer' },
-    { name = 'path' },
-  }),
-})
+-- Servers are auto-enabled by mason-lspconfig on demand.
+-- Completion (nvim-cmp) is configured in lua/plugins/lsp.lua.
 
 -- LSP buffer local keymaps
 vim.api.nvim_create_autocmd('LspAttach', {
@@ -240,3 +215,10 @@ vim.api.nvim_create_autocmd('FileType', {
     vim.treesitter.start(args.buf)
   end,
 })
+
+return {
+  setup = function()
+    setup()
+    setup_lsp_configs()
+  end,
+}

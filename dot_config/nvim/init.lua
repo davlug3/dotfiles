@@ -43,8 +43,6 @@ require('config.options')
 require('config.narrow')
 require('config.manual')
 require('config.keymaps')
-require('config.lsp')
-require('config.dap')
 
 -- Termux mobile suite (button bar, Android clipboard, gesture keymaps).
 -- Inert on desktop unless explicitly enabled for testing: NVIM_MOBILE=1 nvim
