@@ -34,7 +34,7 @@ if (-not (Test-Path $manifestPath)) {
 
 Write-Host "--- Running Starship installation via centralized package handler ---"
 
-if (Process-Manifest -ManifestPath $manifestPath) {
+if (Process-Manifest -ManifestPath $manifestPath -PackageName starship) {
     Write-Host "`n[SUCCESS] Dependency management run complete for Starship." -ForegroundColor Green
 } else {
     Write-Host "`n[FAILURE] Failed to run dependency handler. Check logs above." -ForegroundColor Red

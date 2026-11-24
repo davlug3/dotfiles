@@ -36,7 +36,7 @@ fi
 
 echo "--- Running Starship installation via centralized package handler ---"
 
-if process_manifest "$MANIFEST_PATH"; then
+if process_manifest "$MANIFEST_PATH" starship; then
     echo -e "\n\e[32m[SUCCESS]\e[0m Dependency management run complete for Starship."
 else
     echo -e "\n\e[31m[FAILURE]\e[0m Failed to run dependency handler. Check logs above." >&2

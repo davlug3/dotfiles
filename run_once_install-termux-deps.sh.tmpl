@@ -1,20 +1,36 @@
 {{- if eq .chezmoi.os "android" -}}
 #!/data/data/com.termux/files/usr/bin/env bash
-# Install Termux-specific dependencies for development
+# Install Termux-specific dependencies for development.
+# Only missing packages are installed, so re-runs are cheap and idempotent.
 set -Eeuo pipefail
 
-# Essential packages for development environment
-pkg install -y \
-  git \
-  ripgrep \
-  clang \
-  make \
-  openssl \
-  nodejs-lts \
-  python \
-  unzip \
-  wget \
+PACKAGES=(
+  git
+  ripgrep
+  clang
+  make
+  openssl
+  nodejs-lts
+  python
+  unzip
+  wget
   curl
+)
 
+INSTALLED="$(pkg list-installed 2>/dev/null || true)"
+MISSING=()
+for package in "${PACKAGES[@]}"; do
+  if ! printf '%s\n' "$INSTALLED" | grep -qE "^${package}(/.*)?$"; then
+    MISSING+=("$package")
+  fi
+done
+
+if [[ "${#MISSING[@]}" -eq 0 ]]; then
+  echo "Termux dependencies already installed"
+  exit 0
+fi
+
+echo "Installing missing Termux packages: ${MISSING[*]}"
+pkg install -y "${MISSING[@]}"
 echo "Termux dependencies installed successfully"
 {{- end -}}

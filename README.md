@@ -150,7 +150,7 @@ Each entry is a YAML mapping:
 
 The scripts in `installers/` are thin wrappers. They contain no installation logic themselves, only path resolution, handler sourcing, and a call to `process_manifest()`.
 
-All installers are idempotent (exit 0 when already installed). Invoke any one any time:
+All installers are idempotent: the handlers check for an existing executable/repository first and skip all work when it is present. Invoke any one any time:
 
 ```bash
 ~/installers/install-nvim.sh
@@ -179,6 +179,7 @@ Currently runs:
 - **neovim** — gated on the `Install neovim?` prompt; delegates to `~/installers/install-nvim.sh`
 - **lilypond** — gated on the `Install lilypond?` prompt; delegates to `~/installers/install-lilypond.sh`
 - **ripgrep** — installs `rg` for fast Telescope live_grep (prebuilt binary on Linux/macOS, `pkg` on Termux, winget on Windows); Telescope falls back to native `grep` if rg is missing
+- **tree-sitter CLI** — installs the `tree-sitter` binary needed by nvim-treesitter (prebuilt binary, with pinned/npm fallbacks)
 
 ### Starship prompt
 
@@ -242,4 +243,5 @@ git config core.hooksPath hooks
 ## Notes
 
 - Vim config is still messy, will fix it when I have time
-- The handler's `apt`, `pkg-manager`, and `git-clone` types are currently simulated (they print success but don't execute real commands). Full implementation will replace the `echo` stubs with actual `apt-get`, `git clone`, etc. commands.
+- The handlers perform real installs. Each entrypoint is safe to re-run: already-installed tools are detected and skipped, downloads install atomically, and no empty stub binaries are created.
+- Run `bash tests/run-idempotency.sh` (or `.\tests\run-idempotency.ps1` on Windows) to verify the no-op behaviour without network access.

@@ -20,7 +20,9 @@ trap 'rm -rf "${TEMP_DIR}"' EXIT
 mkdir -p "${FONT_DIR}"
 
 # Download + install to the font directory (idempotent: skip if already present)
+FONT_CHANGED=0
 if [[ ! -f "${INSTALLED_MARKER}" ]]; then
+  FONT_CHANGED=1
   echo "Downloading ${FONT_NAME} Nerd Font..."
   curl -fSL "https://github.com/ryanoasis/nerd-fonts/releases/latest/download/${FONT_NAME}.zip" \
     -o "${TEMP_DIR}/${FONT_NAME}.zip"
@@ -45,12 +47,14 @@ else
   echo "JetBrains Mono Nerd Font already installed"
 fi
 
-# Desktop Unix: refresh the font cache so apps pick up the new font
-if command -v fc-cache >/dev/null 2>&1; then
-  echo "Updating font cache..."
-  fc-cache -fv "${FONT_DIR}"
-else
-  echo "fontconfig not found — skipping font cache update (terminal font still usable)"
+# Desktop Unix: refresh the font cache only when new font files were installed.
+if [[ "${FONT_CHANGED}" -eq 1 ]]; then
+  if command -v fc-cache >/dev/null 2>&1; then
+    echo "Updating font cache..."
+    fc-cache -fv "${FONT_DIR}"
+  else
+    echo "fontconfig not found — skipping font cache update (terminal font still usable)"
+  fi
 fi
 
 # Termux/Android: set the terminal font so Nerd glyphs render in the app
@@ -65,5 +69,9 @@ if [[ -n "${TERMUX_VERSION:-}" ]]; then
   echo "JetBrains Mono Nerd Font set as the Termux terminal font (~/.termux/font.ttf)"
 fi
 
-echo "JetBrains Mono Nerd Font installed successfully"
+if [[ "${FONT_CHANGED}" -eq 1 ]]; then
+  echo "JetBrains Mono Nerd Font installed successfully"
+else
+  echo "JetBrains Mono Nerd Font already installed; nothing to do"
+fi
 {{- end -}}

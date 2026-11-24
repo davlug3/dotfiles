@@ -2,11 +2,16 @@
 #!/usr/bin/env bash
 # Keep the tracked hooks/ (gitleaks pre-commit guard) active on this repo.
 # core.hooksPath lives in .git/config, which git never syncs by design,
-# so this script re-applies it on every `chezmoi apply`. Idempotent.
+# so this script re-applies it on every `chezmoi apply`. Idempotent: only
+# writes when the value actually differs.
 set -e
 
 REPO="{{ .chezmoi.sourceDir }}"
 if [ -d "$REPO/.git" ]; then
-  git -C "$REPO" config core.hooksPath hooks
+    CURRENT="$(git -C "$REPO" config --get core.hooksPath || true)"
+    if [ "$CURRENT" != "hooks" ]; then
+        git -C "$REPO" config core.hooksPath hooks
+        echo "set core.hooksPath=hooks"
+    fi
 fi
 {{- end -}}

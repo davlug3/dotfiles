@@ -12,8 +12,23 @@ if [ ! -f "$HOME/.vim/autoload/plug.vim" ]; then
         https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 fi
 
+# Re-run PlugInstall only when the vimrc (and therefore the plugin list)
+# changed, or when it has never completed successfully.
+MARKER="${HOME}/.cache/vim-plug-installed"
+CURRENT_HASH="$(cksum "$HOME/.vimrc" | awk '{print $1}')"
+if [ -f "$MARKER" ] && [ "$(cat "$MARKER")" = "$CURRENT_HASH" ]; then
+    echo "plugins already installed; skipping PlugInstall"
+    exit 0
+fi
+
 echo "running PlugInstall..."
-vim -E -s -c "PlugInstall --sync" -c "qa" 2>/dev/null || true
+# `vim -E -s` often exits non-zero even after PlugInstall completed, so record
+# the attempt regardless and rely on the vimrc hash to decide future runs.
+if ! vim -E -s -c "PlugInstall --sync" -c "qa" 2>/dev/null; then
+    echo "PlugInstall returned a non-zero exit code; assuming completion" >&2
+fi
+mkdir -p "$(dirname "$MARKER")"
+printf '%s\n' "$CURRENT_HASH" > "$MARKER"
 
 echo "plugin installation done"
 {{- end -}}

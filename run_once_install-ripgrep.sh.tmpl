@@ -3,90 +3,15 @@
 {{- /* ripgrep is installed via `pkg install ripgrep` in the Termux deps script */ -}}
 {{- else -}}
 #!/usr/bin/env bash
-# Install ripgrep for use with Telescope live_grep.
-# If rg is already on $PATH Telescope will use it automatically;
-# otherwise a native grep fallback is configured in lua/plugins/telescope.lua.
+# Delegate to the central, idempotent package handler.
 set -Eeuo pipefail
-
-if command -v rg &>/dev/null; then
-  echo "ripgrep already installed: $(rg --version | head -1)"
-  exit 0
+SRC="$(chezmoi source-path 2>/dev/null || printf '%s' "${HOME}/.local/share/chezmoi")"
+if [[ -f "${SRC}/handlers/package_handler.sh" ]]; then
+  # shellcheck source=handlers/package_handler.sh
+  source "${SRC}/handlers/package_handler.sh"
+  install_package ripgrep standalone-binary latest ""
+else
+  echo "ripgrep install: package handler not found at ${SRC}; skipping" >&2
 fi
-
-BIN_DIR="${HOME}/.local/bin"
-TEMP_DIR=$(mktemp -d)
-trap 'rm -rf "${TEMP_DIR}"' EXIT
-
-mkdir -p "${BIN_DIR}"
-
-OS="$(uname -s)"
-ARCH="$(uname -m)"
-
-# Upstream musl assets omit the "gnu" triple component
-# (e.g. ripgrep-16.0.0-x86_64-unknown-linux-musl.tar.gz).
-case "${OS}-${ARCH}" in
-  Linux-x86_64|Linux-amd64)  TARGET="x86_64-unknown-linux" ;;
-  Linux-aarch64|Linux-arm64) TARGET="aarch64-unknown-linux" ;;
-  Darwin-arm64)              TARGET="aarch64-apple-darwin" ;;
-  Darwin-x86_64|Darwin-amd64) TARGET="x86_64-apple-darwin" ;;
-  *)
-    echo "ripgrep install: unsupported platform ${OS}-${ARCH}; skipping" >&2
-    exit 0
-    ;;
-esac
-
-# Resolve the latest release tag via the GitHub API (retry on transient failures)
-# NOTE: two-step fetch+parse. Piping live curl output directly into `grep -m1`
-# under `set -o pipefail` makes curl exit 23 (SIGPIPE) when grep closes early.
-TAG=""
-RESP=""
-for attempt in 1 2 3; do
-  TAG=""
-  if RESP=$(curl -fsSL --max-time 60 https://api.github.com/repos/BurntSushi/ripgrep/releases/latest 2>/dev/null); then
-    # The API returns a single-line JSON document. Match the tag_name field
-    # explicitly: a greedy `s/.*"([^"]+)".*/` grabs the last quoted value on
-    # the line (e.g. the "eyes" reaction count), not the release tag.
-    TAG=$(printf '%s\n' "${RESP}" | sed -nE 's/.*"tag_name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p' | head -n 1)
-    if [[ "${TAG}" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-      break
-    fi
-    echo "ripgrep install: unexpected release tag '${TAG}' from API; retrying..." >&2
-  else
-    echo "ripgrep install: API attempt ${attempt} failed; retrying..." >&2
-  fi
-  sleep 2
-done
-RESP=""
-
-if [[ -z "${TAG}" ]]; then
-  echo "ripgrep install: could not determine latest release tag; skipping" >&2
-  exit 0
-fi
-
-# Strip leading 'v' from tag (e.g. v24.1.1 -> 24.1.1)
-VERSION="${TAG#v}"
-
-# Linux builds use -musl for maximum binary compatibility
-ASSET="ripgrep-${VERSION}-${TARGET}.tar.gz"
-if [[ "${OS}" == "Linux" ]]; then
-  ASSET="ripgrep-${VERSION}-${TARGET}-musl.tar.gz"
-fi
-
-URL="https://github.com/BurntSushi/ripgrep/releases/download/${TAG}/${ASSET}"
-echo "Downloading ripgrep ${TAG} (${ASSET})..."
-if ! curl -fSL --max-time 120 "${URL}" -o "${TEMP_DIR}/rg.tar.gz"; then
-  echo "ripgrep install: download failed (${URL}); skipping" >&2
-  exit 0
-fi
-
-tar -xzf "${TEMP_DIR}/rg.tar.gz" -C "${TEMP_DIR}"
-RG_BIN="$(find "${TEMP_DIR}" -maxdepth 2 -type f -name 'rg' | head -1)"
-if [[ -z "${RG_BIN}" ]]; then
-  echo "ripgrep install: extracted binary not found; skipping" >&2
-  exit 0
-fi
-cp "${RG_BIN}" "${BIN_DIR}/rg"
-chmod +x "${BIN_DIR}/rg"
-echo "ripgrep installed at ${BIN_DIR}/rg"
 {{- end -}}
 {{- end -}}

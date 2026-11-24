@@ -31,7 +31,7 @@ if (-not (Test-Path $manifestPath)) {
 
 Write-Host "--- Running LilyPond installation via centralized package handler ---"
 
-if (Process-Manifest -ManifestPath $manifestPath) {
+if (Process-Manifest -ManifestPath $manifestPath -PackageName lilypond) {
     Write-Host "`n[SUCCESS] Dependency management run complete for LilyPond." -ForegroundColor Green
 } else {
     Write-Host "`n[FAILURE] Failed to run dependency handler. Check logs above." -ForegroundColor Red

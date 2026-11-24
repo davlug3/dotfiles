@@ -28,6 +28,7 @@ run_installer() {
 # Install a system package using the first available package manager.
 # Bootstrap-only helper (used for git); package installs live in installers/.
 _pkg_install() {
+    have "$1" && return 0
     if have pkg; then          pkg install -y "$1"
     elif have apt-get; then    sudo apt-get update && sudo apt-get install -y "$1"
     elif have dnf; then        sudo dnf install -y "$1"
@@ -41,12 +42,20 @@ _pkg_install() {
 }
 
 install_neovim() {
+    if have nvim; then
+        echo ">>> neovim already installed; skipping"
+        return 0
+    fi
     echo ">>> ensuring neovim..."
     run_installer install-nvim
 }
 
 
 install_starship() {
+    if have starship; then
+        echo ">>> starship already installed; skipping"
+        return 0
+    fi
     echo ">>> ensuring starship..."
     run_installer install-starship
 }
@@ -105,14 +114,23 @@ main() {
     install_dependencies
     install_chezmoi
 
+    SOURCE_DIR="${HOME}/.local/share/chezmoi"
     if $local_repo; then
-        if [ ! -d "$HOME/.local/share/chezmoi" ]; then
+        if [ ! -d "$SOURCE_DIR" ]; then
             chezmoi init --apply "$PWD"
+        elif git -C "$SOURCE_DIR" remote get-url origin 2>/dev/null | grep -q 'davlug3/dotfiles'; then
+            chezmoi update || chezmoi apply
         else
-            chezmoi apply  # re-apply current source state (idempotent update)
+            chezmoi apply
         fi
     else
-        chezmoi init --apply davlug3/dotfiles
+        if [ ! -d "$SOURCE_DIR" ]; then
+            chezmoi init --apply davlug3/dotfiles
+        elif git -C "$SOURCE_DIR" remote get-url origin 2>/dev/null | grep -q 'davlug3/dotfiles'; then
+            chezmoi update || chezmoi apply
+        else
+            chezmoi apply
+        fi
     fi
 
     echo ""

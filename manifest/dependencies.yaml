@@ -32,6 +32,12 @@ starship:
   description: Cross-shell prompt theme.
   url: "https://starship.rs/install.sh"
 
+tree-sitter-cli:
+  type: standalone-binary
+  version: latest
+  description: CLI used by nvim-treesitter for parser generation.
+  url: "https://github.com/tree-sitter/tree-sitter/releases/latest"
+
 # ====================
 # DEVELOPMENT TOOLS
 # ====================

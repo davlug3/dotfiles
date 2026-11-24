@@ -14,11 +14,27 @@ if (-not (Test-Path $plugPath)) {
         -OutFile $plugPath
 }
 
+# Re-run PlugInstall only when the vimrc (plugin list) changed.
+$marker = Join-Path $HOME '.cache\vim-plug-installed'
+$vimrc = Join-Path $HOME '.vimrc'
+$currentHash = if (Test-Path $vimrc) { (Get-FileHash $vimrc -Algorithm SHA256).Hash } else { 'missing' }
+if ((Test-Path $marker) -and ((Get-Content $marker -Raw).Trim() -eq $currentHash)) {
+    Write-Host 'plugins already installed; skipping PlugInstall'
+    exit 0
+}
+
 $vim = Get-Command vim -ErrorAction SilentlyContinue
 if (-not $vim) { $vim = Get-Command gvim -ErrorAction SilentlyContinue }
 if ($vim) {
     Write-Host "running PlugInstall..."
-    & $vim.Source '-E' '-s' '-c' 'PlugInstall --sync' '-c' 'qa'
+    try {
+        & $vim.Source '-E' '-s' '-c' 'PlugInstall --sync' '-c' 'qa'
+    } catch {
+        Write-Warning "PlugInstall reported an error: $($_.Exception.Message)"
+    }
+    $cacheDir = Split-Path $marker -Parent
+    if (-not (Test-Path $cacheDir)) { New-Item -ItemType Directory -Force -Path $cacheDir | Out-Null }
+    Set-Content -Path $marker -Value $currentHash
 } else {
     Write-Host "vim not found; skipping PlugInstall (install vim and re-run chezmoi apply)"
 }

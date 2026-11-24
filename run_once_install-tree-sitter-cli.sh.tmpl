@@ -1,134 +1,17 @@
 {{- if ne .chezmoi.os "windows" -}}
 {{- if env "TERMUX_VERSION" -}}
-#!/data/data/com.termux/files/usr/bin/env bash
+{{- /* tree-sitter is installed via `pkg install tree-sitter` in the Termux deps script */ -}}
 {{- else -}}
 #!/usr/bin/env bash
-{{ end }}
-# Install the tree-sitter CLI for use with nvim-treesitter's :install()
-# (it shells out to `tree-sitter generate` + `tree-sitter build`).
-# `:checkhealth nvim-treesitter` reports whether the CLI is found.
+# Delegate to the central, idempotent package handler.
 set -Eeuo pipefail
-
-# Smoke-test any existing CLI: `command -v` alone can't detect a binary
-# that fails at runtime (e.g. built against a newer glibc than this host).
-if command -v tree-sitter &>/dev/null; then
-  if tree-sitter --version &>/dev/null; then
-    echo "tree-sitter already installed: $(tree-sitter --version)"
-    exit 0
-  fi
-  echo "tree-sitter found but fails to run; reinstalling..." >&2
-fi
-
-# Termux: install via the system package manager
-if [[ -n "${TERMUX_VERSION:-}" ]]; then
-  if pkg install -y tree-sitter; then
-    echo "tree-sitter installed via pkg"
-    exit 0
-  fi
-  echo "tree-sitter install: pkg install failed; skipping" >&2
-  exit 0
-fi
-
-# Linux/macOS: official prebuilt binary from GitHub releases
-BIN_DIR="${HOME}/.local/bin"
-TEMP_DIR=$(mktemp -d)
-trap 'rm -rf "${TEMP_DIR}"' EXIT
-
-mkdir -p "${BIN_DIR}"
-
-case "$(uname -s)-$(uname -m)" in
-  Linux-x86_64|Linux-amd64)     ASSET_OS="linux"; ASSET_ARCH="x64" ;;
-  Linux-aarch64|Linux-arm64)    ASSET_OS="linux"; ASSET_ARCH="arm64" ;;
-  Darwin-arm64)                 ASSET_OS="macos"; ASSET_ARCH="arm64" ;;
-  Darwin-x86_64|Darwin-amd64)   ASSET_OS="macos"; ASSET_ARCH="x64" ;;
-  *)
-    echo "tree-sitter install: unsupported platform $(uname -s)-$(uname -m); skipping" >&2
-    exit 0
-    ;;
-esac
-
-# Last release whose prebuilt Linux binaries run on glibc < 2.39
-# (e.g. Ubuntu 22.04 ships glibc 2.35; tree-sitter v0.26+ needs 2.39).
-PIN_TAG="v0.25.10"
-
-needs_pin() {
-  # True when the host glibc is older than 2.39.
-  [[ "$(uname -s)" == "Linux" ]] || return 1
-  local ver
-  ver=$(ldd --version 2>/dev/null | head -n 1 | grep -oE '[0-9]+\.[0-9]+' | head -n 1)
-  [[ -n "${ver}" ]] || return 1
-  [[ "$(printf '%s\n%s\n' "${ver}" "2.39" | sort -V | head -n 1)" != "2.39" ]]
-}
-
-install_tag() {
-  # Download release $1, install to $BIN_DIR, and smoke-test it.
-  local tag="$1"
-  local asset="tree-sitter-${ASSET_OS}-${ASSET_ARCH}.gz"
-  local url="https://github.com/tree-sitter/tree-sitter/releases/download/${tag}/${asset}"
-  echo "Downloading tree-sitter ${tag} (${asset})..."
-  if ! curl -fsS --max-time 60 -L "${url}" -o "${TEMP_DIR}/tree-sitter.gz"; then
-    return 1
-  fi
-  if command -v gunzip &>/dev/null; then
-    gunzip -c "${TEMP_DIR}/tree-sitter.gz" > "${BIN_DIR}/tree-sitter"
-  else
-    python3 -c "import gzip,shutil; shutil.copyfileobj(gzip.open('${TEMP_DIR}/tree-sitter.gz','rb'), open('${BIN_DIR}/tree-sitter','wb'))"
-  fi
-  chmod +x "${BIN_DIR}/tree-sitter"
-  "${BIN_DIR}/tree-sitter" --version &>/dev/null
-}
-
-# Resolve the release tag to install.
-# NOTE: two-step fetch+parse. Piping live curl output directly into `grep -m1`
-# under `set -o pipefail` makes curl exit 23 (SIGPIPE) when grep closes early.
-TAG=""
-if needs_pin; then
-  echo "tree-sitter install: glibc < 2.39 detected; pinning to ${PIN_TAG}" >&2
-  TAG="${PIN_TAG}"
+SRC="$(chezmoi source-path 2>/dev/null || printf '%s' "${HOME}/.local/share/chezmoi")"
+if [[ -f "${SRC}/handlers/package_handler.sh" ]]; then
+  # shellcheck source=handlers/package_handler.sh
+  source "${SRC}/handlers/package_handler.sh"
+  install_package tree-sitter-cli standalone-binary latest ""
 else
-  RESP=""
-  for attempt in 1 2 3; do
-    if RESP=$(curl -fsS --max-time 60 https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest 2>/dev/null); then
-      # The API response is one line; match tag_name explicitly so a greedy
-      # sed expression cannot capture a later quoted value (e.g. "eyes").
-      TAG=$(printf '%s\n' "${RESP}" | sed -nE 's/.*"tag_name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p' | head -n 1)
-      if [[ ! "${TAG}" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+ ]]; then
-        echo "tree-sitter install: unexpected release tag '${TAG}' from API; retrying..." >&2
-        TAG=""
-      fi
-      [[ -n "${TAG}" ]] && break
-    else
-      TAG=""
-    fi
-    echo "tree-sitter install: API attempt ${attempt} failed; retrying..." >&2
-    sleep 2
-  done
-  RESP=""
+  echo "tree-sitter install: package handler not found at ${SRC}; skipping" >&2
 fi
-
-if [[ -n "${TAG}" ]] && install_tag "${TAG}"; then
-  echo "tree-sitter installed at ${BIN_DIR}/tree-sitter"
-  exit 0
-fi
-
-# The resolved release failed (or the API was unreachable): fall back to the
-# pinned build before giving up on GitHub entirely.
-if [[ "${TAG}" != "${PIN_TAG}" ]]; then
-  echo "tree-sitter install: trying pinned fallback ${PIN_TAG}..." >&2
-  if install_tag "${PIN_TAG}"; then
-    echo "tree-sitter installed at ${BIN_DIR}/tree-sitter"
-    exit 0
-  fi
-fi
-
-# Fallback: npm package (needs node on PATH)
-if command -v npm &>/dev/null; then
-  echo "GitHub download failed; falling back to npm..."
-  npm install -g tree-sitter-cli
-  echo "tree-sitter installed via npm"
-  exit 0
-fi
-
-echo "tree-sitter install: download failed and npm not available; skipping" >&2
-exit 0
+{{- end -}}
 {{- end -}}

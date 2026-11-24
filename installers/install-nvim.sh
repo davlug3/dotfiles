@@ -33,7 +33,7 @@ fi
 
 echo "--- Running Neovim installation via centralized package handler ---"
 
-if process_manifest "$MANIFEST_PATH"; then
+if process_manifest "$MANIFEST_PATH" neovim; then
     echo -e "\n\e[32m[SUCCESS]\e[0m Dependency management run complete for Neovim."
 else
     echo -e "\n\e[31m[FAILURE]\e[0m Failed to run dependency handler. Check logs above." >&2

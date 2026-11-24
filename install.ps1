@@ -40,7 +40,7 @@ function Invoke-PackageInstaller {
     $tempDir = $env:TEMP
     if (-not $tempDir) { $tempDir = $env:TMP }
     if (-not $tempDir) { $tempDir = [System.IO.Path]::GetTempPath() }
-    $tmp = Join-Path $tempDir "chezmoi-$Name.ps1"
+    $tmp = Join-Path $tempDir "chezmoi-$Name-$([guid]::NewGuid().ToString('N')).ps1"
     Set-Content -Path $tmp -Value $script
     try {
         & $tmp
@@ -50,6 +50,10 @@ function Invoke-PackageInstaller {
 }
 
 function Install-Starship {
+    if (Get-Command starship -ErrorAction SilentlyContinue) {
+        Write-Host ">>> starship already installed; skipping"
+        return
+    }
     Write-Host ">>> ensuring starship..."
     Invoke-PackageInstaller "install-starship"
 }
@@ -82,17 +86,35 @@ Install-Starship
 Install-Chezmoi
 
 $localRepo = $false
-if ($PSCommandPath) {
-    $scriptDir = Split-Path -Parent $PSCommandPath
-    if ($PWD.Path -eq $scriptDir) { $localRepo = $true }
+if ($PSScriptRoot) {
+    $localRepo = (Test-Path (Join-Path $PSScriptRoot 'install.ps1'))
+}
+
+$sourceDir = Join-Path $HOME '.local\share\chezmoi'
+$isOurRepo = $false
+if (Test-Path (Join-Path $sourceDir '.git')) {
+    $remote = (& git -C $sourceDir remote get-url origin 2>$null | Out-String).Trim()
+    $isOurRepo = $remote -like '*davlug3/dotfiles*'
 }
 
 if ($localRepo) {
     Write-Host "applying dotfiles from local repo..."
-    chezmoi apply
+    if (-not (Test-Path (Join-Path $sourceDir '.git'))) {
+        chezmoi init --apply $PSScriptRoot
+    } elseif ($isOurRepo) {
+        try { chezmoi update } catch { chezmoi apply }
+    } else {
+        chezmoi apply
+    }
 } else {
     Write-Host "pulling dotfiles from GitHub..."
-    chezmoi init --apply davlug3/dotfiles
+    if (-not (Test-Path (Join-Path $sourceDir '.git'))) {
+        chezmoi init --apply davlug3/dotfiles
+    } elseif ($isOurRepo) {
+        try { chezmoi update } catch { chezmoi apply }
+    } else {
+        chezmoi apply
+    }
 }
 
 Write-Host ""
