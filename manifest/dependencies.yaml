@@ -23,7 +23,8 @@ ripgrep:
   type: standalone-binary
   version: latest
   description: High-speed recursive file finder for Telescope.
-  url: "https://github.com/BurntSushi/ripgrep/releases/latest/download/ripgrep-VERSION-x86_64-unknown-linux-musl.tar.gz"
+  # ${VERSION} is resolved from the releases API (no leading 'v' in ripgrep tags).
+  url: "https://github.com/BurntSushi/ripgrep/releases/download/${VERSION}/ripgrep-${VERSION}-x86_64-unknown-linux-musl.tar.gz"
 
 starship:
   type: standalone-binary

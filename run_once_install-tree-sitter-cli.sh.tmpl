@@ -89,7 +89,13 @@ else
   RESP=""
   for attempt in 1 2 3; do
     if RESP=$(curl -fsS --max-time 60 https://api.github.com/repos/tree-sitter/tree-sitter/releases/latest 2>/dev/null); then
-      TAG=$(printf '%s\n' "${RESP}" | grep '"tag_name"' | head -n 1 | sed -E 's/.*"([^"]+)".*/\1/')
+      # The API response is one line; match tag_name explicitly so a greedy
+      # sed expression cannot capture a later quoted value (e.g. "eyes").
+      TAG=$(printf '%s\n' "${RESP}" | sed -nE 's/.*"tag_name"[[:space:]]*:[[:space:]]*"([^"]+)".*/\1/p' | head -n 1)
+      if [[ ! "${TAG}" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+        echo "tree-sitter install: unexpected release tag '${TAG}' from API; retrying..." >&2
+        TAG=""
+      fi
       [[ -n "${TAG}" ]] && break
     else
       TAG=""
