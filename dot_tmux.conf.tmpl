@@ -83,6 +83,10 @@ set -g status-position bottom
 # to ALL terminals. VS Code's xterm.js partially implements it and produces
 # hex-garbage input in apps like Opencode. So we only enable it for alacritty.
 set -g -a terminal-features '*alacritty*:extkeys'
+# Windows Terminal (WSL) reports xterm-256color; declare 24-bit color so
+# Dracula's hex colors render exactly as intended. The leading comma separates
+# this entry from the alacritty one above when tmux concatenates appended values.
+set -g -a terminal-features ',xterm-256color:RGB'
 if-shell 'echo "#{client_termtype}" | grep -qi alacritty' \
     'set -g extended-keys on ; set -g extended-keys-format csi-u' \
     'set -g extended-keys off'
