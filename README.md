@@ -58,7 +58,7 @@ Installs chezmoi (winget, falling back to the official installer) and runs `chez
 - vim (`.vimrc` + vim-plug, plugins via `PlugInstall`)
 - nvim (config at `~/.config/nvim`, linked to `%LOCALAPPDATA%\nvim` via a junction)
 
-Note: nvim-treesitter parsers install automatically on first launch (needs a `cc`/clang compiler).
+Note: Neovim is pinned to **v0.12.6** and installed from the official release tarball (the distro `apt` version is too old for this config). `~/installers/refresh-nvim-plugins.sh` refreshes lazy.nvim, Mason and nvim-treesitter once after an upgrade; it is a no-op on later runs. nvim-treesitter parsers also install automatically on first launch (needs a `cc`/clang compiler).
 
 On Linux/macOS, ripgrep (`rg`) is installed to `~/.local/bin` on first run for fast fuzzy finding with Telescope. On Termux and Windows (winget), ripgrep comes from the platform package manager. If ripgrep is unavailable, Telescope falls back to native `grep`.
 
@@ -134,8 +134,8 @@ Each entry is a YAML mapping:
 
 | Type | Description | Example |
 |------|-------------|---------|
-| `standalone-binary` | Download and extract a prebuilt binary | ripgrep, starship |
-| `pkg-manager` | Install via system package manager (apt, dnf, brew, etc.) | neovim |
+| `standalone-binary` | Download and extract a prebuilt binary | ripgrep, starship, neovim (pinned) |
+| `pkg-manager` | Install via system package manager (apt, dnf, brew, etc.) | lilypond |
 | `git-clone` | Clone from a Git repository | nvim-treesitter |
 
 ### How It Works

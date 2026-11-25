@@ -43,9 +43,11 @@ tree-sitter-cli:
 # ====================
 
 neovim:
-  type: pkg-manager
-  version: latest
+  # Pinned: the config uses vim.lsp.config (0.11+) and plugins need 0.10+.
+  type: standalone-binary
+  version: "0.12.6"
   description: Neovim editor configuration and plugins.
+  url: "https://github.com/neovim/neovim/releases/download/v0.12.6/nvim-linux-x86_64.tar.gz"
 
 nvim-treesitter:
   type: git-clone

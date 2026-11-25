@@ -18,8 +18,16 @@ function Invoke-RestMethod { throw 'Invoke-RestMethod should not be called' }
 function Invoke-WebRequest { throw 'Invoke-WebRequest should not be called' }
 
 try {
-    foreach ($name in @('rg.exe', 'starship.exe', 'nvim.exe', 'tree-sitter.exe')) {
-        Set-Content -Path (Join-Path $binDir $name) -Value 'fake executable'
+    # Valid tiny .cmd wrappers so Get-Command and `--version` smoke tests work
+    # without needing real binaries or network access.
+    $wrappers = @{
+        'rg.cmd'           = '@echo ripgrep 0.0.0'
+        'starship.cmd'     = '@echo starship 0.0.0'
+        'nvim.cmd'         = '@echo NVIM v0.12.6'
+        'tree-sitter.cmd'  = '@echo tree-sitter 0.0.0'
+    }
+    foreach ($name in $wrappers.Keys) {
+        Set-Content -Path (Join-Path $binDir $name) -Value $wrappers[$name]
     }
 
     . (Join-Path $root 'handlers\package_handler.ps1')

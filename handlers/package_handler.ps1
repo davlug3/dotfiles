@@ -46,12 +46,21 @@ function Remove-StaleStub {
 function Test-PackageInstalled {
     param(
         [Parameter(Mandatory=$true)][string]$Name,
-        [string]$Type = ''
+        [string]$Type = '',
+        [string]$Version = 'latest'
     )
     Remove-StaleStub $Name
     if ($Type -eq 'git-clone') {
         $repo = Join-Path (Join-Path (Join-Path $HOME '.local\share') $Name) '.git'
         return (Test-Path $repo)
+    }
+    if ($Name -eq 'neovim') {
+        $current = ''
+        if (Get-Command nvim -ErrorAction SilentlyContinue) {
+            $line = (& nvim --version | Select-Object -First 1 | Out-String).Trim()
+            if ($line -match 'v?(\d+\.\d+\.\d+)') { $current = $Matches[1] }
+        }
+        return ($current -eq $Version.TrimStart('v'))
     }
     $bin = Get-BinaryName $Name
     return [bool](Get-Command $bin -ErrorAction SilentlyContinue)
@@ -215,6 +224,71 @@ function Install-TreeSitter {
     Write-Warning 'tree-sitter: install failed; skipping'
 }
 
+function Install-Neovim {
+    param([string]$Version = '0.12.6')
+    $versionNumber = $Version.TrimStart('v')
+
+    $current = ''
+    if (Get-Command nvim -ErrorAction SilentlyContinue) {
+        $line = (& nvim --version | Select-Object -First 1 | Out-String).Trim()
+        if ($line -match 'v?(\d+\.\d+\.\d+)') { $current = $Matches[1] }
+    }
+    if ($current -eq $versionNumber) {
+        Write-Host "neovim $versionNumber already installed"
+        return
+    }
+    if ($current) { Write-Host "neovim: found $current, pinning to $versionNumber" }
+
+    if (Get-Command winget -ErrorAction SilentlyContinue) {
+        try {
+            Write-Host "installing neovim $versionNumber via winget..."
+            winget install --id Neovim.Neovim --exact --source winget `
+                --version $versionNumber --scope user `
+                --accept-source-agreements --accept-package-agreements | Out-Null
+            Update-SessionPath
+            $line = (& nvim --version | Select-Object -First 1 | Out-String).Trim()
+            if ($line -match [regex]::Escape($versionNumber)) {
+                Write-Host "neovim $versionNumber installed via winget"
+                return
+            }
+        } catch {
+            Write-Warning "winget neovim $versionNumber failed: $($_.Exception.Message)"
+        }
+    }
+
+    try {
+        Write-Host "installing neovim $versionNumber via official release..."
+        $asset = 'nvim-win64.zip'
+        $url = "https://github.com/neovim/neovim/releases/download/v$versionNumber/$asset"
+        $tempDir = Join-Path ([IO.Path]::GetTempPath()) ("nvim-" + [guid]::NewGuid().ToString('N'))
+        New-Item -ItemType Directory -Path $tempDir | Out-Null
+        try {
+            $zip = Join-Path $tempDir 'nvim.zip'
+            Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $zip
+            $extract = Join-Path $tempDir 'extract'
+            Expand-Archive -Path $zip -DestinationPath $extract -Force
+            $exe = Get-ChildItem -Path $extract -Filter 'nvim.exe' -Recurse | Select-Object -First 1
+            if (-not $exe) { throw 'nvim.exe not found in release archive' }
+            $installDir = Join-Path (Join-Path $HOME '.local\opt') "nvim-v$versionNumber"
+            New-Item -ItemType Directory -Force -Path (Split-Path $installDir -Parent) | Out-Null
+            if (Test-Path $installDir) { Remove-Item $installDir -Recurse -Force }
+            $root = Split-Path -Parent (Split-Path -Parent $exe.FullName)
+            Move-Item -Path $root -Destination $installDir
+            $binDir = Join-Path $HOME '.local\bin'
+            New-Item -ItemType Directory -Force -Path $binDir | Out-Null
+            $wrapper = Join-Path $binDir 'nvim.cmd'
+            Set-Content -Path $wrapper -Value "@echo off`r`n`"$installDir\bin\nvim.exe`" %*"
+            Update-SessionPath
+            Write-Host "neovim $versionNumber installed at $installDir"
+            return
+        } finally {
+            Remove-Item $tempDir -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    } catch {
+        Write-Warning "neovim install failed: $($_.Exception.Message)"
+    }
+}
+
 $wingetIds = @{
     'neovim'    = 'Neovim.Neovim'
     'lilypond'  = 'LilyPond.LilyPond'
@@ -292,7 +366,7 @@ function Install-Package {
         [string]$PackageVersion = 'latest',
         [string]$PackageUrl = ''
     )
-    if (Test-PackageInstalled -Name $PackageName -Type $PackageType) {
+    if (Test-PackageInstalled -Name $PackageName -Type $PackageType -Version $PackageVersion) {
         Write-Host "$PackageName already installed; skipping"
         return $true
     }
@@ -303,6 +377,7 @@ function Install-Package {
             switch ($PackageName) {
                 'ripgrep'         { Install-Ripgrep }
                 'starship'        { Install-Starship }
+                'neovim'          { Install-Neovim -Version $PackageVersion }
                 'tree-sitter-cli' { Install-TreeSitter }
                 default {
                     Write-Warning "no standalone-binary installer for '$PackageName'; skipping"

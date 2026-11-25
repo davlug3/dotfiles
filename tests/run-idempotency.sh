@@ -25,7 +25,11 @@ export PATH="$TMP/bin:${HOME}/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbi
 # Fake, already-installed tools. The handler must skip every network/package
 # operation because these executables exist.
 for binary in rg starship nvim tree-sitter; do
-    printf '#!/bin/sh\necho test-version\n' > "${HOME}/.local/bin/${binary}"
+    if [[ "$binary" == "nvim" ]]; then
+        printf '#!/bin/sh\necho "NVIM v0.12.6"\n' > "${HOME}/.local/bin/${binary}"
+    else
+        printf '#!/bin/sh\necho test-version\n' > "${HOME}/.local/bin/${binary}"
+    fi
     chmod +x "${HOME}/.local/bin/${binary}"
 done
 
@@ -34,13 +38,14 @@ source "${ROOT}/handlers/package_handler.sh"
 
 fail=0
 run_twice() {
-    install_package "$1" "$2" latest ""
-    install_package "$1" "$2" latest ""
+    local version="${3:-latest}"
+    install_package "$1" "$2" "$version" ""
+    install_package "$1" "$2" "$version" ""
 }
 
 run_twice ripgrep standalone-binary
 run_twice starship standalone-binary
-run_twice neovim pkg-manager
+run_twice neovim standalone-binary 0.12.6
 run_twice tree-sitter-cli standalone-binary
 
 if [[ -s "$CURL_LOG" ]]; then

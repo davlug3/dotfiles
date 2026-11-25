@@ -42,10 +42,18 @@ remove_stale_stub() {
 }
 
 package_installed() {
-    local package="$1" type="${2:-}"
+    local package="$1" type="${2:-}" version="${3:-}" current
     remove_stale_stub "$package"
     if [[ "$type" == "git-clone" ]]; then
         [[ -d "${HOME}/.local/share/${package}/.git" ]]
+        return
+    fi
+    if [[ "$package" == "neovim" ]]; then
+        # An old distro nvim (e.g. 0.9.5 from apt) is not "installed" for us:
+        # the config requires >= 0.11. Only the pinned version counts.
+        current="$(nvim --version 2>/dev/null | head -n 1 \
+            | sed -nE 's/^NVIM[[:space:]]+v?([0-9]+\.[0-9]+\.[0-9]+).*/\1/p')"
+        [[ "$current" == "${version#v}" ]]
         return
     fi
     have "$(binary_for_package "$package")"
@@ -284,6 +292,80 @@ install_tree_sitter() (
     exit 0
 )
 
+install_neovim() (
+    set -Eeuo pipefail
+    local version="${1:-0.12.6}" version_number asset os arch url
+    version_number="${version#v}"
+    os="$(uname -s)"
+    arch="$(uname -m)"
+
+    case "${os}-${arch}" in
+        Linux-x86_64|Linux-amd64)   asset="nvim-linux-x86_64.tar.gz" ;;
+        Linux-aarch64|Linux-arm64)  asset="nvim-linux-arm64.tar.gz" ;;
+        Darwin-arm64)               asset="nvim-macos-arm64.tar.gz" ;;
+        Darwin-x86_64|Darwin-amd64) asset="nvim-macos-x86_64.tar.gz" ;;
+        *)
+            log_warn "neovim: unsupported platform ${os}-${arch}; skipping"
+            exit 0
+            ;;
+    esac
+
+    local current
+    current="$(nvim --version 2>/dev/null | head -n 1 \
+        | sed -nE 's/^NVIM[[:space:]]+v?([0-9]+\.[0-9]+\.[0-9]+).*/\1/p')"
+    if [[ "$current" == "$version_number" ]]; then
+        log_info "neovim ${version_number} already installed"
+        exit 0
+    fi
+    if [[ -n "$current" ]]; then
+        log_info "neovim: found ${current}, pinning to ${version_number}"
+    fi
+
+    url="https://github.com/neovim/neovim/releases/download/v${version_number}/${asset}"
+    local tmpdir extract_root
+    tmpdir=$(mktemp -d)
+    trap 'rm -rf "$tmpdir"' EXIT
+    log_info "Downloading neovim v${version_number} (${asset})..."
+    if ! curl -fSL --max-time 240 "$url" -o "${tmpdir}/nvim.tar.gz"; then
+        log_warn "neovim: download failed (${url}); skipping"
+        exit 0
+    fi
+    if ! tar -xzf "${tmpdir}/nvim.tar.gz" -C "$tmpdir"; then
+        log_warn "neovim: could not extract archive; skipping"
+        exit 0
+    fi
+    extract_root="$(find "$tmpdir" -type f -path '*/bin/nvim' -print -quit)"
+    if [[ -z "$extract_root" ]]; then
+        log_warn "neovim: nvim binary not found in archive; skipping"
+        exit 0
+    fi
+    extract_root="$(dirname "$(dirname "$extract_root")")"
+
+    local install_dir wrapper tmp
+    install_dir="${HOME}/.local/opt/nvim-v${version_number}"
+    mkdir -p "${HOME}/.local/opt"
+    if [[ -d "$install_dir" ]]; then
+        rm -rf "$install_dir"
+    fi
+    mv "$extract_root" "$install_dir"
+
+    mkdir -p "${HOME}/.local/bin"
+    wrapper=$(mktemp "${HOME}/.local/bin/nvim.XXXXXX")
+    {
+        printf '#!/usr/bin/env bash\n'
+        printf 'exec "%s/bin/nvim" "$@"\n' "\${HOME}/.local/opt/nvim-v${version_number}"
+    } > "$wrapper"
+    chmod 0755 "$wrapper"
+    mv -f "$wrapper" "${HOME}/.local/bin/nvim"
+
+    tmp="${HOME}/.local/bin/nvim"
+    if "$tmp" --version 2>/dev/null | head -n 1 | grep -q "v${version_number}"; then
+        log_info "neovim v${version_number} installed at ${tmp}"
+    else
+        log_warn "neovim: installed wrapper failed smoke test"
+    fi
+)
+
 install_pkg_manager() (
     local package="$1" bin
     bin="$(binary_for_package "$package")"
@@ -357,7 +439,7 @@ install_package() {
         return 1
     fi
 
-    if package_installed "$package" "$type"; then
+    if package_installed "$package" "$type" "$version"; then
         log_info "${package} already installed; skipping"
         return 0
     fi
@@ -368,6 +450,7 @@ install_package() {
             case "$package" in
                 ripgrep)                 install_ripgrep ;;
                 starship)                install_starship ;;
+                neovim)                  install_neovim "$version" ;;
                 tree-sitter-cli|tree-sitter) install_tree_sitter ;;
                 *)
                     log_warn "no standalone-binary installer for '${package}'; skipping"
